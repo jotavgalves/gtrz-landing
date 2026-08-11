@@ -1,0 +1,57 @@
+name: Prepare Cloudflare Pages public output
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prepare-cloudflare-public.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current site
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build public output directory
+        shell: bash
+        run: |
+          rm -rf public
+          mkdir -p public
+          rsync -a ./ public/ \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='functions' \
+            --exclude='src' \
+            --exclude='public' \
+            --exclude='README-CLOUDFLARE.md'
+
+          # Cloudflare Pages serves this directory as the static site root.
+          test -f public/index.html
+          test -f public/_routes.json
+          test -f public/_headers
+          test -f public/assets/site.css
+          test -f public/assets/site.js
+          test -f public/admin/index.html
+
+      - name: Align deployment documentation
+        shell: bash
+        run: |
+          if grep -q 'Build output directory: `\.`' README-CLOUDFLARE.md; then
+            sed -i 's/Build output directory: `\.`/Build output directory: `public`/' README-CLOUDFLARE.md
+          fi
+
+      - name: Commit production layout
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf .github
+          git add -A
+          git commit -m "Prepare Cloudflare Pages public output"
+          git push origin HEAD:main
