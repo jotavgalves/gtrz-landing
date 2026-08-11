@@ -25,6 +25,7 @@ function autoMapUrl(){const q=address.value.replace(/\n/g,', ').trim();return q?
 function fill(c){
  config=structuredClone(c||{});
  for(const k of ['lot','price','date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto','tickerSeconds'])if($(k))$(k).value=config[k]??'';
+ waMessagePt.value=config.waMessage?.pt||'';waMessageEs.value=config.waMessage?.es||'';
  genresPt.value=(config.genres?.pt||[]).join('\n');genresEs.value=(config.genres?.es||[]).join('\n');tickerItems.value=(config.tickerItems||[]).join('\n');artistCards.value=(config.artistCards||ARTISTS).join('\n');
  const preview=config.mapEmbedUrl||autoMapUrl();mapPreview.src=preview||'about:blank';setPreview(vognPreview,config.vognPhoto,'DJ VOGN');setPreview(glitzyPreview,config.glitzyPhoto,'DJ GLITZY');
  for(const lang of ['pt','es'])for(const [key] of COPY_FIELDS){const e=$(`copy-${lang}-${key}`);if(e)e.value=config.copy?.[lang]?.[key]??''}
@@ -37,6 +38,7 @@ function lines(value){return value.split('\n').map(x=>x.trim()).filter(Boolean)}
 function collect(updateAdvanced=true){
  const c=structuredClone(config||{});
  for(const k of ['date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto'])c[k]=$(k).value.trim();
+ c.waMessage={pt:waMessagePt.value.trim(),es:waMessageEs.value.trim()};
  c.lot=Math.max(1,Number(lot.value||1));c.price=Math.max(0,Number(price.value||0));c.tickerSeconds=Math.min(120,Math.max(18,Number(tickerSeconds.value)||42));c.tickerItems=lines(tickerItems.value);c.artistCards=lines(artistCards.value).filter(x=>ARTISTS.includes(x));
  c.genres={pt:lines(genresPt.value),es:lines(genresEs.value)};c.copy=c.copy||{pt:{},es:{}};
  for(const lang of ['pt','es']){c.copy[lang]=c.copy[lang]||{};for(const [key] of COPY_FIELDS)c.copy[lang][key]=$(`copy-${lang}-${key}`).value.trim()}
