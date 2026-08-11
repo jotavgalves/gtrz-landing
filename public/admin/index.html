@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La Rumba Jampa · Painel</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+<section class="login" id="loginView">
+  <form class="login-card" id="loginForm">
+    <div class="eyebrow">LA RUMBA JAMPA</div>
+    <h1>Painel de edição</h1>
+    <p>Edite toda a configuração de conteúdo da landing sem tocar no código.</p>
+    <div class="field"><label>Senha administrativa</label><input id="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-red btn-full" type="submit">Entrar</button>
+    <div id="loginError" class="error"></div>
+  </form>
+</section>
+
+<div class="shell hidden" id="appView">
+  <aside class="sidebar">
+    <div class="brand">LA RUMBA <span>CMS</span></div><small>Jampa · 2026</small>
+    <nav class="nav">
+      <a href="#evento">Evento</a><a href="#links">Links</a><a href="#mapa">Mapa</a><a href="#djs">DJs</a>
+      <a href="#musica">Música</a><a href="#faixa">Faixa</a><a href="#referencias">Referências</a><a href="#textos">Textos</a>
+      <a href="#secoes">Seções</a><a href="#avancado">Avançado</a>
+    </nav>
+    <div class="sidebar-actions"><a class="btn" href="/" target="_blank" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Visualizar site</a><button class="logout" id="logoutBtn">Sair</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><div><strong>Painel de conteúdo</strong><div class="status" id="status">Carregando…</div></div><div class="top-actions"><button class="btn" id="reloadBtn">Recarregar</button><button class="btn btn-red" id="saveTop">Salvar alterações</button></div></header>
+    <div class="content">
+      <div class="note">O design fica protegido. Pelo painel você altera conteúdo, títulos PT/ES, lote, preços, links, mapa, DJs, gêneros, faixa animada, referências e visibilidade das seções. Para qualquer campo técnico extra, use “Avançado”.</div>
+
+      <section class="section" id="evento">
+        <div class="section-head"><h2>Evento e lote</h2><p>Informações centrais reutilizadas na landing.</p></div>
+        <div class="section-body">
+          <div class="grid3">
+            <div class="field"><label>Lote atual</label><input id="lot" type="number" min="1"></div>
+            <div class="field"><label>Preço</label><input id="price" type="number" min="0"></div>
+            <div class="field"><label>Data/hora ISO</label><input id="date" placeholder="2026-08-29T21:00:00-03:00"></div>
+            <div class="field"><label>Data exibida</label><input id="eventDateLabel"></div>
+            <div class="field"><label>Horário exibido</label><input id="eventTimeLabel"></div>
+            <div class="field"><label>Cidade</label><input id="city"></div>
+          </div>
+          <div class="field"><label>Nome do local</label><input id="venue"></div>
+        </div>
+      </section>
+
+      <section class="section" id="links">
+        <div class="section-head"><h2>Links e contato</h2><p>Todos os CTAs e contatos públicos usam estes valores.</p></div>
+        <div class="section-body grid2">
+          <div class="field"><label>WhatsApp</label><input id="wa"></div>
+          <div class="field"><label>Sympla</label><input id="sympla"></div>
+          <div class="field"><label>Instagram</label><input id="insta"></div>
+          <div class="field"><label>Email</label><input id="email"></div>
+        </div>
+      </section>
+
+      <section class="section" id="mapa">
+        <div class="section-head"><h2>Localização e Google Maps</h2><p>O iframe real aparece na landing e é carregado de forma lazy.</p></div>
+        <div class="section-body">
+          <div class="field"><label>Endereço</label><textarea id="address"></textarea></div>
+          <div class="grid2">
+            <div class="field"><label>Link “Como chegar”</label><input id="mapLink"></div>
+            <div class="field"><label>URL do iframe Google Maps</label><input id="mapEmbedUrl"><div class="help">Pode colar um link de embed. Se deixar vazio, o site gera automaticamente um embed usando o endereço.</div></div>
+          </div>
+          <div class="upload-line" style="margin-bottom:14px"><button class="btn" id="generateMapBtn" type="button">Gerar iframe pelo endereço</button></div>
+          <div class="map-preview"><iframe id="mapPreview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+        </div>
+      </section>
+
+      <section class="section" id="djs">
+        <div class="section-head"><h2>DJs</h2><p>Use URL estática em <code>/assets/djs/...</code> ou envie para R2 pelo próprio painel.</p></div>
+        <div class="section-body">
+          <div class="photo-row"><div class="photo-preview" id="vognPreview">DJ VOGN</div><div>
+            <div class="field"><label>Foto Vogn · URL</label><input id="vognPhoto" placeholder="/assets/djs/vogn.webp"></div>
+            <div class="upload-line"><input id="vognFile" type="file" accept="image/*"><button class="btn" data-upload="vogn" type="button">Enviar foto</button></div>
+            <div class="field" style="margin-top:14px"><label>Biografia PT</label><textarea id="vognTextPt"></textarea></div>
+            <div class="field"><label>Biografia ES</label><textarea id="vognTextEs"></textarea></div>
+          </div></div>
+          <hr style="border:0;border-top:1px solid #2b2b2b;margin:26px 0">
+          <div class="photo-row"><div class="photo-preview" id="glitzyPreview">DJ GLITZY</div><div>
+            <div class="field"><label>Foto Glitzy · URL</label><input id="glitzyPhoto" placeholder="/assets/djs/glitzy.webp"></div>
+            <div class="upload-line"><input id="glitzyFile" type="file" accept="image/*"><button class="btn" data-upload="glitzy" type="button">Enviar foto</button></div>
+            <div class="field" style="margin-top:14px"><label>Biografia PT</label><textarea id="glitzyTextPt"></textarea></div>
+            <div class="field"><label>Biografia ES</label><textarea id="glitzyTextEs"></textarea></div>
+          </div></div>
+        </div>
+      </section>
+
+      <section class="section" id="musica">
+        <div class="section-head"><h2>Gêneros</h2><p>Um gênero por linha. A ordem é a ordem exibida na landing.</p></div>
+        <div class="section-body grid2"><div class="field"><label>Português</label><textarea class="genres" id="genresPt"></textarea></div><div class="field"><label>Español</label><textarea class="genres" id="genresEs"></textarea></div></div>
+      </section>
+
+      <section class="section" id="faixa">
+        <div class="section-head"><h2>Faixa animada</h2><p>Controle o texto e a velocidade do ticker infinito. Quanto maior o número de segundos, mais lenta a faixa.</p></div>
+        <div class="section-body">
+          <div class="field"><label>Duração do ciclo · segundos</label><input id="tickerSeconds" type="number" min="18" max="120" step="1"><div class="help">Padrão: 42 s. Faixa segura: 18–120 s.</div></div>
+          <div class="field"><label>Itens da faixa · um por linha</label><textarea class="genres" id="tickerItems"></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" id="referencias">
+        <div class="section-head"><h2>Cards de artistas</h2><p>Um nome por linha. A ordem das linhas define a ordem no site. Remover um nome esconde aquele card.</p></div>
+        <div class="section-body">
+          <div class="field"><label>Referências ativas</label><textarea class="genres" id="artistCards"></textarea><div class="help">Nomes disponíveis: ANITTA, BAD BUNNY, CARLOS VIVES, DADDY YANKEE, DIOMENDES DÍAS, DON OMAR, EL ALFA, JUAN LUIS GUERRA, KAROL G, OSCAR D LEON, ROMEO SANTOS, SHAKIRA.</div></div>
+        </div>
+      </section>
+
+      <section class="section" id="textos">
+        <div class="section-head"><h2>Textos bilíngues</h2><p>Títulos, labels, botões, perguntas, respostas e textos principais. Títulos aceitam <code>&lt;br&gt;</code> e <code>&lt;span class="red"&gt;</code>.</p></div>
+        <div class="section-body"><div class="lang-tabs"><button class="btn active" data-lang="pt" type="button">Português</button><button class="btn" data-lang="es" type="button">Español</button></div><div class="copy-panel active" data-panel="pt"></div><div class="copy-panel" data-panel="es"></div></div>
+      </section>
+
+      <section class="section" id="secoes">
+        <div class="section-head"><h2>Seções</h2><p>Desligar uma seção oculta o bloco sem apagar seu conteúdo.</p></div>
+        <div class="section-body"><div class="switches" id="sectionSwitches"></div></div>
+      </section>
+
+      <section class="section" id="avancado">
+        <div class="section-head"><h2>Avançado</h2><p>Configuração completa em JSON. Use somente quando quiser alterar algo não exposto acima.</p></div>
+        <div class="section-body"><div class="field"><label>JSON da configuração</label><textarea id="advancedConfig" style="min-height:360px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace"></textarea></div><div class="upload-line"><button class="btn" id="refreshJsonBtn" type="button">Atualizar JSON pelo formulário</button><button class="btn" id="applyJsonBtn" type="button">Aplicar JSON no formulário</button></div><div class="help" style="margin-top:10px">O botão “Salvar alterações” continua sendo necessário para publicar.</div></div>
+      </section>
+    </div>
+    <button class="btn btn-red sticky-save" id="saveBottom">Salvar alterações</button>
+  </main>
+</div>
+<script src="/admin/admin.js" defer></script>
+</body>
+</html>

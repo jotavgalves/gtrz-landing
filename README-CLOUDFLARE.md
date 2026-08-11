@@ -22,7 +22,7 @@ Importe `jotavgalves/gtrz-landing` via integração Git.
 - Production branch: `main`
 - Framework preset: nenhum
 - Build command: deixe vazio
-- Build output directory: `.`
+- Build output directory: `public`
 - Root directory: raiz do repositório
 
 ## Bindings e secrets
