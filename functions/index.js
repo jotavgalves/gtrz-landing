@@ -76,8 +76,8 @@ export async function onRequest(context) {
   const origin = PRIMARY_ORIGIN;
   const canonical = PRIMARY_ORIGIN + '/';
 
-  const seoTitle = 'La Rumba Jampa | Festa Latina em João Pessoa - 29 Ago 2026';
-  const seoDescription = 'La Rumba Jampa em João Pessoa dia 29 de agosto de 2026, no Fascynios Recepções. Reggaeton, salsa, bachata, merengue, dembow, cumbia e mais.';
+  const seoTitle = 'Festa Latina em João Pessoa | La Rumba Jampa — 29 Ago 2026';
+  const seoDescription = 'Festa latina em João Pessoa: La Rumba Jampa, sábado 29 de agosto de 2026, às 21h, no Fascynios Recepções. Reggaeton, salsa, bachata, merengue, dembow, cumbia, vallenato e perreo.';
   const shareTitle = config.shareTitle || 'La Rumba Jampa — 29 AGO 2026';
   const shareDescription = config.shareDescription || seoDescription;
   const shareImage = absoluteUrl(config.shareImage, origin);
@@ -118,16 +118,21 @@ export async function onRequest(context) {
         inLanguage:'pt-BR',
         isPartOf:{'@id':`${canonical}#website`},
         about:{'@id':`${canonical}#event`},
+        mainEntity:{'@id':`${canonical}#event`},
         primaryImageOfPage:schemaImage ? {'@type':'ImageObject',url:schemaImage} : undefined
       },
       {
         '@type':'Event',
         '@id':`${canonical}#event`,
         name:'La Rumba Jampa',
+        alternateName:'La Rumba Jampa Latina',
         description:seoDescription,
         url:canonical,
         startDate,
         endDate,
+        doorTime:startDate,
+        inLanguage:['pt-BR','es'],
+        mainEntityOfPage:{'@id':`${canonical}#webpage`},
         eventStatus:'https://schema.org/EventScheduled',
         eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',
         isAccessibleForFree:false,
@@ -156,7 +161,7 @@ export async function onRequest(context) {
           availability:'https://schema.org/InStock',
           validFrom:'2026-08-09'
         },
-        keywords:'festa latina, João Pessoa, reggaeton, salsa, bachata, merengue, dembow, cumbia, vallenato, perreo, La Rumba Jampa'
+        keywords:'festa latina João Pessoa, evento latino João Pessoa, reggaeton João Pessoa, salsa, bachata, merengue, dembow, cumbia, vallenato, perreo, La Rumba Jampa'
       }
     ]
   };
