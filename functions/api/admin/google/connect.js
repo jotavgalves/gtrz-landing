@@ -1,5 +1,6 @@
-import { json, verifyAdmin } from '../../../../src/functions-lib.js';
+import { json } from '../../../../src/functions-lib.js';
 import { driveRedirectUri, makeDriveState } from '../../../../src/google-drive.js';
+import { verifyAdmin } from '../../../../src/security.js';
 
 export async function onRequestGet({ request, env }) {
   if (!(await verifyAdmin(request, env))) return json({ ok:false, error:'Não autorizado' }, 401);
