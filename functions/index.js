@@ -153,7 +153,8 @@ export async function onRequest(context) {
           url:ticketUrl,
           price:Number.isFinite(price) ? String(price) : '50',
           priceCurrency:'BRL',
-          availability:'https://schema.org/InStock'
+          availability:'https://schema.org/InStock',
+          validFrom:'2026-08-09'
         },
         keywords:'festa latina, João Pessoa, reggaeton, salsa, bachata, merengue, dembow, cumbia, vallenato, perreo, La Rumba Jampa'
       }
