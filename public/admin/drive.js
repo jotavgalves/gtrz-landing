@@ -3,6 +3,98 @@
   const MAX_WIDTH = 1600;
   const MAX_HEIGHT = 2000;
   const MAX_UPLOAD_BYTES = 7 * 1024 * 1024;
+  let sharePatched = false;
+
+  function setLocalPreview(container, url, label) {
+    if (!container) return;
+    container.innerHTML = '';
+    if (url) {
+      const img = new Image();
+      img.src = url;
+      img.alt = label;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      container.appendChild(img);
+    } else container.textContent = label;
+  }
+
+  function ensureShareSection() {
+    const map = $('mapa');
+    if (!map) return;
+
+    if (!$('compartilhamento')) {
+      const section = document.createElement('section');
+      section.className = 'section';
+      section.id = 'compartilhamento';
+      section.innerHTML = `
+        <div class="section-head"><h2>Compartilhamento do link</h2><p>Edite o preview que aparece quando o link é enviado no WhatsApp, Facebook, Telegram e outras plataformas.</p></div>
+        <div class="section-body">
+          <div class="grid2">
+            <div class="field"><label>Título do preview</label><input id="shareTitle" maxlength="100" placeholder="La Rumba Jampa — 29 AGO 2026"><div class="help">É o título mostrado junto ao link compartilhado.</div></div>
+            <div class="field"><label>Descrição do preview</label><textarea id="shareDescription" maxlength="220" placeholder="Uma noite latina em João Pessoa..."></textarea><div class="help">Texto curto mostrado abaixo do título.</div></div>
+          </div>
+          <div class="photo-row" style="margin-top:18px">
+            <div class="photo-preview" id="sharePreview" style="aspect-ratio:1200/630;min-height:0;overflow:hidden">IMAGEM DO LINK</div>
+            <div>
+              <div class="field"><label>Imagem do preview · URL</label><input id="sharePhoto" placeholder="/media/drive/..."><div class="help">Use <strong>1200 × 630 px</strong> (proporção 1,91:1). Se enviar outra proporção, o painel centraliza, recorta e converte automaticamente para 1200 × 630.</div></div>
+              <div class="upload-line"><input id="shareFile" type="file" accept="image/*"><button class="btn" data-upload="share" type="button">Enviar imagem</button></div>
+            </div>
+          </div>
+        </div>`;
+      map.parentNode.insertBefore(section, map);
+    }
+
+    const nav = document.querySelector('.nav');
+    if (nav && !nav.querySelector('a[href="#compartilhamento"]')) {
+      const mapLink = nav.querySelector('a[href="#mapa"]');
+      const a = document.createElement('a');
+      a.href = '#compartilhamento';
+      a.textContent = 'Compartilhar';
+      nav.insertBefore(a, mapLink || null);
+    }
+
+    const input = $('sharePhoto');
+    if (input && !input.dataset.previewBound) {
+      input.dataset.previewBound = '1';
+      input.addEventListener('input', () => setLocalPreview($('sharePreview'), input.value.trim(), 'IMAGEM DO LINK'));
+    }
+  }
+
+  function applyShareConfig(c) {
+    ensureShareSection();
+    if ($('shareTitle')) $('shareTitle').value = c?.shareTitle || 'La Rumba Jampa — 29 AGO 2026';
+    if ($('shareDescription')) $('shareDescription').value = c?.shareDescription || 'João Pessoa recebe a La Rumba Jampa em 29 de agosto. Uma noite latina das 21h às 5h.';
+    if ($('sharePhoto')) $('sharePhoto').value = c?.shareImage || '';
+    setLocalPreview($('sharePreview'), c?.shareImage || '', 'IMAGEM DO LINK');
+  }
+
+  function patchAdminState() {
+    if (sharePatched) return;
+    try {
+      if (typeof fill === 'function') {
+        const originalFill = fill;
+        fill = function(c) {
+          const result = originalFill(c);
+          applyShareConfig(c);
+          return result;
+        };
+      }
+      if (typeof collect === 'function') {
+        const originalCollect = collect;
+        collect = function(updateAdvanced = true) {
+          const c = originalCollect(false);
+          ensureShareSection();
+          c.shareTitle = $('shareTitle')?.value.trim() || 'La Rumba Jampa — 29 AGO 2026';
+          c.shareDescription = $('shareDescription')?.value.trim() || '';
+          c.shareImage = $('sharePhoto')?.value.trim() || '';
+          if (updateAdvanced && $('advancedConfig')) $('advancedConfig').value = JSON.stringify(c, null, 2);
+          return c;
+        };
+      }
+      sharePatched = true;
+    } catch {}
+  }
 
   function ensureDriveBox() {
     const body = document.querySelector('#djs .section-body');
@@ -84,14 +176,12 @@
         ctx.drawImage(decoded.source, 0, 0, w, h);
         let blob = await canvasBlob(canvas, 'image/webp', quality);
         if (blob?.type === 'image/webp') return blob;
-        blob = await canvasBlob(canvas, 'image/jpeg', quality);
-        return blob;
+        return canvasBlob(canvas, 'image/jpeg', quality);
       };
 
       let quality = 0.88;
       let blob = await render(width, height, quality);
       if (!blob) throw new Error('Não foi possível converter a imagem.');
-
       while (blob.size > MAX_UPLOAD_BYTES && quality > 0.52) {
         quality -= 0.1;
         blob = await render(width, height, quality);
@@ -111,6 +201,38 @@
     }
   }
 
+  async function optimizeShareImage(file) {
+    if (!file?.type?.startsWith('image/')) throw new Error('Selecione uma imagem válida.');
+    const decoded = await decodeImage(file);
+    try {
+      const targetW = 1200, targetH = 630, targetRatio = targetW / targetH;
+      const sourceRatio = decoded.width / decoded.height;
+      let sx = 0, sy = 0, sw = decoded.width, sh = decoded.height;
+      if (sourceRatio > targetRatio) {
+        sw = decoded.height * targetRatio;
+        sx = (decoded.width - sw) / 2;
+      } else if (sourceRatio < targetRatio) {
+        sh = decoded.width / targetRatio;
+        sy = (decoded.height - sh) / 2;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { alpha:false });
+      if (!ctx) throw new Error('Seu navegador não conseguiu preparar a imagem.');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(decoded.source, sx, sy, sw, sh, 0, 0, targetW, targetH);
+      let blob = await canvasBlob(canvas, 'image/webp', 0.88);
+      if (!blob) blob = await canvasBlob(canvas, 'image/jpeg', 0.88);
+      if (!blob) throw new Error('Não foi possível converter a imagem do compartilhamento.');
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      return new File([blob], `la-rumba-share-${Date.now()}.${ext}`, { type:blob.type, lastModified:Date.now() });
+    } finally {
+      decoded.close?.();
+    }
+  }
+
   document.addEventListener('click', async event => {
     const btn = event.target.closest?.('[data-upload]');
     if (!btn) return;
@@ -124,7 +246,7 @@
     btn.disabled = true;
     try {
       btn.textContent = 'Otimizando…';
-      const file = await optimizeImage(original);
+      const file = slot === 'share' ? await optimizeShareImage(original) : await optimizeImage(original);
       const beforeMb = (original.size / 1024 / 1024).toFixed(1);
       const afterMb = (file.size / 1024 / 1024).toFixed(1);
       const statusEl = $('status');
@@ -138,27 +260,33 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.error || 'Falha no upload');
 
-      $(slot + 'Photo').value = data.url;
+      const target = $(slot + 'Photo');
+      if (target) target.value = data.url;
       const preview = $(slot + 'Preview');
-      if (preview) {
-        preview.innerHTML = '';
-        const img = new Image(); img.src = data.url; img.alt = slot; preview.appendChild(img);
-      }
+      if (preview) setLocalPreview(preview, data.url, slot === 'share' ? 'IMAGEM DO LINK' : slot);
       if (statusEl) { statusEl.textContent = `Imagem enviada (${afterMb} MB). Salve as alterações.`; statusEl.classList.add('ok'); }
     } catch (error) {
       alert(error?.message || 'Falha ao processar a imagem');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Enviar foto';
+      btn.textContent = slot === 'share' ? 'Enviar imagem' : 'Enviar foto';
     }
   }, true);
 
+  ensureShareSection();
+  patchAdminState();
+  try { if (typeof config !== 'undefined' && config) applyShareConfig(config); } catch {}
+
   const observer = new MutationObserver(() => {
+    ensureShareSection();
+    patchAdminState();
     if (!document.getElementById('appView')?.classList.contains('hidden')) refreshDriveStatus();
   });
   observer.observe(document.documentElement, { attributes:true, subtree:true, attributeFilter:['class'] });
 
   addEventListener('DOMContentLoaded', () => {
+    ensureShareSection();
+    patchAdminState();
     ensureDriveBox();
     const query = new URLSearchParams(location.search);
     if (query.get('drive') === 'connected') {
