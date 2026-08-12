@@ -1,5 +1,6 @@
-import { json, verifyAdmin } from '../../../../src/functions-lib.js';
-import { DEFAULT_DRIVE_FOLDER_ID, driveConnected } from '../../../../src/google-drive.js';
+import { json } from '../../../../src/functions-lib.js';
+import { driveConnected } from '../../../../src/google-drive.js';
+import { verifyAdmin } from '../../../../src/security.js';
 
 export async function onRequestGet({ request, env }) {
   if (!(await verifyAdmin(request, env))) return json({ ok:false, error:'Não autorizado' }, 401);
@@ -7,6 +8,7 @@ export async function onRequestGet({ request, env }) {
     ok:true,
     clientConfigured:Boolean(env.GOOGLE_DRIVE_CLIENT_ID && env.GOOGLE_DRIVE_CLIENT_SECRET),
     connected:await driveConnected(env),
-    folderId:env.GOOGLE_DRIVE_FOLDER_ID || DEFAULT_DRIVE_FOLDER_ID
+    folderConfigured:Boolean(env.GOOGLE_DRIVE_FOLDER_ID),
+    separateEncryptionKey:Boolean(env.DRIVE_ENCRYPTION_KEY)
   });
 }
