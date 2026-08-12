@@ -56,7 +56,8 @@ export async function onRequest(context) {
     );
   }
 
-  html = html.replace('</head>', `${tags.join('\n')}\n</head>`);
+  html = html.replace('</head>', `${tags.join('\n')}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n</head>`);
+  html = html.replace('</body>', '<script src="/assets/ordinal-fix.js" defer></script>\n</body>');
   const headers = new Headers(asset.headers);
   headers.set('content-type','text/html; charset=UTF-8');
   headers.set('cache-control','no-cache');
