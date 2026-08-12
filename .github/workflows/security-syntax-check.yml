@@ -1,0 +1,40 @@
+name: Validate security JavaScript
+on:
+  push:
+    paths:
+      - '.github/workflows/security-syntax-check.yml'
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/security.js
+          node --check src/google-drive.js
+          node --check functions/index.js
+          node --check functions/api/site.js
+          node --check functions/api/admin/login.js
+          node --check functions/api/admin/logout.js
+          node --check functions/api/admin/content.js
+          node --check functions/api/admin/upload.js
+          node --check functions/api/admin/security-config.js
+          node --check functions/api/admin/google/connect.js
+          node --check functions/api/admin/google/status.js
+          node --check 'functions/media/[[path]].js'
+          node --check public/admin/security-login.js
+          node --check public/admin/drive.js
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/security-syntax-check.yml
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Remove one-shot security validation workflow'
+          git push
