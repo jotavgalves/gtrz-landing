@@ -1,0 +1,4 @@
+#lotNumberBig{display:inline-flex;align-items:flex-start;white-space:nowrap}
+#lotNumberBig .lot-number-core{display:inline-block;line-height:.82}
+#lotNumberBig .lot-ordinal-o{display:inline-block;font-family:var(--display);font-weight:400;font-size:.28em;line-height:1;letter-spacing:0;margin-left:.035em;transform:translateY(.06em)}
+@media(max-width:700px){#lotNumberBig .lot-ordinal-o{font-size:.27em;margin-left:.03em;transform:translateY(.05em)}}
