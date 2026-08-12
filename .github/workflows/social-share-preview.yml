@@ -1,0 +1,207 @@
+name: Add editable social share preview
+on:
+  push:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Patch social sharing preview
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          repo = Path('.')
+
+          # 1) Admin HTML: add Share section and navigation.
+          share_section = '''
+      <section class="section" id="compartilhamento">
+        <div class="section-head"><h2>Compartilhamento do link</h2><p>Edite o que aparece quando o link do site é enviado no WhatsApp, Facebook, Telegram e outras plataformas.</p></div>
+        <div class="section-body">
+          <div class="grid2">
+            <div class="field"><label>Título do preview</label><input id="shareTitle" maxlength="100" placeholder="La Rumba Jampa — 29 AGO 2026"><div class="help">Título que aparece junto ao link compartilhado.</div></div>
+            <div class="field"><label>Descrição do preview</label><textarea id="shareDescription" maxlength="220" placeholder="Uma noite latina em João Pessoa..."></textarea><div class="help">Texto curto exibido abaixo do título.</div></div>
+          </div>
+          <div class="photo-row" style="margin-top:18px">
+            <div class="photo-preview" id="sharePreview" style="aspect-ratio:1200/630;min-height:0">IMAGEM DO LINK</div>
+            <div>
+              <div class="field"><label>Imagem do preview · URL</label><input id="sharePhoto" placeholder="/media/drive/..."><div class="help">Tamanho recomendado: <strong>1200 × 630 px</strong> (proporção 1,91:1). Ao enviar pelo painel, a imagem é recortada e convertida automaticamente para esse tamanho.</div></div>
+              <div class="upload-line"><input id="shareFile" type="file" accept="image/*"><button class="btn" data-upload="share" type="button">Enviar imagem</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+'''
+          for name in ['admin/index.html','public/admin/index.html']:
+              p=repo/name
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('<a href="#evento">Evento</a><a href="#links">Links</a><a href="#mapa">Mapa</a>', '<a href="#evento">Evento</a><a href="#links">Links</a><a href="#compartilhamento">Compartilhar</a><a href="#mapa">Mapa</a>')
+              if 'id="compartilhamento"' not in s:
+                  marker='      <section class="section" id="mapa">'
+                  if marker not in s: raise SystemExit(f'Marcador mapa não encontrado em {name}')
+                  s=s.replace(marker, share_section+marker, 1)
+              p.write_text(s,encoding='utf-8')
+
+          # 2) Admin JS: persist title/description/image and preview.
+          for name in ['admin/admin.js','public/admin/admin.js']:
+              p=repo/name
+              s=p.read_text(encoding='utf-8')
+              old="for(const k of ['lot','price','date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto','tickerSeconds'])"
+              new="for(const k of ['lot','price','date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto','tickerSeconds','shareTitle','shareDescription'])"
+              s=s.replace(old,new)
+              old2="const preview=config.mapEmbedUrl||autoMapUrl();mapPreview.src=preview||'about:blank';setPreview(vognPreview,config.vognPhoto,'DJ VOGN');setPreview(glitzyPreview,config.glitzyPhoto,'DJ GLITZY');"
+              new2="const preview=config.mapEmbedUrl||autoMapUrl();mapPreview.src=preview||'about:blank';setPreview(vognPreview,config.vognPhoto,'DJ VOGN');setPreview(glitzyPreview,config.glitzyPhoto,'DJ GLITZY');if($('sharePhoto'))$('sharePhoto').value=config.shareImage||'';if($('sharePreview'))setPreview($('sharePreview'),config.shareImage||'','IMAGEM DO LINK');"
+              s=s.replace(old2,new2)
+              old3="for(const k of ['date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto'])c[k]=$(k).value.trim();"
+              new3="for(const k of ['date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto','shareTitle','shareDescription'])c[k]=$(k).value.trim();if($('sharePhoto'))c.shareImage=$('sharePhoto').value.trim();"
+              s=s.replace(old3,new3)
+              old4="vognPhoto.addEventListener('input',()=>setPreview(vognPreview,vognPhoto.value,'DJ VOGN'));glitzyPhoto.addEventListener('input',()=>setPreview(glitzyPreview,glitzyPhoto.value,'DJ GLITZY'));"
+              new4="vognPhoto.addEventListener('input',()=>setPreview(vognPreview,vognPhoto.value,'DJ VOGN'));glitzyPhoto.addEventListener('input',()=>setPreview(glitzyPreview,glitzyPhoto.value,'DJ GLITZY'));if($('sharePhoto'))$('sharePhoto').addEventListener('input',()=>setPreview($('sharePreview'),$('sharePhoto').value,'IMAGEM DO LINK'));"
+              s=s.replace(old4,new4)
+              p.write_text(s,encoding='utf-8')
+
+          # 3) Drive JS: special 1200x630 center-crop for share image.
+          share_optimizer = r'''
+  async function optimizeShareImage(file) {
+    if (!file?.type?.startsWith('image/')) throw new Error('Selecione uma imagem válida.');
+    const decoded = await decodeImage(file);
+    try {
+      const targetW = 1200, targetH = 630, targetRatio = targetW / targetH;
+      const sourceRatio = decoded.width / decoded.height;
+      let sx = 0, sy = 0, sw = decoded.width, sh = decoded.height;
+      if (sourceRatio > targetRatio) {
+        sw = decoded.height * targetRatio;
+        sx = (decoded.width - sw) / 2;
+      } else if (sourceRatio < targetRatio) {
+        sh = decoded.width / targetRatio;
+        sy = (decoded.height - sh) / 2;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW; canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { alpha:false });
+      if (!ctx) throw new Error('Seu navegador não conseguiu preparar a imagem.');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(decoded.source, sx, sy, sw, sh, 0, 0, targetW, targetH);
+      let blob = await canvasBlob(canvas, 'image/webp', 0.88);
+      if (!blob) blob = await canvasBlob(canvas, 'image/jpeg', 0.88);
+      if (!blob) throw new Error('Não foi possível converter a imagem do compartilhamento.');
+      let quality = 0.8;
+      while (blob.size > MAX_UPLOAD_BYTES && quality >= 0.5) {
+        blob = await canvasBlob(canvas, blob.type === 'image/webp' ? 'image/webp' : 'image/jpeg', quality);
+        quality -= 0.08;
+      }
+      const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      return new File([blob], `la-rumba-share-${Date.now()}.${ext}`, { type:blob.type, lastModified:Date.now() });
+    } finally { decoded.close?.(); }
+  }
+
+'''
+          for name in ['admin/drive.js','public/admin/drive.js']:
+              p=repo/name
+              s=p.read_text(encoding='utf-8')
+              if 'async function optimizeShareImage' not in s:
+                  marker="  document.addEventListener('click', async event => {"
+                  if marker not in s: raise SystemExit(f'Marcador upload não encontrado em {name}')
+                  s=s.replace(marker,share_optimizer+marker,1)
+              s=s.replace('const file = await optimizeImage(original);', "const file = slot === 'share' ? await optimizeShareImage(original) : await optimizeImage(original);")
+              s=s.replace("btn.textContent = 'Enviar foto';", "btn.textContent = slot === 'share' ? 'Enviar imagem' : 'Enviar foto';")
+              p.write_text(s,encoding='utf-8')
+
+          # 4) Default config.
+          p=repo/'src/functions-lib.js'
+          s=p.read_text(encoding='utf-8')
+          needle='"email":"gtrzeventos@gmail.com","vognPhoto"'
+          replacement='"email":"gtrzeventos@gmail.com","shareTitle":"La Rumba Jampa — 29 AGO 2026","shareDescription":"João Pessoa recebe a La Rumba Jampa em 29 de agosto. Uma noite latina das 21h às 5h.","shareImage":"","vognPhoto"'
+          if needle in s:
+              s=s.replace(needle,replacement,1)
+          p.write_text(s,encoding='utf-8')
+
+          # 5) Root Pages Function: inject dynamic Open Graph metadata server-side.
+          fn = repo/'functions/index.js'
+          fn.write_text(r'''import { getConfig } from '../src/functions-lib.js';
+
+function esc(value) {
+  return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function absoluteUrl(value, origin) {
+  if (!value) return '';
+  try { return new URL(value, origin).toString(); } catch { return ''; }
+}
+function stripExistingMeta(html) {
+  return html
+    .replace(/<meta\s+(?:property|name)=["'](?:og:[^"']+|twitter:[^"']+|description)["'][^>]*>\s*/gi,'')
+    .replace(/<link\s+rel=["']canonical["'][^>]*>\s*/gi,'');
+}
+
+export async function onRequest(context) {
+  const asset = await context.next();
+  const type = asset.headers.get('content-type') || '';
+  if (!type.includes('text/html')) return asset;
+
+  let config = {};
+  try { config = await getConfig(context.env); } catch {}
+
+  const requestUrl = new URL(context.request.url);
+  const origin = requestUrl.origin;
+  const canonical = origin + '/';
+  const title = config.shareTitle || 'La Rumba Jampa — 29 AGO 2026';
+  const description = config.shareDescription || 'João Pessoa recebe a La Rumba Jampa em 29 de agosto. Uma noite latina das 21h às 5h.';
+  const image = absoluteUrl(config.shareImage, origin);
+
+  let html = stripExistingMeta(await asset.text());
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(title)}</title>`);
+
+  const tags = [
+    `<meta name="description" content="${esc(description)}">`,
+    `<link rel="canonical" href="${esc(canonical)}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:site_name" content="La Rumba Jampa">`,
+    `<meta property="og:title" content="${esc(title)}">`,
+    `<meta property="og:description" content="${esc(description)}">`,
+    `<meta property="og:url" content="${esc(canonical)}">`,
+    `<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">`,
+    `<meta name="twitter:title" content="${esc(title)}">`,
+    `<meta name="twitter:description" content="${esc(description)}">`
+  ];
+  if (image) tags.push(
+    `<meta property="og:image" content="${esc(image)}">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    `<meta property="og:image:alt" content="${esc(title)}">`,
+    `<meta name="twitter:image" content="${esc(image)}">`
+  );
+  html = html.replace('</head>', `${tags.join('\n')}\n</head>`);
+  const headers = new Headers(asset.headers);
+  headers.set('content-type','text/html; charset=UTF-8');
+  headers.set('cache-control','no-cache');
+  headers.delete('content-length');
+  return new Response(html,{status:asset.status,statusText:asset.statusText,headers});
+}
+''',encoding='utf-8')
+
+          # 6) Route root through Pages Functions so crawlers see dynamic metadata.
+          for name in ['_routes.json','public/_routes.json']:
+              p=repo/name
+              data=json.loads(p.read_text(encoding='utf-8'))
+              include=data.setdefault('include',[])
+              if '/' not in include: include.insert(0,'/')
+              p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          PY
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/social-share-preview.yml
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add editable social share preview'
+          git push
