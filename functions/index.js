@@ -1,4 +1,5 @@
 import { getConfig } from '../src/functions-lib.js';
+import { maskConfigMedia } from '../src/security.js';
 
 function esc(value) {
   return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -31,38 +32,30 @@ function eventEndIso(startDate) {
   return new Date(time + 8 * 60 * 60 * 1000).toISOString();
 }
 
-const mediaProtectionStyle = `<style>
-img,picture,svg,canvas,.svg-card,.artist-normalized,.svg-fallback,.dj-photo{
-  -webkit-user-select:none!important;
-  user-select:none!important;
-  -webkit-user-drag:none!important;
-  -webkit-touch-callout:none!important;
-}
-</style>`;
+function applySecurityHeaders(headers) {
+  const csp = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "script-src 'self' https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://challenges.cloudflare.com",
+    "frame-src https://www.google.com https://challenges.cloudflare.com",
+    "upgrade-insecure-requests"
+  ].join('; ');
 
-const mediaProtectionScript = `<script>
-(()=>{
-  document.addEventListener('contextmenu',e=>e.preventDefault(),true);
-  document.addEventListener('dragstart',e=>{
-    if(e.target&&e.target.closest&&e.target.closest('img,picture,svg,canvas,.svg-card'))e.preventDefault();
-  },true);
-  document.addEventListener('keydown',e=>{
-    if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='s')e.preventDefault();
-  },true);
-  const lock=root=>{
-    if(!root||!root.querySelectorAll)return;
-    root.querySelectorAll('img').forEach(img=>{img.draggable=false;img.setAttribute('draggable','false')});
-  };
-  lock(document);
-  new MutationObserver(records=>{
-    for(const record of records)for(const node of record.addedNodes){
-      if(node.nodeType!==1)continue;
-      if(node.matches&&node.matches('img')){node.draggable=false;node.setAttribute('draggable','false')}
-      lock(node);
-    }
-  }).observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>`;
+  headers.set('content-security-policy', csp);
+  headers.set('x-frame-options', 'DENY');
+  headers.set('x-content-type-options', 'nosniff');
+  headers.set('referrer-policy', 'strict-origin-when-cross-origin');
+  headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()');
+  headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
+  headers.set('cross-origin-opener-policy', 'same-origin-allow-popups');
+}
 
 export async function onRequest(context) {
   const asset = await context.next();
@@ -70,7 +63,7 @@ export async function onRequest(context) {
   if (!type.includes('text/html')) return asset;
 
   let config = {};
-  try { config = await getConfig(context.env); } catch {}
+  try { config = await maskConfigMedia(context.env, await getConfig(context.env)); } catch {}
 
   const requestUrl = new URL(context.request.url);
   const origin = requestUrl.origin;
@@ -85,7 +78,6 @@ export async function onRequest(context) {
   const ticketUrl = absoluteUrl(config.sympla, origin) || canonical;
   const instagramUrl = absoluteUrl(config.insta, origin);
   const venueName = config.venue || 'Fascynios Recepções';
-  const city = config.city || 'João Pessoa';
   const streetAddress = String(config.address || 'R. Pastor Misael Jácome Cavalcante, 814').split('\n')[0].trim();
   const startDate = config.date || '2026-08-29T21:00:00-03:00';
   const endDate = eventEndIso(startDate);
@@ -195,13 +187,14 @@ export async function onRequest(context) {
 
   const jsonLd = `<script type="application/ld+json">${safeJsonLd(graph)}</script>`;
 
-  html = html.replace('</head>', `${tags.join('\n')}\n${jsonLd}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n${mediaProtectionStyle}\n</head>`);
-  html = html.replace('</body>', `<script src="/assets/ordinal-fix.js" defer></script>\n${mediaProtectionScript}\n</body>`);
+  html = html.replace('</head>', `${tags.join('\n')}\n${jsonLd}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n<link rel="stylesheet" href="/assets/security.css">\n</head>`);
+  html = html.replace('</body>', `<script src="/assets/ordinal-fix.js" defer></script>\n<script src="/assets/security.js" defer></script>\n</body>`);
 
   const headers = new Headers(asset.headers);
   headers.set('content-type','text/html; charset=UTF-8');
   headers.set('cache-control','no-cache');
   headers.set('x-robots-tag','index, follow, max-image-preview:large');
+  applySecurityHeaders(headers);
   headers.delete('content-length');
   return new Response(html,{status:asset.status,statusText:asset.statusText,headers});
 }
