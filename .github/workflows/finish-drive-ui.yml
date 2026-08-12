@@ -1,0 +1,54 @@
+name: Finish Drive UI
+on:
+  push:
+    paths:
+      - '.github/workflows/finish-drive-ui.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update admin HTML and docs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for p in [Path('admin/index.html'), Path('public/admin/index.html')]:
+              s = p.read_text()
+              s = s.replace('Use URL estática em <code>/assets/djs/...</code> ou envie para R2 pelo próprio painel.', 'Use URL estática em <code>/assets/djs/...</code> ou envie diretamente para o Google Drive pelo próprio painel.')
+              if '/admin/drive.js' not in s:
+                  s = s.replace('<script src="/admin/admin.js" defer></script>', '<script src="/admin/admin.js" defer></script>\n<script src="/admin/drive.js" defer></script>')
+              p.write_text(s)
+
+          root_drive = Path('admin/drive.js')
+          public_drive = Path('public/admin/drive.js')
+          if public_drive.exists() and not root_drive.exists():
+              root_drive.write_text(public_drive.read_text())
+
+          p = Path('README-CLOUDFLARE.md')
+          s = p.read_text()
+          s = s.replace('`functions/media/[[path]].js` — entrega de imagens do R2.', '`functions/media/[[path]].js` — entrega das imagens armazenadas no Google Drive pelo próprio domínio.')
+          old = '''### R2 recomendado para fotos
+Crie um bucket R2 e vincule com nome **`MEDIA`**. O painel salva uploads em `djs/...` e publica via `/media/...`.
+
+Sem R2, você ainda pode colocar arquivos estáticos em `assets/djs/` e informar no painel caminhos como `/assets/djs/vogn.webp`, ou usar uma URL externa.'''
+          new = '''### Google Drive para fotos dos DJs
+O painel envia as fotos diretamente para o Google Drive. Configure os secrets **`GOOGLE_DRIVE_CLIENT_ID`** e **`GOOGLE_DRIVE_CLIENT_SECRET`**. Depois do deploy, abra `/admin/` e clique em **Conectar Google Drive** para autorizar a conta uma única vez.
+
+A pasta padrão já está configurada no backend. Opcionalmente, você pode sobrescrevê-la com `GOOGLE_DRIVE_FOLDER_ID`. O token de autorização é armazenado criptografado no D1 usando `SESSION_SECRET`.
+
+O binding R2 **`MEDIA` não é mais necessário**. Ele permanece apenas como compatibilidade para eventuais URLs antigas. Você também pode continuar usando imagens estáticas em `assets/djs/` ou URLs externas.'''
+          if old in s:
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
+      - name: Remove workflow
+        run: rm -f .github/workflows/finish-drive-ui.yml
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Finish Google Drive admin integration'
+          git push
