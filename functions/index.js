@@ -15,6 +15,39 @@ function stripExistingMeta(html) {
     .replace(/<link\s+rel=["']canonical["'][^>]*>\s*/gi,'');
 }
 
+const mediaProtectionStyle = `<style>
+img,picture,svg,canvas,.svg-card,.artist-normalized,.svg-fallback,.dj-photo{
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-user-drag:none!important;
+  -webkit-touch-callout:none!important;
+}
+</style>`;
+
+const mediaProtectionScript = `<script>
+(()=>{
+  document.addEventListener('contextmenu',e=>e.preventDefault(),true);
+  document.addEventListener('dragstart',e=>{
+    if(e.target&&e.target.closest&&e.target.closest('img,picture,svg,canvas,.svg-card'))e.preventDefault();
+  },true);
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='s')e.preventDefault();
+  },true);
+  const lock=root=>{
+    if(!root||!root.querySelectorAll)return;
+    root.querySelectorAll('img').forEach(img=>{img.draggable=false;img.setAttribute('draggable','false')});
+  };
+  lock(document);
+  new MutationObserver(records=>{
+    for(const record of records)for(const node of record.addedNodes){
+      if(node.nodeType!==1)continue;
+      if(node.matches&&node.matches('img')){node.draggable=false;node.setAttribute('draggable','false')}
+      lock(node);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>`;
+
 export async function onRequest(context) {
   const asset = await context.next();
   const type = asset.headers.get('content-type') || '';
@@ -56,8 +89,8 @@ export async function onRequest(context) {
     );
   }
 
-  html = html.replace('</head>', `${tags.join('\n')}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n</head>`);
-  html = html.replace('</body>', '<script src="/assets/ordinal-fix.js" defer></script>\n</body>');
+  html = html.replace('</head>', `${tags.join('\n')}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n${mediaProtectionStyle}\n</head>`);
+  html = html.replace('</body>', `<script src="/assets/ordinal-fix.js" defer></script>\n${mediaProtectionScript}\n</body>`);
   const headers = new Headers(asset.headers);
   headers.set('content-type','text/html; charset=UTF-8');
   headers.set('cache-control','no-cache');
