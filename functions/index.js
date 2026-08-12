@@ -1,6 +1,8 @@
 import { getConfig } from '../src/functions-lib.js';
 import { maskConfigMedia } from '../src/security.js';
 
+const PRIMARY_ORIGIN = 'https://gtrz.com.br';
+
 function esc(value) {
   return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -58,6 +60,12 @@ function applySecurityHeaders(headers) {
 }
 
 export async function onRequest(context) {
+  const requestUrl = new URL(context.request.url);
+  if (requestUrl.hostname === 'gtrz.pages.dev' || requestUrl.hostname === 'www.gtrz.com.br') {
+    const destination = new URL(requestUrl.pathname + requestUrl.search, PRIMARY_ORIGIN);
+    return Response.redirect(destination.toString(), 301);
+  }
+
   const asset = await context.next();
   const type = asset.headers.get('content-type') || '';
   if (!type.includes('text/html')) return asset;
@@ -65,9 +73,8 @@ export async function onRequest(context) {
   let config = {};
   try { config = await maskConfigMedia(context.env, await getConfig(context.env)); } catch {}
 
-  const requestUrl = new URL(context.request.url);
-  const origin = requestUrl.origin;
-  const canonical = origin + '/';
+  const origin = PRIMARY_ORIGIN;
+  const canonical = PRIMARY_ORIGIN + '/';
 
   const seoTitle = 'La Rumba Jampa | Festa Latina em João Pessoa - 29 Ago 2026';
   const seoDescription = 'La Rumba Jampa em João Pessoa dia 29 de agosto de 2026, no Fascynios Recepções. Reggaeton, salsa, bachata, merengue, dembow, cumbia e mais.';
