@@ -1,0 +1,47 @@
+name: Improve Drive security status copy
+on:
+  push:
+    paths:
+      - '.github/workflows/admin-drive-security-copy.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch admin Drive status
+        shell: python
+        run: |
+          from pathlib import Path
+          for path in [Path('admin/drive.js'), Path('public/admin/drive.js')]:
+              text = path.read_text(encoding='utf-8')
+              text = text.replace('placeholder="/media/drive/..."', 'placeholder="/media/..."')
+              old = """      if (data.connected) {
+        label.textContent = 'Conectado e pronto para receber uploads.';
+        button.textContent = 'Reconectar Google Drive';
+        button.disabled = false;
+      } else if (data.clientConfigured) {"""
+              new = """      if (data.connected && !data.folderConfigured) {
+        label.textContent = 'Google Drive conectado, mas falta configurar GOOGLE_DRIVE_FOLDER_ID no Cloudflare.';
+        button.textContent = 'Reconectar Google Drive';
+        button.disabled = false;
+      } else if (data.connected) {
+        label.textContent = data.separateEncryptionKey
+          ? 'Conectado, pasta protegida e chave de criptografia separada.'
+          : 'Conectado e pronto. Recomendado: configurar DRIVE_ENCRYPTION_KEY como Secret.';
+        button.textContent = 'Reconectar Google Drive';
+        button.disabled = false;
+      } else if (data.clientConfigured) {"""
+              if old not in text:
+                  raise SystemExit(f'Bloco esperado não encontrado em {path}')
+              path.write_text(text.replace(old, new), encoding='utf-8')
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/admin-drive-security-copy.yml
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Improve Drive security status in admin'
+          git push
