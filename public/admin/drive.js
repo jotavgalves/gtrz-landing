@@ -1,3 +1,4 @@
+import('/admin/security-login.js').catch(() => {});
 (() => {
   const $ = id => document.getElementById(id);
   const MAX_WIDTH = 1600;
