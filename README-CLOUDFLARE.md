@@ -11,8 +11,9 @@ Projeto preparado para **Cloudflare Pages + Pages Functions**, com landing públ
 - `admin/` — painel de edição.
 - `functions/api/site.js` — configuração pública.
 - `functions/api/admin/*` — login, leitura, gravação e uploads.
-- `functions/media/[[path]].js` — entrega de imagens do R2.
+- `functions/media/[[path]].js` — entrega das imagens armazenadas no Google Drive pelo próprio domínio.
 - `src/functions-lib.js` — configuração padrão, D1 e sessão.
+- `src/google-drive.js` — OAuth, upload e leitura das imagens do Google Drive.
 - `_routes.json` — limita Functions a `/api/*` e `/media/*`.
 
 ## Deploy no Cloudflare Pages
@@ -28,16 +29,25 @@ Importe `jotavgalves/gtrz-landing` via integração Git.
 ## Bindings e secrets
 
 ### D1 obrigatório para persistência do painel
-Crie um D1 e vincule com nome **`DB`**. A tabela `site_config` é criada automaticamente.
+Crie um D1 e vincule com nome **`DB`**. As tabelas necessárias são criadas automaticamente.
 
 ### Secrets obrigatórios para login
 - `ADMIN_PASSWORD`
 - `SESSION_SECRET` — use uma string longa e aleatória.
 
-### R2 recomendado para fotos
-Crie um bucket R2 e vincule com nome **`MEDIA`**. O painel salva uploads em `djs/...` e publica via `/media/...`.
+### Google Drive para fotos dos DJs
+O painel envia as fotos diretamente para o Google Drive. Configure no Cloudflare:
 
-Sem R2, você ainda pode colocar arquivos estáticos em `assets/djs/` e informar no painel caminhos como `/assets/djs/vogn.webp`, ou usar uma URL externa.
+- `GOOGLE_DRIVE_CLIENT_ID`
+- `GOOGLE_DRIVE_CLIENT_SECRET`
+
+Depois do deploy, abra `/admin/` e clique em **Conectar Google Drive** para autorizar sua conta uma única vez.
+
+A pasta padrão do Drive já está configurada no backend. Opcionalmente, você pode sobrescrevê-la com `GOOGLE_DRIVE_FOLDER_ID`.
+
+O refresh token do Google é armazenado criptografado no D1 usando `SESSION_SECRET`. O binding R2 **`MEDIA` não é mais necessário**; ele só permanece suportado para compatibilidade com URLs antigas que eventualmente tenham sido salvas no R2.
+
+Você também pode continuar usando arquivos estáticos em `assets/djs/` ou uma URL externa.
 
 ## Google Maps
 
@@ -73,4 +83,4 @@ O ticker usa apenas CSS `transform`, com dois segmentos idênticos para loop con
 
 ## Após configurar bindings/secrets
 
-Faça um novo deploy do Pages para que os bindings estejam disponíveis às Functions.
+Faça um novo deploy do Pages para que os bindings e secrets estejam disponíveis às Functions.
