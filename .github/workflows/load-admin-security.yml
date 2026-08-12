@@ -1,0 +1,30 @@
+name: Load admin security client
+on:
+  push:
+    paths:
+      - '.github/workflows/load-admin-security.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load security client before admin login handling
+        shell: python
+        run: |
+          from pathlib import Path
+          prefix = "import('/admin/security-login.js').catch(() => {});\n"
+          for path in [Path('admin/drive.js'), Path('public/admin/drive.js')]:
+              text = path.read_text(encoding='utf-8')
+              if not text.startswith(prefix):
+                  path.write_text(prefix + text, encoding='utf-8')
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/load-admin-security.yml
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Load admin Turnstile security client'
+          git push
