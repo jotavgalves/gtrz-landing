@@ -25,6 +25,7 @@ function stripExistingMeta(html) {
   return html
     .replace(/<meta\s+(?:property|name)=["'](?:og:[^"']+|twitter:[^"']+|description|robots|googlebot|author|application-name|keywords)["'][^>]*>\s*/gi,'')
     .replace(/<link\s+rel=["']canonical["'][^>]*>\s*/gi,'')
+    .replace(/<link\s+rel=["'](?:icon|shortcut icon)["'][^>]*>\s*/gi,'')
     .replace(/<script\s+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>\s*/gi,'');
 }
 
@@ -176,6 +177,8 @@ export async function onRequest(context) {
     `<meta name="author" content="GTRZ Eventos">`,
     `<meta name="application-name" content="La Rumba Jampa">`,
     `<link rel="canonical" href="${esc(canonical)}">`,
+    `<link rel="icon" type="image/svg+xml" sizes="any" href="/favicon-google.svg">`,
+    `<link rel="shortcut icon" type="image/svg+xml" href="/favicon-google.svg">`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:site_name" content="La Rumba Jampa">`,
     `<meta property="og:locale" content="pt_BR">`,
