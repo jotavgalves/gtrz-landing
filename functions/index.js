@@ -2,6 +2,8 @@ import { getConfig } from '../src/functions-lib.js';
 import { maskConfigMedia } from '../src/security.js';
 
 const PRIMARY_ORIGIN = 'https://gtrz.com.br';
+const SITE_NAME = 'GTRZ Eventos';
+const FAVICON_PATH = '/favicon.svg';
 
 function esc(value) {
   return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -25,7 +27,7 @@ function stripExistingMeta(html) {
   return html
     .replace(/<meta\s+(?:property|name)=["'](?:og:[^"']+|twitter:[^"']+|description|robots|googlebot|author|application-name|keywords)["'][^>]*>\s*/gi,'')
     .replace(/<link\s+rel=["']canonical["'][^>]*>\s*/gi,'')
-    .replace(/<link\s+rel=["'](?:icon|shortcut icon)["'][^>]*>\s*/gi,'')
+    .replace(/<link\s+rel=["'](?:icon|shortcut icon|apple-touch-icon|apple-touch-icon-precomposed)["'][^>]*>\s*/gi,'')
     .replace(/<script\s+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>\s*/gi,'');
 }
 
@@ -62,7 +64,11 @@ function applySecurityHeaders(headers) {
 
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url);
-  if (requestUrl.hostname === 'gtrz.pages.dev' || requestUrl.hostname === 'www.gtrz.com.br') {
+  if (
+    requestUrl.protocol !== 'https:' ||
+    requestUrl.hostname === 'gtrz.pages.dev' ||
+    requestUrl.hostname === 'www.gtrz.com.br'
+  ) {
     const destination = new URL(requestUrl.pathname + requestUrl.search, PRIMARY_ORIGIN);
     return Response.redirect(destination.toString(), 301);
   }
@@ -76,9 +82,10 @@ export async function onRequest(context) {
 
   const origin = PRIMARY_ORIGIN;
   const canonical = PRIMARY_ORIGIN + '/';
+  const faviconUrl = absoluteUrl(FAVICON_PATH, origin);
 
   const seoTitle = 'Festa Latina em João Pessoa | La Rumba Jampa — 29 Ago 2026';
-  const seoDescription = 'Festa latina em João Pessoa: La Rumba Jampa, sábado 29 de agosto de 2026, às 21h, no Fascynios Recepções. Reggaeton, salsa, bachata, merengue, dembow, cumbia, vallenato e perreo.';
+  const seoDescription = 'Festa latina em João Pessoa dia 29 de agosto de 2026, às 21h, no Fascynios Recepções. Reggaeton, salsa, bachata, merengue, dembow e mais.';
   const shareTitle = config.shareTitle || 'La Rumba Jampa — 29 AGO 2026';
   const shareDescription = config.shareDescription || seoDescription;
   const shareImage = absoluteUrl(config.shareImage, origin);
@@ -97,16 +104,25 @@ export async function onRequest(context) {
       {
         '@type':'Organization',
         '@id':`${canonical}#organization`,
-        name:'GTRZ Eventos',
+        name:SITE_NAME,
+        alternateName:'GTRZ',
         url:canonical,
         email:config.email || 'gtrzeventos@gmail.com',
+        logo:{
+          '@type':'ImageObject',
+          url:faviconUrl,
+          contentUrl:faviconUrl,
+          width:1080,
+          height:1080
+        },
         sameAs:instagramUrl ? [instagramUrl] : []
       },
       {
         '@type':'WebSite',
         '@id':`${canonical}#website`,
         url:canonical,
-        name:'La Rumba Jampa',
+        name:SITE_NAME,
+        alternateName:['GTRZ'],
         inLanguage:['pt-BR','es'],
         publisher:{'@id':`${canonical}#organization`}
       },
@@ -174,13 +190,13 @@ export async function onRequest(context) {
     `<meta name="description" content="${esc(seoDescription)}">`,
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`,
     `<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`,
-    `<meta name="author" content="GTRZ Eventos">`,
-    `<meta name="application-name" content="La Rumba Jampa">`,
+    `<meta name="author" content="${SITE_NAME}">`,
+    `<meta name="application-name" content="${SITE_NAME}">`,
     `<link rel="canonical" href="${esc(canonical)}">`,
-    `<link rel="icon" type="image/svg+xml" sizes="any" href="/favicon-google.svg">`,
-    `<link rel="shortcut icon" type="image/svg+xml" href="/favicon-google.svg">`,
+    `<link rel="icon" type="image/svg+xml" sizes="any" href="${esc(FAVICON_PATH)}">`,
+    `<link rel="shortcut icon" type="image/svg+xml" href="${esc(FAVICON_PATH)}">`,
     `<meta property="og:type" content="website">`,
-    `<meta property="og:site_name" content="La Rumba Jampa">`,
+    `<meta property="og:site_name" content="${SITE_NAME}">`,
     `<meta property="og:locale" content="pt_BR">`,
     `<meta property="og:locale:alternate" content="es_ES">`,
     `<meta property="og:title" content="${esc(shareTitle)}">`,
@@ -194,6 +210,7 @@ export async function onRequest(context) {
   if (shareImage) {
     tags.push(
       `<meta property="og:image" content="${esc(shareImage)}">`,
+      `<meta property="og:image:secure_url" content="${esc(shareImage)}">`,
       `<meta property="og:image:width" content="1200">`,
       `<meta property="og:image:height" content="630">`,
       `<meta property="og:image:alt" content="${esc(shareTitle)}">`,
