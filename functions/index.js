@@ -220,8 +220,8 @@ export async function onRequest(context) {
 
   const jsonLd = `<script type="application/ld+json">${safeJsonLd(graph)}</script>`;
 
-  html = html.replace('</head>', `${tags.join('\n')}\n${jsonLd}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n<link rel="stylesheet" href="/assets/security.css">\n</head>`);
-  html = html.replace('</body>', `<script src="/assets/ordinal-fix.js" defer></script>\n<script src="/assets/security.js" defer></script>\n</body>`);
+  html = html.replace('</head>', `${tags.join('\n')}\n${jsonLd}\n<link rel="stylesheet" href="/assets/ordinal-fix.css">\n<link rel="stylesheet" href="/assets/security.css">\n<link rel="stylesheet" href="/assets/duo.css">\n</head>`);
+  html = html.replace('</body>', `<script src="/assets/ordinal-fix.js" defer></script>\n<script src="/assets/security.js" defer></script>\n<script src="/assets/duo.js" defer></script>\n</body>`);
 
   const headers = new Headers(asset.headers);
   headers.set('content-type','text/html; charset=UTF-8');
