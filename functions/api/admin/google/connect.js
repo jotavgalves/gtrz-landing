@@ -13,7 +13,8 @@ export async function onRequestGet({ request, env }) {
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', 'https://www.googleapis.com/auth/drive');
   url.searchParams.set('access_type', 'offline');
-  url.searchParams.set('prompt', 'consent');
+  url.searchParams.set('prompt', 'select_account consent');
+  url.searchParams.set('login_hint', 'jvgacontato@gmail.com');
   url.searchParams.set('include_granted_scopes', 'true');
   url.searchParams.set('state', await makeDriveState(env, request));
   return Response.redirect(url.toString(), 302);
