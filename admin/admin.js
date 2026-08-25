@@ -20,11 +20,21 @@ function showLogin(msg=''){loginView.classList.remove('hidden');appView.classLis
 function showApp(){loginView.classList.add('hidden');appView.classList.remove('hidden')}
 function buildCopyFields(){for(const lang of ['pt','es']){const panel=document.querySelector(`[data-panel="${lang}"]`);panel.innerHTML='';COPY_FIELDS.forEach(([key,label])=>{const d=document.createElement('div');d.className='field';d.innerHTML=`<label>${label}</label><textarea id="copy-${lang}-${key}"></textarea>`;panel.appendChild(d)})}}
 function buildSections(){sectionSwitches.innerHTML=Object.entries(SECTION_LABELS).map(([key,label])=>`<label class="switch"><span>${label}</span><input type="checkbox" data-section-key="${key}"></label>`).join('')}
+function buildDuoControls(){
+ const body=document.querySelector('#evento .section-body');if(!body||$('duoAdminBlock'))return;
+ const block=document.createElement('div');block.id='duoAdminBlock';block.style.cssText='margin-top:26px;padding-top:24px;border-top:1px solid #2b2b2b';
+ block.innerHTML=`<div style="margin-bottom:16px"><strong style="display:block;font-size:.95rem;margin-bottom:5px">Promo Duo</strong><div class="help">O preço é calculado automaticamente: 2 × (preço atual − desconto por pessoa).</div></div><div class="grid3"><label class="switch" style="min-height:46px"><span>Promo Duo ativa</span><input id="duoEnabled" type="checkbox"></label><div class="field"><label>Desconto por pessoa · R$</label><input id="duoDiscountPerTicket" type="number" min="0" step="1" value="10"></div><div class="field"><label>Prévia calculada</label><div id="duoPreview" style="min-height:46px;display:flex;align-items:center;padding:0 12px;border:1px solid #333;background:#111;font-weight:800">—</div></div></div>`;
+ body.appendChild(block);
+}
+function updateDuoPreview(){const out=$('duoPreview');if(!out)return;const p=Math.max(0,Number($('price')?.value||0));const raw=Math.max(0,Number($('duoDiscountPerTicket')?.value||0));const d=Math.min(p,raw);const unit=Math.max(0,p-d);const total=unit*2;const saving=d*2;out.textContent=`2 por R$ ${total.toLocaleString('pt-BR')} · R$ ${unit.toLocaleString('pt-BR')} por pessoa · economiza R$ ${saving.toLocaleString('pt-BR')}`}
 function setPreview(container,url,label){container.innerHTML='';if(url){const img=new Image();img.src=url;img.alt=label;container.appendChild(img)}else container.textContent=label}
 function autoMapUrl(){const q=address.value.replace(/\n/g,', ').trim();return q?`https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`:''}
 function fill(c){
  config=structuredClone(c||{});
  for(const k of ['lot','price','date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto','tickerSeconds'])if($(k))$(k).value=config[k]??'';
+ if($('duoEnabled'))$('duoEnabled').checked=config.duoEnabled!==false;
+ if($('duoDiscountPerTicket'))$('duoDiscountPerTicket').value=config.duoDiscountPerTicket??10;
+ updateDuoPreview();
  waMessagePt.value=config.waMessage?.pt||'';waMessageEs.value=config.waMessage?.es||'';
  genresPt.value=(config.genres?.pt||[]).join('\n');genresEs.value=(config.genres?.es||[]).join('\n');tickerItems.value=(config.tickerItems||[]).join('\n');artistCards.value=(config.artistCards||ARTISTS).join('\n');
  const preview=config.mapEmbedUrl||autoMapUrl();mapPreview.src=preview||'about:blank';setPreview(vognPreview,config.vognPhoto,'DJ VOGN');setPreview(glitzyPreview,config.glitzyPhoto,'DJ GLITZY');
@@ -39,7 +49,10 @@ function collect(updateAdvanced=true){
  const c=structuredClone(config||{});
  for(const k of ['date','eventDateLabel','eventTimeLabel','city','venue','wa','sympla','insta','email','address','mapLink','mapEmbedUrl','vognPhoto','glitzyPhoto'])c[k]=$(k).value.trim();
  c.waMessage={pt:waMessagePt.value.trim(),es:waMessageEs.value.trim()};
- c.lot=Math.max(1,Number(lot.value||1));c.price=Math.max(0,Number(price.value||0));c.tickerSeconds=Math.min(120,Math.max(18,Number(tickerSeconds.value)||42));c.tickerItems=lines(tickerItems.value);c.artistCards=lines(artistCards.value).filter(x=>ARTISTS.includes(x));
+ c.lot=Math.max(1,Number(lot.value||1));c.price=Math.max(0,Number(price.value||0));
+ c.duoEnabled=$('duoEnabled')?$('duoEnabled').checked:true;
+ c.duoDiscountPerTicket=Math.min(c.price,Math.max(0,Number($('duoDiscountPerTicket')?.value??10)));
+ c.tickerSeconds=Math.min(120,Math.max(18,Number(tickerSeconds.value)||42));c.tickerItems=lines(tickerItems.value);c.artistCards=lines(artistCards.value).filter(x=>ARTISTS.includes(x));
  c.genres={pt:lines(genresPt.value),es:lines(genresEs.value)};c.copy=c.copy||{pt:{},es:{}};
  for(const lang of ['pt','es']){c.copy[lang]=c.copy[lang]||{};for(const [key] of COPY_FIELDS)c.copy[lang][key]=$(`copy-${lang}-${key}`).value.trim()}
  c.copy.pt.vognText=vognTextPt.value.trim();c.copy.es.vognText=vognTextEs.value.trim();c.copy.pt.glitzyText=glitzyTextPt.value.trim();c.copy.es.glitzyText=glitzyTextEs.value.trim();
@@ -55,4 +68,6 @@ document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{document.quer
 document.querySelectorAll('[data-upload]').forEach(btn=>btn.onclick=async()=>{const slot=btn.dataset.upload,file=$(slot+'File').files[0];if(!file)return alert('Selecione uma imagem');btn.disabled=true;btn.textContent='Enviando…';try{const fd=new FormData();fd.append('file',file);fd.append('slot',slot);const r=await fetch('/api/admin/upload',{method:'POST',body:fd});const d=await r.json().catch(()=>({}));if(!r.ok||!d.ok)throw new Error(d.error||'Falha no upload');$(slot+'Photo').value=d.url;setPreview($(slot+'Preview'),d.url,slot);status('Imagem enviada. Salve as alterações.',true)}catch(e){alert(e.message)}finally{btn.disabled=false;btn.textContent='Enviar foto'}});
 refreshJsonBtn.onclick=()=>{advancedConfig.value=JSON.stringify(collect(false),null,2);status('JSON atualizado pelo formulário.',true)};
 applyJsonBtn.onclick=()=>{try{const parsed=JSON.parse(advancedConfig.value);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('O JSON precisa ser um objeto.');fill(parsed);status('JSON aplicado ao formulário. Salve para publicar.',true)}catch(e){alert('JSON inválido: '+e.message)}};
-buildCopyFields();buildSections();load();
+buildCopyFields();buildSections();buildDuoControls();
+$('price')?.addEventListener('input',updateDuoPreview);$('duoDiscountPerTicket')?.addEventListener('input',updateDuoPreview);$('duoEnabled')?.addEventListener('change',updateDuoPreview);
+load();
