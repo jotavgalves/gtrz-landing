@@ -9,6 +9,7 @@
   const hasPrice=value=>value!==null&&value!==undefined&&String(value).trim()!==''&&Number.isFinite(Number(value));
 
   function safeUrl(value){
+    if(!String(value||'').trim())return '#';
     try{const u=new URL(String(value||''),location.origin);return /^https?:$/.test(u.protocol)?u.toString():'#'}catch{return '#'}
   }
   function waUrl(raw,message){
@@ -54,7 +55,7 @@
     return t;
   }
   function tickets(config){
-    const source=Array.isArray(config.tickets)&&config.tickets.length?config.tickets:legacyTickets(config);
+    const source=Array.isArray(config.tickets)?config.tickets:legacyTickets(config);
     return source.map(normalizeTicket).filter(t=>t.visible);
   }
   function text(ticket,key,lang,fallback=''){const localized=ticket?.[lang]||{};return localized[key]??fallback}
