@@ -1,41 +1,33 @@
-.tickets-grid.duo-ready{grid-template-columns:.5fr 1.5fr;gap:34px;align-items:stretch}
+.tickets-grid.duo-ready{grid-template-columns:minmax(230px,.48fr) minmax(0,1.52fr);gap:34px;align-items:stretch}
 .tickets-grid.duo-ready .tickets-intro{align-self:center}
-.ticket-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;position:relative;z-index:2}
-.ticket-card{min-width:0;padding:24px;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.34);box-shadow:0 24px 70px rgba(0,0,0,.16);position:relative;overflow:hidden}
-.ticket-card--single{background:#fff;color:#121212}
-.ticket-card--duo{background:#0b0b0b;color:#fff;border-color:#0b0b0b}
-.ticket-card--door{background:#eee6e2;color:#121212;border-color:#eee6e2}
-.ticket-card--duo:before{content:'';position:absolute;width:190px;height:190px;right:-100px;top:-110px;border:42px solid rgba(255,0,0,.18);border-radius:50%;pointer-events:none}
-.ticket-card--door:before{content:'';position:absolute;width:150px;height:150px;right:-88px;bottom:-92px;border:34px solid rgba(255,0,0,.16);transform:rotate(18deg);pointer-events:none}
-.ticket-card__top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px;margin-bottom:30px;position:relative;z-index:1}
-.ticket-card__type{font-size:.59rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
-.ticket-card--single .ticket-card__type,.ticket-card--door .ticket-card__type{color:#6b6361}
-.ticket-card--duo .ticket-card__type{color:#ff5757}
-.ticket-card__badge{display:inline-flex;align-items:center;min-height:26px;padding:0 9px;background:#fff;color:#111;font-size:.52rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
-.ticket-card__badge--sold{background:var(--red);color:#fff}
-.ticket-card__title{font-family:var(--display);font-size:clamp(2.3rem,3.4vw,3.9rem);font-weight:400;line-height:.84;text-transform:uppercase;margin:0 0 12px;position:relative;z-index:1}
-.ticket-card__price{font-family:var(--display);font-size:clamp(3.8rem,5.2vw,5.8rem);font-weight:400;line-height:.82;white-space:nowrap;margin:8px 0 12px;letter-spacing:-.02em;position:relative;z-index:1}
-.ticket-card__price--pending{font-family:var(--sans);font-size:clamp(1.15rem,1.6vw,1.55rem);font-weight:950;line-height:1.05;letter-spacing:.06em;white-space:normal;min-height:74px;display:flex;align-items:end}
-.ticket-card__price small{font-family:var(--sans);font-size:.64rem;font-weight:900;letter-spacing:.08em;vertical-align:top;margin-right:4px}
-.ticket-card__meta{font-size:.73rem;font-weight:800;line-height:1.5;margin:0 0 22px;position:relative;z-index:1}
-.ticket-card--single .ticket-card__meta,.ticket-card--door .ticket-card__meta{color:#615957}
-.ticket-card--duo .ticket-card__meta{color:#b8afad}
-.ticket-card__compare{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;font-size:.66rem;font-weight:800;position:relative;z-index:1}
-.ticket-card__compare s{color:#8c8381}
-.ticket-card__saving{display:inline-flex;align-items:center;width:max-content;max-width:100%;min-height:31px;padding:0 10px;background:var(--red);color:#fff;font-size:.6rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:24px;position:relative;z-index:1}
-.ticket-card__actions{display:grid;gap:8px;margin-top:auto;position:relative;z-index:1}
-.ticket-card__actions .btn{width:100%;min-width:0}
-.ticket-card--single .ticket-card__actions .btn-primary{background:#111;color:#fff;border-color:#111}
-.ticket-card--single .ticket-card__actions .btn-secondary{background:transparent;color:#111;border-color:rgba(0,0,0,.24)}
-.ticket-card--duo .ticket-card__actions .btn-primary{background:var(--red);color:#fff;border-color:var(--red)}
-.ticket-card__fine{font-size:.56rem;line-height:1.45;margin:13px 0 0;opacity:.62;position:relative;z-index:1}
-.ticket-door-status,.ticket-btn-disabled{min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 14px;font-size:.68rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
-.ticket-door-status{border:1px solid rgba(0,0,0,.24);background:#fff;color:#111}
-.ticket-btn-disabled{background:#3b3533!important;color:#d7cfcc!important;border-color:#3b3533!important;cursor:not-allowed;pointer-events:none}
-.ticket-card.is-sold-out:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent 0,transparent 18px,rgba(120,0,0,.035) 18px,rgba(120,0,0,.035) 36px);pointer-events:none}
-.ticket-card.is-sold-out .ticket-card__price,.ticket-card.is-sold-out .ticket-card__meta,.ticket-card.is-sold-out .ticket-card__compare,.ticket-card.is-sold-out .ticket-card__saving,.ticket-card.is-sold-out .ticket-card__fine{opacity:.48}
+.ticket-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:stretch;position:relative;z-index:2;min-width:0}
+.ticket-card{min-width:0;padding:25px;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.34);box-shadow:0 24px 70px rgba(0,0,0,.16);position:relative;overflow:hidden;transition:opacity .2s,filter .2s,transform .2s}
+.ticket-card--light{background:#fff;color:#121212}
+.ticket-card--dark{background:#0b0b0b;color:#fff;border-color:#0b0b0b}
+.ticket-card--red{background:#ff0000;color:#fff;border-color:#ff0000}
+.ticket-card--dark:before,.ticket-card--red:before{content:'';position:absolute;width:190px;height:190px;right:-100px;top:-110px;border:42px solid rgba(255,255,255,.11);border-radius:50%;pointer-events:none}
+.ticket-card.is-sold-out{filter:saturate(.28)}
+.ticket-card.is-dimmed{opacity:.46;filter:grayscale(.38)}
+.ticket-card__top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px;margin-bottom:30px;position:relative}
+.ticket-card__type{font-size:.58rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.ticket-card--light .ticket-card__type{color:#6b6361}.ticket-card--dark .ticket-card__type{color:#ff5757}.ticket-card--red .ticket-card__type{color:#fff}
+.ticket-card__badge{display:inline-flex;align-items:center;min-height:26px;padding:0 9px;background:#fff;color:#111;font-size:.5rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.ticket-card--light .ticket-card__badge{background:#111;color:#fff}.ticket-card__badge--status{background:#111!important;color:#fff!important}
+.ticket-card__title{font-family:var(--display);font-size:clamp(2.65rem,4.3vw,4.5rem);font-weight:400;line-height:.84;text-transform:uppercase;margin:0 0 12px;position:relative;overflow-wrap:anywhere}
+.ticket-card__price{font-family:var(--display);font-size:clamp(4.15rem,5.7vw,6.4rem);font-weight:400;line-height:.82;white-space:nowrap;margin:8px 0 12px;letter-spacing:-.02em}
+.ticket-card__price small{font-family:var(--sans);font-size:.62rem;font-weight:900;letter-spacing:.08em;vertical-align:top;margin-right:4px}
+.ticket-card__price--pending{font-family:var(--sans);font-size:clamp(1.05rem,1.5vw,1.35rem);font-weight:950;letter-spacing:.08em;line-height:1.15;white-space:normal;min-height:78px;display:flex;align-items:center;margin:8px 0 12px;text-transform:uppercase}
+.ticket-card__meta{font-size:.74rem;font-weight:800;line-height:1.5;margin:0 0 18px}
+.ticket-card--light .ticket-card__meta{color:#615957}.ticket-card--dark .ticket-card__meta{color:#b8afad}.ticket-card--red .ticket-card__meta{color:rgba(255,255,255,.82)}
+.ticket-card__compare{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 9px;font-size:.67rem;font-weight:800}.ticket-card__compare s{opacity:.58}
+.ticket-card__saving{display:inline-flex;align-items:center;width:max-content;max-width:100%;min-height:30px;padding:0 9px;background:var(--red);color:#fff;font-size:.59rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:20px}
+.ticket-card--red .ticket-card__saving{background:#111}
+.ticket-card__actions{display:grid;gap:8px;margin-top:auto}.ticket-card__actions .btn{width:100%;min-width:0}
+.ticket-card--light .ticket-card__actions .btn-primary{background:#111;color:#fff;border-color:#111}.ticket-card--light .ticket-card__actions .btn-secondary{background:transparent;color:#111;border-color:rgba(0,0,0,.24)}
+.ticket-card--dark .ticket-card__actions .btn-primary{background:var(--red);color:#fff;border-color:var(--red)}.ticket-card--dark .ticket-card__actions .btn-secondary{background:#fff;color:#111;border-color:#fff}
+.ticket-card--red .ticket-card__actions .btn-primary{background:#fff;color:#111;border-color:#fff}.ticket-card--red .ticket-card__actions .btn-secondary{background:#111;color:#fff;border-color:#111}
+.ticket-card__fine{font-size:.57rem;line-height:1.45;margin:12px 0 0;opacity:.64}.ticket-btn-disabled{cursor:not-allowed!important;background:#383838!important;color:#aaa!important;border-color:#383838!important;pointer-events:none;transform:none!important}.ticket-door-status{min-height:54px;display:flex;align-items:center;justify-content:center;border:1px solid currentColor;font-size:.62rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:10px}.ticket-empty{grid-column:1/-1;padding:38px;border:1px dashed rgba(255,255,255,.35);text-align:center;font-size:.75rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .tickets-grid.duo-ready .tickets-kicker{color:rgba(255,255,255,.86)}
-@media(max-width:1240px){.tickets-grid.duo-ready{grid-template-columns:1fr;gap:34px}.tickets-grid.duo-ready .tickets-intro{display:flex;align-items:end;justify-content:space-between;gap:20px}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.5rem,14vw,10rem)}.ticket-options{width:100%}}
-@media(max-width:900px){.ticket-options{grid-template-columns:repeat(2,minmax(0,1fr))}.ticket-card--door:last-child{grid-column:1/-1}}
-@media(max-width:720px){.tickets{padding:78px 0 94px;min-height:auto}.tickets-grid.duo-ready{gap:26px}.tickets-grid.duo-ready .tickets-intro{display:block}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.4rem,25vw,8rem)}.ticket-options{grid-template-columns:1fr;gap:12px}.ticket-card--door:last-child{grid-column:auto}.ticket-card{padding:24px}.ticket-card__top{margin-bottom:26px}.ticket-card__title{font-size:3.4rem}.ticket-card__price{font-size:5.6rem}.ticket-card__price--pending{font-size:1.3rem;min-height:58px}.ticket-card__actions .btn{min-height:58px}.globe{width:120vw;right:-60vw;bottom:-20vw}}
-@media(max-width:420px){.ticket-card{padding:21px}.ticket-card__price{font-size:4.9rem}.ticket-card__price--pending{font-size:1.18rem}.ticket-card__title{font-size:3rem}.ticket-card__badge{font-size:.48rem}}
+@media(max-width:1180px){.tickets-grid.duo-ready{grid-template-columns:1fr;gap:30px}.tickets-grid.duo-ready .tickets-intro{display:flex;align-items:end;justify-content:space-between;gap:20px}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.5rem,14vw,10rem)}.ticket-options{width:100%;grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}}
+@media(max-width:760px){.tickets{padding:78px 0 94px;min-height:auto}.tickets-grid.duo-ready{gap:24px}.tickets-grid.duo-ready .tickets-intro{display:block}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.4rem,25vw,8rem)}.ticket-options{grid-template-columns:1fr;gap:12px}.ticket-card{padding:24px}.ticket-card__top{margin-bottom:25px}.ticket-card__title{font-size:3.35rem}.ticket-card__price{font-size:5.4rem}.ticket-card__actions .btn{min-height:58px}.globe{width:120vw;right:-60vw;bottom:-20vw}}
+@media(max-width:420px){.ticket-card{padding:21px}.ticket-card__price{font-size:4.8rem}.ticket-card__title{font-size:2.95rem}.ticket-card__badge{font-size:.46rem}}
