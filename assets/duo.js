@@ -1,147 +1,142 @@
 (()=>{
-  const FALLBACK={lot:1,price:50,individualSoldOut:false,duoEnabled:true,duoSoldOut:false,duoDiscountPerTicket:10,doorEnabled:true,doorSoldOut:false,doorPrice:null,wa:'https://wa.me/5581920013249',sympla:'https://www.sympla.com.br/evento/la-rumba-jampa/3534032'};
+  const FALLBACK={lot:1,price:50,wa:'https://wa.me/5581920013249',sympla:'https://www.sympla.com.br/evento/la-rumba-jampa/3534032'};
   let currentConfig={...FALLBACK};
 
   const money=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(Number(value)||0);
   const currentLang=()=>document.documentElement.lang?.toLowerCase().startsWith('es')?'es':'pt';
   const ordinal=n=>`${Math.max(1,Number(n)||1)}º`;
-  const clampDiscount=(price,value)=>Math.min(Math.max(0,Number(price)||0),Math.max(0,Number(value)||0));
-  const optionalPrice=value=>value===null||value===undefined||String(value).trim()===''?null:Math.max(0,Number(value)||0);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const hasPrice=value=>value!==null&&value!==undefined&&String(value).trim()!==''&&Number.isFinite(Number(value));
 
+  function safeUrl(value){
+    try{const u=new URL(String(value||''),location.origin);return /^https?:$/.test(u.protocol)?u.toString():'#'}catch{return '#'}
+  }
   function waUrl(raw,message){
     let base=String(raw||FALLBACK.wa).trim();
     if(/^\+?[\d\s().-]{8,}$/.test(base))base=`https://wa.me/${base.replace(/\D/g,'')}`;
-    try{const u=new URL(base);u.searchParams.set('text',message);return u.toString()}
-    catch{const digits=base.replace(/\D/g,'');return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`}
+    try{const u=new URL(base);if(!/^https?:$/.test(u.protocol))return '#';u.searchParams.set('text',message);return u.toString()}
+    catch{const digits=base.replace(/\D/g,'');return digits?`https://wa.me/${digits}?text=${encodeURIComponent(message)}`:'#'}
   }
 
-  function copy(config){
-    const lang=currentLang();
-    const lot=Math.max(1,Number(config.lot)||FALLBACK.lot);
+  function legacyTickets(config){
     const price=Math.max(0,Number(config.price)||0);
-    const discount=clampDiscount(price,config.duoDiscountPerTicket??FALLBACK.duoDiscountPerTicket);
-    const duoUnit=Math.max(0,price-discount);
-    const regularTotal=price*2;
-    const duoTotal=duoUnit*2;
-    const saving=Math.max(0,regularTotal-duoTotal);
-    if(lang==='es')return{
-      individual:'ENTRADA INDIVIDUAL',singleTitle:'INDIVIDUAL',singleMeta:'1 entrada',singleBuy:'Comprar individual',sympla:'Comprar en Sympla',
-      duoType:'PROMO ESPECIAL',duoTitle:'PROMO DUO',best:'MEJOR VALOR',duoMeta:`2 entradas · R$ ${money(duoUnit)} por persona`,
-      compare:`Comprando por separado: R$ ${money(regularTotal)}`,save:`AHORRA R$ ${money(saving)}`,duoBuy:'Comprar Promo Duo',
-      fine:'Promo válida mientras esté activa y haya disponibilidad en el lote actual.',
-      doorType:'VENTA EN EL LUGAR',doorTitle:'ENTRADA EN PUERTA',doorMeta:'Compra disponible solamente en la entrada del evento.',doorBuy:'Venta solamente en puerta',doorPricePending:'PRECIO EN PUERTA',
-      soldOut:'AGOTADO',
-      individualMessage:`¡Hola! Quiero comprar 1 entrada individual para La Rumba Jampa. Vi en el sitio que el lote ${ordinal(lot)} está por R$ ${money(price)}. ¿Puedes enviarme los datos para el pago y confirmar mi compra?`,
-      duoMessage:`¡Hola! Quiero comprar la Promo Duo de La Rumba Jampa: 2 entradas por R$ ${money(duoTotal)} (R$ ${money(duoUnit)} por persona), ahorrando R$ ${money(saving)} frente a dos entradas individuales del lote ${ordinal(lot)}. ¿Puedes enviarme los datos para el pago y confirmar mi compra?`
-    };
-    return{
-      individual:'INGRESSO INDIVIDUAL',singleTitle:'INDIVIDUAL',singleMeta:'1 entrada',singleBuy:'Comprar individual',sympla:'Comprar no Sympla',
-      duoType:'PROMO ESPECIAL',duoTitle:'PROMO DUO',best:'MELHOR VALOR',duoMeta:`2 entradas · R$ ${money(duoUnit)} por pessoa`,
-      compare:`Comprando separado: R$ ${money(regularTotal)}`,save:`ECONOMIZE R$ ${money(saving)}`,duoBuy:'Comprar Promo Duo',
-      fine:'Promo válida enquanto estiver ativa e houver disponibilidade no lote atual.',
-      doorType:'VENDA NO LOCAL',doorTitle:'ENTRADA EN PUERTA',doorMeta:'Compra disponível somente na entrada do evento.',doorBuy:'Venda somente na porta',doorPricePending:'VALOR NA PORTA',
-      soldOut:'ESGOTADO',
-      individualMessage:`Olá! Quero comprar 1 ingresso individual para a La Rumba Jampa. Vi no site que o ${ordinal(lot)} lote está por R$ ${money(price)}. Pode me enviar os dados para pagamento e confirmar minha compra?`,
-      duoMessage:`Olá! Quero comprar a Promo Duo da La Rumba Jampa: 2 ingressos por R$ ${money(duoTotal)} (R$ ${money(duoUnit)} por pessoa), economizando R$ ${money(saving)} em relação a dois ingressos individuais do ${ordinal(lot)} lote. Pode me enviar os dados para pagamento e confirmar minha compra?`
-    };
+    const discount=Math.min(price,Math.max(0,Number(config.duoDiscountPerTicket??10)||0));
+    const duoUnit=Math.max(0,price-discount),duoTotal=duoUnit*2,saving=discount*2;
+    return[
+      {
+        id:'individual',visible:true,status:config.individualSoldOut===true?'soldout':'available',dimWhenLocked:true,theme:'light',purchaseMode:'both',price,
+        pt:{type:'INGRESSO INDIVIDUAL',title:'INDIVIDUAL',badge:'',meta:`1 entrada · ${ordinal(config.lot)} lote`,compare:'',saving:'',note:'',buttonPrimary:'Comprar individual',buttonSecondary:'Comprar no Sympla',priceText:'CONSULTE',soldOutLabel:'ESGOTADO',lockedLabel:'EM BREVE',whatsappMessage:`Olá! Quero comprar 1 ingresso individual para a La Rumba Jampa. Vi no site que o ${ordinal(config.lot)} lote está por R$ ${money(price)}. Pode me enviar os dados para pagamento e confirmar minha compra?`},
+        es:{type:'ENTRADA INDIVIDUAL',title:'INDIVIDUAL',badge:'',meta:`1 entrada · lote ${ordinal(config.lot)}`,compare:'',saving:'',note:'',buttonPrimary:'Comprar individual',buttonSecondary:'Comprar en Sympla',priceText:'CONSULTAR',soldOutLabel:'AGOTADO',lockedLabel:'PRÓXIMAMENTE',whatsappMessage:`¡Hola! Quiero comprar 1 entrada individual para La Rumba Jampa. Vi en el sitio que el lote ${ordinal(config.lot)} está por R$ ${money(price)}. ¿Puedes enviarme los datos para el pago y confirmar mi compra?`}
+      },
+      {
+        id:'promo-duo',visible:config.duoEnabled!==false,status:config.duoSoldOut===true?'soldout':'available',dimWhenLocked:true,theme:'dark',purchaseMode:'whatsapp',price:duoTotal,
+        pt:{type:'PROMO ESPECIAL',title:'PROMO DUO',badge:'MELHOR VALOR',meta:`2 entradas · R$ ${money(duoUnit)} por pessoa`,compare:`Comprando separado: R$ ${money(price*2)}`,saving:`ECONOMIZE R$ ${money(saving)}`,note:'Promo válida enquanto estiver ativa e houver disponibilidade no lote atual.',buttonPrimary:'Comprar Promo Duo',buttonSecondary:'',priceText:'CONSULTE',soldOutLabel:'ESGOTADO',lockedLabel:'EM BREVE',whatsappMessage:`Olá! Quero comprar a Promo Duo da La Rumba Jampa: 2 ingressos por R$ ${money(duoTotal)}. Pode me enviar os dados para pagamento e confirmar minha compra?`},
+        es:{type:'PROMO ESPECIAL',title:'PROMO DUO',badge:'MEJOR VALOR',meta:`2 entradas · R$ ${money(duoUnit)} por persona`,compare:`Comprando por separado: R$ ${money(price*2)}`,saving:`AHORRA R$ ${money(saving)}`,note:'Promo válida mientras esté activa y haya disponibilidad en el lote actual.',buttonPrimary:'Comprar Promo Duo',buttonSecondary:'',priceText:'CONSULTAR',soldOutLabel:'AGOTADO',lockedLabel:'PRÓXIMAMENTE',whatsappMessage:`¡Hola! Quiero comprar la Promo Duo de La Rumba Jampa: 2 entradas por R$ ${money(duoTotal)}. ¿Puedes enviarme los datos para el pago y confirmar mi compra?`}
+      },
+      {
+        id:'entrada-en-puerta',visible:config.doorEnabled!==false,status:config.doorSoldOut===true?'soldout':'available',dimWhenLocked:true,theme:'red',purchaseMode:'none',price:hasPrice(config.doorPrice)?Math.max(0,Number(config.doorPrice)):null,
+        pt:{type:'VENDA NO LOCAL',title:'ENTRADA EN PUERTA',badge:'',meta:'Compra disponível somente na entrada do evento.',compare:'',saving:'',note:'',buttonPrimary:'Venda somente na porta',buttonSecondary:'',priceText:'VALOR NA PORTA',soldOutLabel:'ESGOTADO',lockedLabel:'EM BREVE',whatsappMessage:''},
+        es:{type:'VENTA EN EL LUGAR',title:'ENTRADA EN PUERTA',badge:'',meta:'Compra disponible solamente en la entrada del evento.',compare:'',saving:'',note:'',buttonPrimary:'Venta solamente en puerta',buttonSecondary:'',priceText:'PRECIO EN PUERTA',soldOutLabel:'AGOTADO',lockedLabel:'PRÓXIMAMENTE',whatsappMessage:''}
+      }
+    ];
   }
 
-  function soldOutButton(label){return `<span class="btn ticket-btn-disabled" aria-disabled="true">${label}</span>`}
-  function lockGenericIndividualLinks(){
-    if(currentConfig.individualSoldOut!==true)return;
-    document.querySelectorAll('.js-wa,.js-ticket').forEach(link=>{
+  function normalizeTicket(raw,index){
+    const base={id:`ticket-${index+1}`,visible:true,status:'available',dimWhenLocked:true,theme:'light',purchaseMode:'whatsapp',price:null,whatsappUrl:'',symplaUrl:'',customUrl:'',pt:{},es:{}};
+    const t={...base,...(raw||{})};
+    t.id=String(t.id||base.id);
+    t.visible=t.visible!==false;
+    t.status=['available','soldout','locked'].includes(t.status)?t.status:'available';
+    t.theme=['light','dark','red'].includes(t.theme)?t.theme:'light';
+    t.purchaseMode=['whatsapp','sympla','both','custom','none'].includes(t.purchaseMode)?t.purchaseMode:'whatsapp';
+    t.price=hasPrice(t.price)?Math.max(0,Number(t.price)):null;
+    t.pt={...base.pt,...(raw?.pt||{})};t.es={...base.es,...(raw?.es||{})};
+    return t;
+  }
+  function tickets(config){
+    const source=Array.isArray(config.tickets)&&config.tickets.length?config.tickets:legacyTickets(config);
+    return source.map(normalizeTicket).filter(t=>t.visible);
+  }
+  function text(ticket,key,lang,fallback=''){const localized=ticket?.[lang]||{};return localized[key]??fallback}
+
+  function priceHtml(ticket,lang){
+    if(ticket.price!==null)return `<div class="ticket-card__price"><small>R$</small>${esc(money(ticket.price))}</div>`;
+    return `<div class="ticket-card__price ticket-card__price--pending">${esc(text(ticket,'priceText',lang,lang==='es'?'CONSULTAR':'CONSULTE'))}</div>`;
+  }
+  function statusLabel(ticket,lang){
+    if(ticket.status==='soldout')return text(ticket,'soldOutLabel',lang,lang==='es'?'AGOTADO':'ESGOTADO');
+    if(ticket.status==='locked')return text(ticket,'lockedLabel',lang,lang==='es'?'PRÓXIMAMENTE':'EM BREVE');
+    return '';
+  }
+  function defaultMessage(ticket,lang){
+    const title=text(ticket,'title',lang,'Ingresso');
+    const price=ticket.price!==null?` R$ ${money(ticket.price)}`:'';
+    return lang==='es'?`¡Hola! Quiero comprar ${title} para La Rumba Jampa.${price?` El valor mostrado es${price}.`:''}`:`Olá! Quero comprar ${title} para a La Rumba Jampa.${price?` O valor exibido é${price}.`:''}`;
+  }
+  function actionHtml(ticket,config,lang){
+    const disabled=ticket.status!=='available';
+    if(disabled)return `<span class="btn ticket-btn-disabled" aria-disabled="true">${esc(statusLabel(ticket,lang))}</span>`;
+    const primary=text(ticket,'buttonPrimary',lang,lang==='es'?'Comprar':'Comprar');
+    const secondary=text(ticket,'buttonSecondary',lang,lang==='es'?'Comprar en Sympla':'Comprar no Sympla');
+    const msg=text(ticket,'whatsappMessage',lang,'').trim()||defaultMessage(ticket,lang);
+    const wa=waUrl(ticket.whatsappUrl||config.wa,msg);
+    const sympla=safeUrl(ticket.symplaUrl||config.sympla||FALLBACK.sympla);
+    const custom=safeUrl(ticket.customUrl);
+    if(ticket.purchaseMode==='none')return primary?`<div class="ticket-door-status">${esc(primary)}</div>`:'';
+    if(ticket.purchaseMode==='whatsapp')return `<a class="btn btn-primary" href="${esc(wa)}" target="_blank" rel="noopener">${esc(primary)}</a>`;
+    if(ticket.purchaseMode==='sympla')return `<a class="btn btn-primary" href="${esc(sympla)}" target="_blank" rel="noopener">${esc(primary)}</a>`;
+    if(ticket.purchaseMode==='custom')return `<a class="btn btn-primary" href="${esc(custom)}" target="_blank" rel="noopener">${esc(primary)}</a>`;
+    return `<a class="btn btn-primary" href="${esc(wa)}" target="_blank" rel="noopener">${esc(primary)}</a><a class="btn btn-secondary" href="${esc(sympla)}" target="_blank" rel="noopener">${esc(secondary)}</a>`;
+  }
+  function cardHtml(ticket,config,lang){
+    const badge=ticket.status==='available'?text(ticket,'badge',lang,''):statusLabel(ticket,lang);
+    const meta=text(ticket,'meta',lang,'');
+    const compare=text(ticket,'compare',lang,'');
+    const saving=text(ticket,'saving',lang,'');
+    const note=text(ticket,'note',lang,'');
+    const stateClass=ticket.status==='soldout'?' is-sold-out':ticket.status==='locked'?' is-locked':'';
+    const dimClass=ticket.status==='locked'&&ticket.dimWhenLocked!==false?' is-dimmed':'';
+    return `<article class="ticket-card ticket-card--${esc(ticket.theme)}${stateClass}${dimClass}" data-ticket-id="${esc(ticket.id)}">
+      <div class="ticket-card__top"><span class="ticket-card__type">${esc(text(ticket,'type',lang,''))}</span>${badge?`<span class="ticket-card__badge${ticket.status==='available'?'':' ticket-card__badge--status'}">${esc(badge)}</span>`:''}</div>
+      <h3 class="ticket-card__title">${esc(text(ticket,'title',lang,'INGRESSO'))}</h3>
+      ${priceHtml(ticket,lang)}
+      ${meta?`<p class="ticket-card__meta">${esc(meta)}</p>`:''}
+      ${compare?`<div class="ticket-card__compare"><s>${esc(compare)}</s></div>`:''}
+      ${saving?`<div class="ticket-card__saving">${esc(saving)}</div>`:''}
+      <div class="ticket-card__actions">${actionHtml(ticket,config,lang)}</div>
+      ${note?`<p class="ticket-card__fine">${esc(note)}</p>`:''}
+    </article>`;
+  }
+
+  function routeGenericPurchaseLinks(){
+    document.querySelectorAll('.hero-main-ctas .js-wa,.hero-main-ctas .js-ticket,.final .ctas .js-wa,.final .ctas .js-ticket').forEach(link=>{
       if(link.getAttribute('href')!=='#ingressos')link.setAttribute('href','#ingressos');
       link.removeAttribute('target');link.removeAttribute('rel');
     });
   }
-
   function render(config){
     const section=document.getElementById('ingressos');
     const grid=section?.querySelector('.tickets-grid');
     if(!grid)return;
-
-    const existingPrice=Number(document.getElementById('priceMain')?.textContent||FALLBACK.price);
-    const merged={...FALLBACK,...config};
-    if(!Number.isFinite(Number(merged.price)))merged.price=existingPrice;
-    const price=Math.max(0,Number(merged.price)||0);
-    const discount=clampDiscount(price,merged.duoDiscountPerTicket??FALLBACK.duoDiscountPerTicket);
-    const duoUnit=Math.max(0,price-discount);
-    const duoTotal=duoUnit*2;
-    const doorPrice=optionalPrice(merged.doorPrice);
-    const c=copy(merged);
-    currentConfig=merged;
-
+    currentConfig={...FALLBACK,...config};
+    const list=tickets(currentConfig),lang=currentLang();
     grid.classList.add('duo-ready');
     let host=grid.querySelector('.ticket-options');
     const old=grid.querySelector('.tickets-purchase');
-    if(!host){
-      host=document.createElement('div');
-      host.className='ticket-options reveal in';
-      if(old)old.replaceWith(host);else grid.appendChild(host);
-    }
-
-    const individualHref=waUrl(merged.wa,c.individualMessage);
-    const duoHref=waUrl(merged.wa,c.duoMessage);
-    const sympla=merged.sympla||FALLBACK.sympla;
-    const individualSoldOut=merged.individualSoldOut===true;
-    const duoEnabled=merged.duoEnabled!==false;
-    const duoSoldOut=merged.duoSoldOut===true;
-    const doorEnabled=merged.doorEnabled!==false;
-    const doorSoldOut=merged.doorSoldOut===true;
-
-    const individualActions=individualSoldOut?soldOutButton(c.soldOut):`<a class="btn btn-primary" href="${individualHref}" target="_blank" rel="noopener">${c.singleBuy}</a><a class="btn btn-secondary" href="${sympla}" target="_blank" rel="noopener">${c.sympla}</a>`;
-    const duoActions=duoSoldOut?soldOutButton(c.soldOut):`<a class="btn btn-primary" href="${duoHref}" target="_blank" rel="noopener">${c.duoBuy}</a>`;
-    const doorActions=doorSoldOut?soldOutButton(c.soldOut):`<div class="ticket-door-status">${c.doorBuy}</div>`;
-    const doorPriceHtml=doorPrice===null?`<div class="ticket-card__price ticket-card__price--pending">${c.doorPricePending}</div>`:`<div class="ticket-card__price"><small>R$</small>${money(doorPrice)}</div>`;
-
-    host.innerHTML=`
-      <article class="ticket-card ticket-card--single${individualSoldOut?' is-sold-out':''}">
-        <div class="ticket-card__top"><span class="ticket-card__type">${c.individual}</span>${individualSoldOut?`<span class="ticket-card__badge ticket-card__badge--sold">${c.soldOut}</span>`:''}</div>
-        <h3 class="ticket-card__title">${c.singleTitle}</h3>
-        <div class="ticket-card__price"><small>R$</small>${money(price)}</div>
-        <p class="ticket-card__meta">${c.singleMeta} · ${ordinal(merged.lot)} lote</p>
-        <div class="ticket-card__actions">${individualActions}</div>
-      </article>
-      ${duoEnabled?`<article class="ticket-card ticket-card--duo${duoSoldOut?' is-sold-out':''}">
-        <div class="ticket-card__top"><span class="ticket-card__type">${c.duoType}</span><span class="ticket-card__badge${duoSoldOut?' ticket-card__badge--sold':''}">${duoSoldOut?c.soldOut:c.best}</span></div>
-        <h3 class="ticket-card__title">${c.duoTitle}</h3>
-        <div class="ticket-card__price"><small>R$</small>${money(duoTotal)}</div>
-        <p class="ticket-card__meta">${c.duoMeta}</p>
-        <div class="ticket-card__compare"><s>${c.compare}</s></div>
-        <div class="ticket-card__saving">${c.save}</div>
-        <div class="ticket-card__actions">${duoActions}</div>
-        <p class="ticket-card__fine">${c.fine}</p>
-      </article>`:''}
-      ${doorEnabled?`<article class="ticket-card ticket-card--door${doorSoldOut?' is-sold-out':''}">
-        <div class="ticket-card__top"><span class="ticket-card__type">${c.doorType}</span>${doorSoldOut?`<span class="ticket-card__badge ticket-card__badge--sold">${c.soldOut}</span>`:''}</div>
-        <h3 class="ticket-card__title">${c.doorTitle}</h3>
-        ${doorPriceHtml}
-        <p class="ticket-card__meta">${c.doorMeta}</p>
-        <div class="ticket-card__actions">${doorActions}</div>
-      </article>`:''}`;
-
-    lockGenericIndividualLinks();
+    if(!host){host=document.createElement('div');host.className='ticket-options reveal in';if(old)old.replaceWith(host);else grid.appendChild(host)}
+    host.dataset.count=String(list.length);
+    host.innerHTML=list.length?list.map(t=>cardHtml(t,currentConfig,lang)).join(''):`<div class="ticket-empty">${lang==='es'?'No hay entradas visibles en este momento.':'Não há ingressos visíveis no momento.'}</div>`;
+    routeGenericPurchaseLinks();
   }
-
   async function load(){
-    try{
-      const response=await fetch('/api/site',{cache:'no-store'});
-      const data=await response.json();
-      if(response.ok&&data?.config)currentConfig={...FALLBACK,...data.config};
-    }catch{}
+    try{const response=await fetch('/api/site',{cache:'no-store'});const data=await response.json();if(response.ok&&data?.config)currentConfig={...FALLBACK,...data.config}}catch{}
     render(currentConfig);
   }
-
   const start=()=>{
     load();
     new MutationObserver(()=>render(currentConfig)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-    new MutationObserver(mutations=>{
-      if(currentConfig.individualSoldOut!==true)return;
-      if(mutations.some(m=>m.target?.matches?.('.js-wa,.js-ticket')))lockGenericIndividualLinks();
-    }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['href']});
-    document.addEventListener('click',event=>{
-      if(event.target.closest('[data-lang-btn],[data-modal-lang]'))setTimeout(()=>render(currentConfig),0);
-    });
+    new MutationObserver(mutations=>{if(mutations.some(m=>m.target?.matches?.('.hero-main-ctas .js-wa,.hero-main-ctas .js-ticket,.final .ctas .js-wa,.final .ctas .js-ticket')))routeGenericPurchaseLinks()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['href']});
+    document.addEventListener('click',event=>{if(event.target.closest('[data-lang-btn],[data-modal-lang]'))setTimeout(()=>render(currentConfig),0)});
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
