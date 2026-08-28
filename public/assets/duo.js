@@ -49,7 +49,7 @@
   function soldOutButton(label){return `<span class="btn ticket-btn-disabled" aria-disabled="true">${label}</span>`}
   function lockGenericIndividualLinks(){
     if(currentConfig.individualSoldOut!==true)return;
-    document.querySelectorAll('.js-wa').forEach(link=>{
+    document.querySelectorAll('.js-wa,.js-ticket').forEach(link=>{
       if(link.getAttribute('href')!=='#ingressos')link.setAttribute('href','#ingressos');
       link.removeAttribute('target');link.removeAttribute('rel');
     });
@@ -137,7 +137,7 @@
     new MutationObserver(()=>render(currentConfig)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
     new MutationObserver(mutations=>{
       if(currentConfig.individualSoldOut!==true)return;
-      if(mutations.some(m=>m.target?.matches?.('.js-wa')))lockGenericIndividualLinks();
+      if(mutations.some(m=>m.target?.matches?.('.js-wa,.js-ticket')))lockGenericIndividualLinks();
     }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['href']});
     document.addEventListener('click',event=>{
       if(event.target.closest('[data-lang-btn],[data-modal-lang]'))setTimeout(()=>render(currentConfig),0);
