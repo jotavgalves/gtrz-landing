@@ -4,7 +4,7 @@
 .ticket-card{min-width:0;padding:25px;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.34);box-shadow:0 24px 70px rgba(0,0,0,.16);position:relative;overflow:hidden;transition:opacity .2s,filter .2s,transform .2s}
 .ticket-card--light{background:#fff;color:#121212}
 .ticket-card--dark{background:#0b0b0b;color:#fff;border-color:#0b0b0b}
-.ticket-card--red{background:#ff0000;color:#fff;border-color:#ff0000}
+.ticket-card--red{background:#6f0710;color:#fff;border-color:#6f0710}
 .ticket-card--dark:before,.ticket-card--red:before{content:'';position:absolute;width:190px;height:190px;right:-100px;top:-110px;border:42px solid rgba(255,255,255,.11);border-radius:50%;pointer-events:none}
 .ticket-card.is-sold-out{filter:saturate(.28)}
 .ticket-card.is-dimmed{opacity:.46;filter:grayscale(.38)}
@@ -15,7 +15,8 @@
 .ticket-card--light .ticket-card__badge{background:#111;color:#fff}.ticket-card__badge--status{background:#111!important;color:#fff!important}
 .ticket-card__title{font-family:var(--display);font-size:clamp(2.65rem,4.3vw,4.5rem);font-weight:400;line-height:.84;text-transform:uppercase;margin:0 0 12px;position:relative;overflow-wrap:anywhere}
 .ticket-card__price{font-family:var(--display);font-size:clamp(4.15rem,5.7vw,6.4rem);font-weight:400;line-height:.82;white-space:nowrap;margin:8px 0 12px;letter-spacing:-.02em}
-.ticket-card__price small{font-family:var(--sans);font-size:.62rem;font-weight:900;letter-spacing:.08em;vertical-align:top;margin-right:4px}
+.ticket-card__price:not(.ticket-card__price--pending){display:flex;align-items:flex-start;gap:7px}
+.ticket-card__price small{font-family:var(--sans);font-size:clamp(1rem,1.15vw,1.28rem);font-weight:900;line-height:1;letter-spacing:.06em;margin:0;padding-top:.13em;vertical-align:initial}
 .ticket-card__price--pending{font-family:var(--sans);font-size:clamp(1.05rem,1.5vw,1.35rem);font-weight:950;letter-spacing:.08em;line-height:1.15;white-space:normal;min-height:78px;display:flex;align-items:center;margin:8px 0 12px;text-transform:uppercase}
 .ticket-card__meta{font-size:.74rem;font-weight:800;line-height:1.5;margin:0 0 18px}
 .ticket-card--light .ticket-card__meta{color:#615957}.ticket-card--dark .ticket-card__meta{color:#b8afad}.ticket-card--red .ticket-card__meta{color:rgba(255,255,255,.82)}
@@ -29,5 +30,5 @@
 .ticket-card__fine{font-size:.57rem;line-height:1.45;margin:12px 0 0;opacity:.64}.ticket-btn-disabled{cursor:not-allowed!important;background:#383838!important;color:#aaa!important;border-color:#383838!important;pointer-events:none;transform:none!important}.ticket-door-status{min-height:54px;display:flex;align-items:center;justify-content:center;border:1px solid currentColor;font-size:.62rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:10px}.ticket-empty{grid-column:1/-1;padding:38px;border:1px dashed rgba(255,255,255,.35);text-align:center;font-size:.75rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .tickets-grid.duo-ready .tickets-kicker{color:rgba(255,255,255,.86)}
 @media(max-width:1180px){.tickets-grid.duo-ready{grid-template-columns:1fr;gap:30px}.tickets-grid.duo-ready .tickets-intro{display:flex;align-items:end;justify-content:space-between;gap:20px}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.5rem,14vw,10rem)}.ticket-options{width:100%;grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}}
-@media(max-width:760px){.tickets{padding:78px 0 94px;min-height:auto}.tickets-grid.duo-ready{gap:24px}.tickets-grid.duo-ready .tickets-intro{display:block}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.4rem,25vw,8rem)}.ticket-options{grid-template-columns:1fr;gap:12px}.ticket-card{padding:24px}.ticket-card__top{margin-bottom:25px}.ticket-card__title{font-size:3.35rem}.ticket-card__price{font-size:5.4rem}.ticket-card__actions .btn{min-height:58px}.globe{width:120vw;right:-60vw;bottom:-20vw}}
+@media(max-width:760px){.tickets{padding:78px 0 94px;min-height:auto}.tickets-grid.duo-ready{gap:24px}.tickets-grid.duo-ready .tickets-intro{display:block}.tickets-grid.duo-ready .tickets-intro h2{font-size:clamp(5.4rem,25vw,8rem)}.ticket-options{grid-template-columns:1fr;gap:12px}.ticket-card{padding:24px}.ticket-card__top{margin-bottom:25px}.ticket-card__title{font-size:3.35rem}.ticket-card__price{font-size:5.4rem}.ticket-card__price small{font-size:1.08rem}.ticket-card__actions .btn{min-height:58px}.globe{width:120vw;right:-60vw;bottom:-20vw}}
 @media(max-width:420px){.ticket-card{padding:21px}.ticket-card__price{font-size:4.8rem}.ticket-card__title{font-size:2.95rem}.ticket-card__badge{font-size:.46rem}}
