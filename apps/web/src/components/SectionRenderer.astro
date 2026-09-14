@@ -1,0 +1,14 @@
+---
+import type { CmsEvent,CmsSection,Locale } from '@/lib/cms';
+import Hero from './sections/Hero.astro';import About from './sections/About.astro';import Rhythms from './sections/Rhythms.astro';import Differentials from './sections/Differentials.astro';import Events from './sections/Events.astro';import Community from './sections/Community.astro';import Instagram from './sections/Instagram.astro';import Contact from './sections/Contact.astro';
+const {section,locale,events}=Astro.props as {section:CmsSection;locale:Locale;events:CmsEvent[]};
+const props={locale,content:section.content,config:section.config,events};
+---
+{section.type==='hero'&&<Hero {...props}/>} 
+{section.type==='about'&&<About {...props}/>} 
+{section.type==='rhythms'&&<Rhythms {...props}/>} 
+{section.type==='differentials'&&<Differentials {...props}/>} 
+{section.type==='events'&&<Events {...props}/>} 
+{['team','freelancers','partnerships'].includes(section.type)&&section.type==='team'&&<Community {...props}/>} 
+{section.type==='instagram'&&<Instagram {...props}/>} 
+{section.type==='contact'&&<Contact {...props}/>} 

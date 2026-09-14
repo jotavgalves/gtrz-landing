@@ -1,0 +1,4 @@
+---
+const {locale,content={}}=Astro.props;const es=locale==='es';const c={eyebrow:'GTRZ',title:es?'¿HACEMOS QUE SUCEDA?':'VAMOS FAZER ACONTECER?',cta:es?'Hablar con GTRZ':'Falar com a GTRZ',email:'gtrzeventos@gmail.com',...content};
+---
+<section class="contact-section" data-section="contact"><div class="shell"><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2><a class="button primary" href={`mailto:${c.email}`} data-track="contact.email">{c.cta}</a></div></section>

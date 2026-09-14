@@ -1,25 +1,5 @@
 ---
-import { defaultContent } from '@/lib/default-content';
-import type { Locale } from '@/lib/cms';
-const { locale } = Astro.props as { locale: Locale };
-const c = defaultContent(locale).hero;
-const es = locale === 'es';
+import { defaultContent } from '@/lib/default-content';import type { Locale } from '@/lib/cms';
+const {locale,content={}}=Astro.props as {locale:Locale;content?:Record<string,any>};const d=defaultContent(locale).hero;const c={...d,...content};const es=locale==='es';
 ---
-<section id="top" class="hero" data-section="hero">
-  <div class="shell hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">{c.eyebrow}</span>
-      <h1>{c.title}</h1>
-      <p>{c.body}</p>
-      <div class="actions">
-        <a class="button primary" href="#eventos" data-track="hero.events">{es ? 'Ver eventos' : 'Ver eventos'}</a>
-        <a class="button" href="#sobre" data-track="hero.about">{es ? 'Conocer GTRZ' : 'Conhecer a GTRZ'}</a>
-      </div>
-    </div>
-    <aside class="origin-card">
-      <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
-      <div><small>{es ? 'DE VENEZUELA A BRASIL' : 'DA VENEZUELA PARA O BRASIL'}</small><h2>{c.originTitle}</h2><p>{c.originBody}</p></div>
-      <div class="route"><b>VENEZUELA</b><i></i><b>BRASIL</b></div>
-    </aside>
-  </div>
-</section>
+<section id="top" class="hero" data-section="hero"><div class="shell hero-grid"><div class="hero-copy"><span class="eyebrow">{c.eyebrow}</span><h1>{c.title}</h1><p>{c.body}</p><div class="actions"><a class="button primary" href="#eventos" data-track="hero.events">{c.primaryCta||'Ver eventos'}</a><a class="button" href="#sobre" data-track="hero.about">{c.secondaryCta||(es?'Conocer GTRZ':'Conhecer a GTRZ')}</a></div></div><aside class="origin-card"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><div><small>{c.originEyebrow||(es?'DE VENEZUELA A BRASIL':'DA VENEZUELA PARA O BRASIL')}</small><h2>{c.originTitle}</h2><p>{c.originBody}</p></div><div class="route"><b>VENEZUELA</b><i></i><b>BRASIL</b></div></aside></div></section>
