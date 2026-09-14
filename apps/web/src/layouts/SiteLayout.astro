@@ -5,6 +5,7 @@ import '@/styles/global.css';
 import '@/styles/pages.css';
 import '@/styles/popup.css';
 import '@/styles/institutional.css';
+import '@/styles/prototype-v3.css';
 interface Props { title?: string; locale: 'pt-BR' | 'es'; }
 const { title = 'GTRZ Eventos', locale } = Astro.props;
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
@@ -60,6 +61,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
         }
       }),{threshold:[.35]});
       document.querySelectorAll('[data-section]').forEach((el)=>sectionObserver.observe(el));
+      const revealObserver = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('in'); revealObserver.unobserve(entry.target); }
+      }), { threshold: .12 });
+      document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
       const progress = document.querySelector('[data-scroll-progress]');
       const fired = new Set();
       const onScroll = () => {
