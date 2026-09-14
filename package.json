@@ -1,0 +1,13 @@
+{
+  "name": "gtrz-platform",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @gtrz/web dev",
+    "dev:admin": "pnpm --filter @gtrz/admin dev",
+    "dev:api": "pnpm --filter @gtrz/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  }
+}
