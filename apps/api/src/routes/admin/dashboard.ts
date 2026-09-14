@@ -38,3 +38,11 @@ dashboardAdminRoutes.put('/settings/:key', async (c) => {
   await audit(c.env, 'update', 'site_setting', key);
   return c.json({ ok: true });
 });
+
+dashboardAdminRoutes.get('/audit',async(c)=>{
+  const limit=Math.min(500,Math.max(1,Number(c.req.query('limit')||200)));
+  return c.json(await c.env.DB.prepare(`
+    SELECT id,actor_user_id,action,entity_type,entity_id,metadata_json,created_at
+    FROM audit_logs ORDER BY created_at DESC LIMIT ?
+  `).bind(limit).all());
+});
