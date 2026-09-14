@@ -1,13 +1,18 @@
 ---
 import Header from '@/components/Header.astro';
 import LanguageGate from '@/components/LanguageGate.astro';
+import type { SiteSettings } from '@/lib/cms';
 import '@/styles/global.css';
 import '@/styles/pages.css';
 import '@/styles/popup.css';
 import '@/styles/institutional.css';
 import '@/styles/prototype-v3.css';
-interface Props { title?: string; locale: 'pt-BR' | 'es'; }
-const { title = 'GTRZ Eventos', locale } = Astro.props;
+interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings; }
+const { locale, settings={} } = Astro.props;
+const chrome=settings.chrome||{};
+const title=Astro.props.title||(locale==='es'?(chrome.metaTitleEs||'GTRZ Eventos'):(chrome.metaTitlePt||'GTRZ Eventos'));
+const description=locale==='es'?(chrome.metaDescriptionEs||'GTRZ Eventos — experiencias culturales entre Venezuela y Brasil.'):(chrome.metaDescriptionPt||'GTRZ Eventos — experiências culturais entre Venezuela e Brasil.');
+const footer=locale==='es'?(chrome.footerEs||'GTRZ Eventos · Venezuela → Brasil'):(chrome.footerPt||'GTRZ Eventos · Venezuela → Brasil');
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 ---
 <!doctype html>
@@ -16,14 +21,14 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta name="theme-color" content="#080808" />
-    <meta name="description" content="GTRZ Eventos — experiências culturais entre Venezuela e Brasil." />
+    <meta name="description" content={description} />
     <title>{title}</title>
   </head>
   <body>
-    <Header locale={locale} />
-    <LanguageGate locale={locale} />
+    <Header locale={locale} chrome={chrome} />
+    <LanguageGate locale={locale} chrome={chrome} />
     <slot />
-    <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>GTRZ Eventos · Venezuela → Brasil</span></div></footer>
+    <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>{footer}</span></div></footer>
     <script define:vars={{ apiBase, locale }}>
       const sessionKey = 'gtrz_session_id';
       const attributionKey = 'gtrz_attribution';
