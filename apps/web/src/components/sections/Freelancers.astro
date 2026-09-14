@@ -1,11 +1,30 @@
 ---
 const {locale,content={}}=Astro.props as {locale:'pt-BR'|'es';content:Record<string,any>};
 const es=locale==='es';
-const c={eyebrow:es?'Sé parte de la operación':'Faça parte da operação',title:es?'TRABAJA CON GTRZ.':'TRABALHE COM A GTRZ.',body:es?'Los eventos dependen de una buena red de profesionales. Registra tu perfil para futuras producciones de GTRZ.':'Eventos dependem de uma boa rede de profissionais. Cadastre seu perfil para futuras produções da GTRZ.',cta:es?'Registrarme como freelancer':'Cadastrar como freelancer',...content};
+const c={
+  eyebrow:es?'Sé parte de la operación':'Faça parte da operação',
+  title:es?'TRABAJA CON GTRZ.':'TRABALHE COM A GTRZ.',
+  body:es?'Los eventos dependen de una buena red de profesionales. GTRZ mantiene una base de freelancers para formar equipos según cada producción.':'Eventos dependem de uma boa rede de profissionais. A GTRZ mantém um banco de freelancers para montar equipes conforme cada produção.',
+  cta:es?'Registrarme como freelancer':'Cadastrar como freelancer',
+  ...content
+};
+const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
-<section id="trabalhe" class="paper-section people-cta-section" data-section="freelancers">
-  <div class="shell people-cta-grid">
-    <div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div>
-    <div class="people-cta-copy"><p>{c.body}</p><div class="role-cloud"><span>Produção</span><span>Recepção</span><span>Bar</span><span>Foto</span><span>Vídeo</span><span>Design</span><span>Social</span><span>Apoio</span></div><a class="button primary" href={`/trabalhe-conosco?lang=${locale}`} data-track="freelancers.open">{c.cta}</a></div>
+<section id="trabalhe" class="collab" data-section="freelancers">
+  <div class="wrap">
+    <div class="collab-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2></div><p>{c.body}</p></div>
+    <div class="collab-grid">
+      <article class="collab-card reveal">
+        <img class="collab-logo" src="/brand/gtrz-symbol.svg" alt="" />
+        <div><span class="index">01 · {es?'Base de freelancers':'Banco de freelancers'}</span><h3 class="display">{es?'¿QUIERES TRABAJAR CON NOSOTROS?':'QUER TRABALHAR COM A GENTE?'}</h3><p>{es?'Registra tu perfil para ser considerado en próximas producciones. El registro no es una vacante específica ni crea vínculo laboral: sirve para que GTRZ encuentre profesionales compatibles cuando surja demanda.':'Cadastre seu perfil para ser considerado nas próximas produções. O cadastro não é uma vaga específica nem cria vínculo empregatício: ele serve para a GTRZ encontrar profissionais compatíveis quando surgir demanda.'}</p><div class="collab-points"><span>Produção</span><span>Recepção</span><span>Bar</span><span>Audiovisual</span><span>Foto</span><span>Design</span><span>Social</span><span>Apoio</span></div></div>
+        <a class="btn btn-red" href={`/trabalhe-conosco?lang=${locale}`} data-track="freelancers.open">{c.cta}</a>
+      </article>
+      <article class="collab-card dark reveal">
+        <img class="collab-logo" src="/brand/gtrz-symbol.svg" alt="" />
+        <div><span class="index">02 · {es?'Cómo funciona':'Como funciona'}</span><h3 class="display">{es?'ENTRASTE EN NUESTRO RADAR.':'ENTROU NO NOSSO RADAR.'}</h3><p>{es?'Cuando una producción necesite equipo, filtramos la base por ciudad, disponibilidad y función. Si tu perfil encaja, GTRZ entra en contacto con briefing, diaria, horario y condiciones de ese trabajo.':'Quando uma produção precisar de equipe, filtramos o banco por cidade, disponibilidade e função. Se o perfil fizer sentido, a GTRZ entra em contato diretamente com briefing, diária, horário e condições daquele trabalho.'}</p><div class="collab-points"><span>{es?'Registro gratuito':'Cadastro gratuito'}</span><span>{es?'Por demanda':'Por demanda'}</span><span>{es?'Pago por job':'Pagamento por job'}</span><span>{es?'Sin promesa de contratación':'Sem promessa de contratação'}</span></div></div>
+        <a class="btn" href="#contato">{es?'Dudas sobre trabajos':'Dúvidas sobre freelas'}</a>
+      </article>
+    </div>
+    <div class="recruitment reveal"><div><strong>{es?'¿También eres proveedor o prestas un servicio especializado?':'Também é fornecedor ou presta um serviço especializado?'}</strong><span>{es?'Estructura, seguridad, iluminación, sonido, escenografía, alimentación, transporte u otros servicios pueden entrar por el canal de alianzas.':'Estrutura, segurança, iluminação, som, cenografia, alimentação, transporte ou outro serviço para eventos podem entrar pelo canal de parcerias.'}</span></div><a class="btn" href="#parcerias">{es?'Ir a alianzas':'Ir para parcerias'}</a></div>
   </div>
 </section>
