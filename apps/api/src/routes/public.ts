@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
+import { consumePublicFormQuota, verifyTurnstile } from '../security';
+
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 const id=()=>crypto.randomUUID();
 
@@ -11,7 +13,34 @@ publicRoutes.get('/site', async (c) => {
   return c.json({page,sections:sections.results,events:events.results},200,{'cache-control':'public,max-age=30,s-maxage=60'});
 });
 
-publicRoutes.get('/events/:slug',async(c)=>{const slug=c.req.param('slug');const event=await c.env.DB.prepare("SELECT * FROM events WHERE slug=? AND status!='draft' LIMIT 1").bind(slug).first();if(!event)return c.json({error:'not_found'},404);const localizations=await c.env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=?').bind(event.id).all();const tickets=await c.env.DB.prepare('SELECT * FROM event_tickets WHERE event_id=? ORDER BY position').bind(event.id).all();const artists=await c.env.DB.prepare('SELECT * FROM event_artists WHERE event_id=? ORDER BY position').bind(event.id).all();return c.json({event,localizations:localizations.results,tickets:tickets.results,artists:artists.results});});
+publicRoutes.get('/events/:slug',async(c)=>{
+  const slug=c.req.param('slug');
+  const event=await c.env.DB.prepare("SELECT * FROM events WHERE slug=? AND status!='draft' LIMIT 1").bind(slug).first();
+  if(!event)return c.json({error:'not_found'},404);
+  const localizations=await c.env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=?').bind(event.id).all();
+  const tickets=await c.env.DB.prepare('SELECT * FROM event_tickets WHERE event_id=? ORDER BY position').bind(event.id).all();
+  const artists=await c.env.DB.prepare('SELECT * FROM event_artists WHERE event_id=? ORDER BY position').bind(event.id).all();
+  return c.json({event,localizations:localizations.results,tickets:tickets.results,artists:artists.results});
+});
 
-publicRoutes.post('/freelancers',async(c)=>{const b=await c.req.json<any>().catch(()=>null);if(!b?.name||!b?.whatsapp||!b?.city)return c.json({error:'invalid_form'},400);const appId=id();await c.env.DB.prepare('INSERT INTO freelancer_applications(id,name,email,whatsapp,city,state,instagram,roles_json,portfolio_url,availability,source) VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(appId,String(b.name).slice(0,160),b.email||null,String(b.whatsapp).slice(0,50),String(b.city).slice(0,100),b.state||null,b.instagram||null,JSON.stringify(Array.isArray(b.roles)?b.roles:[]),b.portfolioUrl||null,b.availability||null,b.source||null).run();return c.json({ok:true,id:appId},201);});
-publicRoutes.post('/partnerships',async(c)=>{const b=await c.req.json<any>().catch(()=>null);if(!b?.contactName||!b?.partnershipType)return c.json({error:'invalid_form'},400);const leadId=id();await c.env.DB.prepare('INSERT INTO partnership_leads(id,contact_name,company_name,partnership_type,email,whatsapp,city,message,source,campaign) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(leadId,String(b.contactName).slice(0,160),b.companyName||null,String(b.partnershipType).slice(0,80),b.email||null,b.whatsapp||null,b.city||null,b.message||null,b.source||null,b.campaign||null).run();return c.json({ok:true,id:leadId},201);});
+publicRoutes.post('/freelancers',async(c)=>{
+  const b=await c.req.json<any>().catch(()=>null);
+  if(!b?.name||!b?.whatsapp||!b?.city)return c.json({error:'invalid_form'},400);
+  if(!(await verifyTurnstile(c,b.turnstileToken)))return c.json({error:'challenge_failed'},400);
+  if(!(await consumePublicFormQuota(c,'freelancer')))return c.json({error:'rate_limited'},429);
+  const appId=id();
+  await c.env.DB.prepare('INSERT INTO freelancer_applications(id,name,email,whatsapp,city,state,instagram,roles_json,portfolio_url,availability,source) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(appId,String(b.name).slice(0,160),b.email?String(b.email).slice(0,200):null,String(b.whatsapp).slice(0,50),String(b.city).slice(0,100),b.state?String(b.state).slice(0,60):null,b.instagram?String(b.instagram).slice(0,160):null,JSON.stringify(Array.isArray(b.roles)?b.roles.slice(0,20):[]),b.portfolioUrl?String(b.portfolioUrl).slice(0,1000):null,b.availability?String(b.availability).slice(0,3000):null,b.source?String(b.source).slice(0,160):null).run();
+  return c.json({ok:true,id:appId},201);
+});
+
+publicRoutes.post('/partnerships',async(c)=>{
+  const b=await c.req.json<any>().catch(()=>null);
+  if(!b?.contactName||!b?.partnershipType)return c.json({error:'invalid_form'},400);
+  if(!(await verifyTurnstile(c,b.turnstileToken)))return c.json({error:'challenge_failed'},400);
+  if(!(await consumePublicFormQuota(c,'partnership')))return c.json({error:'rate_limited'},429);
+  const leadId=id();
+  await c.env.DB.prepare('INSERT INTO partnership_leads(id,contact_name,company_name,partnership_type,email,whatsapp,city,message,source,campaign) VALUES(?,?,?,?,?,?,?,?,?,?)')
+    .bind(leadId,String(b.contactName).slice(0,160),b.companyName?String(b.companyName).slice(0,200):null,String(b.partnershipType).slice(0,80),b.email?String(b.email).slice(0,200):null,b.whatsapp?String(b.whatsapp).slice(0,50):null,b.city?String(b.city).slice(0,100):null,b.message?String(b.message).slice(0,5000):null,b.source?String(b.source).slice(0,160):null,b.campaign?String(b.campaign).slice(0,160):null).run();
+  return c.json({ok:true,id:leadId},201);
+});
