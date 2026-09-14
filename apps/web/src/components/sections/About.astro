@@ -7,6 +7,10 @@ const c={
   body1:es?'GTRZ nació en Venezuela, creada por venezolanos con ganas de transformar encuentros en experiencias con identidad. En Brasil, el proyecto encontró nuevos caminos y hoy es construido en conjunto por venezolanos y brasileños.':'A GTRZ nasceu na Venezuela, criada por venezuelanos com vontade de transformar encontros em experiências com identidade. No Brasil, o projeto ganhou novos caminhos e hoje é construído em conjunto por venezuelanos e brasileiros.',
   body2:es?'Desde la dirección creativa hasta la operación, cada evento necesita personalidad propia, música, cultura, cuidado y presencia.':'Da direção criativa à operação, cada evento precisa ter personalidade própria, música, cultura, cuidado e presença.',
   note:es?'Producción de eventos · Dirección creativa · Experiencias de marca · Cultura nocturna':'Produção de eventos · Direção criativa · Experiências de marca · Cultura noturna',
+  metric1Value:'2',metric1Label:es?'Países de origen y construcción':'Países na nossa história',
+  metric2Value:'2',metric2Label:es?'Culturas construyendo juntas':'Culturas construindo juntas',
+  metric3Value:'PT + ES',metric3Label:es?'Comunicación bilingüe':'Comunicação bilíngue',
+  metric4Value:'1',metric4Label:es?'Marca, múltiples experiencias':'Marca, múltiplas experiências',
   ...content
 };
 const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
@@ -19,9 +23,9 @@ const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop
 </section>
 <section class="numbers" aria-label={es?'GTRZ en números':'GTRZ em números'}>
   <div class="wrap numbers-grid">
-    <div class="number-card"><strong>2</strong><span>{es?'Países de origen y construcción':'Países na nossa história'}</span></div>
-    <div class="number-card"><strong>2</strong><span>{es?'Culturas construyendo juntas':'Culturas construindo juntas'}</span></div>
-    <div class="number-card"><strong>PT + ES</strong><span>{es?'Comunicación bilingüe':'Comunicação bilíngue'}</span></div>
-    <div class="number-card"><strong>1</strong><span>{es?'Marca, múltiples experiencias':'Marca, múltiplas experiências'}</span></div>
+    <div class="number-card"><strong>{c.metric1Value}</strong><span>{c.metric1Label}</span></div>
+    <div class="number-card"><strong>{c.metric2Value}</strong><span>{c.metric2Label}</span></div>
+    <div class="number-card"><strong>{c.metric3Value}</strong><span>{c.metric3Label}</span></div>
+    <div class="number-card"><strong>{c.metric4Value}</strong><span>{c.metric4Label}</span></div>
   </div>
 </section>

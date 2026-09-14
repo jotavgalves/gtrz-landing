@@ -1,7 +1,18 @@
 ---
 const {locale,content={}}=Astro.props as {locale:'pt-BR'|'es';content:Record<string,any>};
 const es=locale==='es';
-const c={eyebrow:es?'Marcas · Espacios · Artistas · Proveedores':'Marcas · Casas · Artistas · Fornecedores',title:es?'ALIANZAS QUE TIENEN SENTIDO.':'PARCERIAS QUE FAZEM SENTIDO.',body:es?'GTRZ está abierta a colaboraciones que sumen experiencia para el público y valor para ambas partes. Puede significar recibir un evento, activar una marca, desarrollar una acción conjunta, conectar artistas o construir una producción desde cero.':'A GTRZ está aberta a colaborações que agreguem experiência para o público e valor para os dois lados. Isso pode significar receber um evento, ativar uma marca, desenvolver uma ação conjunta, conectar artistas ou construir uma produção do zero.',cta:es?'Proponer una alianza':'Propor uma parceria',...content};
+const c={
+  eyebrow:es?'Marcas · Espacios · Artistas · Proveedores':'Marcas · Casas · Artistas · Fornecedores',
+  title:es?'ALIANZAS QUE TIENEN SENTIDO.':'PARCERIAS QUE FAZEM SENTIDO.',
+  body:es?'GTRZ está abierta a colaboraciones que sumen experiencia para el público y valor para ambas partes. Puede significar recibir un evento, activar una marca, desarrollar una acción conjunta, conectar artistas o construir una producción desde cero.':'A GTRZ está aberta a colaborações que agreguem experiência para o público e valor para os dois lados. Isso pode significar receber um evento, ativar uma marca, desenvolver uma ação conjunta, conectar artistas ou construir uma produção do zero.',
+  cta:es?'Proponer una alianza':'Propor uma parceria',
+  type1Title:es?'Espacios':'Casas e espaços',type1Body:es?'Lugares interesados en recibir producciones y formatos de GTRZ.':'Locais interessados em receber produções e formatos da GTRZ.',
+  type2Title:'Marcas',type2Body:es?'Patrocinio, activaciones y experiencias con presencia relevante.':'Patrocínio, ativações, experiências e presença relevante dentro do evento.',
+  type3Title:es?'Artistas y proyectos':'Artistas e projetos',type3Body:es?'Conexiones para line-up, colaboraciones culturales y proyectos especiales.':'Conexões para line-up, collabs culturais e projetos especiais.',
+  type4Title:es?'Proveedores':'Fornecedores',type4Body:es?'Sonido, luz, estructura, alimentación, seguridad, escenografía y operación.':'Som, luz, estrutura, alimentação, segurança, cenografia e operação.',
+  secondaryCta:es?'Conocer nuestros eventos':'Conhecer nossos eventos',
+  ...content
+};
 const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
 <section id="parcerias" class="partner-strip" data-section="partnerships">
@@ -12,12 +23,12 @@ const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';con
       <h2 class="display">{lead} <span class="red">{accent}</span></h2>
       <p>{c.body}</p>
       <div class="partner-types">
-        <div class="partner-type"><small>{es?'Espacios':'Casas e espaços'}</small><span>{es?'Lugares interesados en recibir producciones y formatos de GTRZ.':'Locais interessados em receber produções e formatos da GTRZ.'}</span></div>
-        <div class="partner-type"><small>{es?'Marcas':'Marcas'}</small><span>{es?'Patrocinio, activaciones y experiencias con presencia relevante.':'Patrocínio, ativações, experiências e presença relevante dentro do evento.'}</span></div>
-        <div class="partner-type"><small>{es?'Artistas y proyectos':'Artistas e projetos'}</small><span>{es?'Conexiones para line-up, colaboraciones culturales y proyectos especiales.':'Conexões para line-up, collabs culturais e projetos especiais.'}</span></div>
-        <div class="partner-type"><small>{es?'Proveedores':'Fornecedores'}</small><span>{es?'Sonido, luz, estructura, alimentación, seguridad, escenografía y operación.':'Som, luz, estrutura, alimentação, segurança, cenografia e operação.'}</span></div>
+        <div class="partner-type"><small>{c.type1Title}</small><span>{c.type1Body}</span></div>
+        <div class="partner-type"><small>{c.type2Title}</small><span>{c.type2Body}</span></div>
+        <div class="partner-type"><small>{c.type3Title}</small><span>{c.type3Body}</span></div>
+        <div class="partner-type"><small>{c.type4Title}</small><span>{c.type4Body}</span></div>
       </div>
-      <div class="hero-actions"><a class="btn btn-red" href={`/parcerias?lang=${locale}`} data-track="partnerships.open">{c.cta}</a><a class="btn" href="#eventos">{es?'Conocer nuestros eventos':'Conhecer nossos eventos'}</a></div>
+      <div class="hero-actions"><a class="btn btn-red" href={`/parcerias?lang=${locale}`} data-track="partnerships.open">{c.cta}</a><a class="btn" href="#eventos">{c.secondaryCta}</a></div>
     </div>
   </div>
 </section>

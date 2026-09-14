@@ -13,5 +13,5 @@ const sections=localizedSections(payload.sections,locale);
 ---
 <SiteLayout locale={locale} settings={payload.settings}>
   <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events} team={team}/>)}</main>
-  <EventPopup events={events} locale={locale} settings={payload.settings?.event_popup}/>
+  <EventPopup events={events} locale={locale} siteSettings={payload.settings}/>
 </SiteLayout>

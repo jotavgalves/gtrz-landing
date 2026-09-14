@@ -28,13 +28,23 @@ export interface ChromeSettings {
   footerEs?: string;
   eventsLabelPt?: string;
   eventsLabelEs?: string;
+  langShortPt?: string;
+  langShortEs?: string;
   gateEyebrow?: string;
+  gateEyebrowPt?: string;
+  gateEyebrowEs?: string;
   gateTitlePrefix?: string;
+  gateTitlePrefixPt?: string;
+  gateTitlePrefixEs?: string;
   gateTitleHighlight?: string;
+  gateTitleHighlightPt?: string;
+  gateTitleHighlightEs?: string;
   gateBodyPt?: string;
   gateBodyEs?: string;
   gateHintPt?: string;
   gateHintEs?: string;
+  gateOptionPt?: string;
+  gateOptionEs?: string;
   navPt?: Array<[string,string]>;
   navEs?: Array<[string,string]>;
 }
@@ -43,6 +53,7 @@ export interface SiteSettings {
   social?: Record<string,unknown>;
   general?: Record<string,unknown>;
   chrome?: ChromeSettings;
+  copy?: Record<string,Record<string,Record<string,string>>>;
 }
 export interface HomePayload { page:unknown; sections:CmsSectionRow[]; events:CmsEvent[]; team:CmsTeamMember[]; settings:SiteSettings; }
 const API_BASE = import.meta.env.PUBLIC_API_BASE || '';

@@ -8,6 +8,8 @@ const configured=es?chrome.navEs:chrome.navPt;
 const nav=Array.isArray(configured)&&configured.length?configured:(es?defaultEs:defaultPt);
 const safeNav=nav.filter(item=>Array.isArray(item)&&item.length>=2).map(([label,href])=>[String(label),String(href).startsWith('#')||String(href).startsWith('/')?String(href):'#'] as [string,string]);
 const eventsLabel=es?(chrome.eventsLabelEs||'Eventos'):(chrome.eventsLabelPt||'Eventos');
+const langPt=chrome.langShortPt||'PT';
+const langEs=chrome.langShortEs||'ES';
 ---
 <header class="header">
   <div class="header-in">
@@ -19,8 +21,8 @@ const eventsLabel=es?(chrome.eventsLabelEs||'Eventos'):(chrome.eventsLabelPt||'E
     </nav>
     <div class="nav-actions">
       <div class="lang-switch" aria-label="Idioma">
-        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">PT</a>
-        <a class:list={{active:es}} href="?lang=es" data-language="es">ES</a>
+        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">{langPt}</a>
+        <a class:list={{active:es}} href="?lang=es" data-language="es">{langEs}</a>
       </div>
       <a class="events-btn" href="#eventos" data-track="nav.events">{eventsLabel}</a>
     </div>

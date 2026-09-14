@@ -2,19 +2,32 @@
 import type { CmsEvent,Locale } from '@/lib/cms';
 const {events,locale,content={}}=Astro.props as {events:CmsEvent[];locale:Locale;content?:Record<string,any>};
 const es=locale==='es';
-const c={eyebrow:'Agenda GTRZ',title:'EVENTOS.',body:es?'Cada proyecto tiene identidad propia. Entra al evento para ver detalles, line-up, lugar y entradas.':'Cada projeto tem identidade própria. Entre no evento para ver detalhes, line-up, local e ingressos.',emptyTitle:es?'Nuevos eventos en preparación.':'Novos eventos em preparação.',emptyBody:es?'Síguenos en Instagram para recibir las próximas fechas.':'Siga a GTRZ no Instagram para receber as próximas datas.',...content};
+const c={
+  eyebrow:'Agenda GTRZ',title:'EVENTOS.',
+  body:es?'Cada proyecto tiene identidad propia. Entra al evento para ver detalles, line-up, lugar y entradas.':'Cada projeto tem identidade própria. Entre no evento para ver detalhes, line-up, local e ingressos.',
+  emptyTitle:es?'Nuevos eventos en preparación.':'Novos eventos em preparação.',
+  emptyBody:es?'Síguenos en Instagram para recibir las próximas fechas.':'Siga a GTRZ no Instagram para receber as próximas datas.',
+  statusSalesOpen:es?'Entradas disponibles':'Ingressos disponíveis',
+  statusSoldOut:es?'Agotado':'Esgotado',
+  statusPast:es?'Realizado':'Realizado',
+  statusActive:es?'Evento activo':'Evento ativo',
+  genericSummary:es?'Una experiencia GTRZ con identidad propia.':'Uma experiência GTRZ com identidade própria.',
+  activeCta:es?'Entrar al evento':'Entrar no evento',
+  pastCta:es?'Revivir la edición':'Rever a edição',
+  ...content
+};
 const formatDate=(iso:string)=>{try{return new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(iso)).replace('.','').toUpperCase()}catch{return ''}};
-const statusLabel=(status:string)=>status==='sales_open'?(es?'Entradas disponibles':'Ingressos disponíveis'):status==='sold_out'?(es?'Agotado':'Esgotado'):['finished','archived'].includes(status)?(es?'Realizado':'Realizado'):(es?'Evento activo':'Evento ativo');
+const statusLabel=(status:string)=>status==='sales_open'?c.statusSalesOpen:status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(status)?c.statusPast:c.statusActive;
 ---
 <section id="eventos" class="events" data-section="events">
   <div class="wrap">
     <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
-    {events.length ? <div class="event-grid">{events.map((event,index)=>{
+    {events.length ? <div class="event-grid">{events.map((event)=>{
       const past=['finished','archived'].includes(event.status);
       const titleParts=String(event.title||event.slug).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
       return <article class:list={['event-card','reveal',past&&'past']}>
         <div class="event-card-top"><span class="status"><span class="status-dot"></span>{statusLabel(event.status)}</span><div class="event-meta">{formatDate(event.starts_at)}<br/>{event.city}{event.state?` · ${event.state}`:''}</div></div>
-        <div><h3 class="display">{lead} <span class="red">{accent}</span></h3><p>{event.summary || (es?'Una experiencia GTRZ con identidad propia.':'Uma experiência GTRZ com identidade própria.')}</p><div class="event-actions"><a class:list={['btn',!past&&'btn-red']} href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>{past?(es?'Revivir la edición':'Rever a edição'):(es?'Entrar al evento':'Entrar no evento')}</a></div></div>
+        <div><h3 class="display">{lead} <span class="red">{accent}</span></h3><p>{event.summary || c.genericSummary}</p><div class="event-actions"><a class:list={['btn',!past&&'btn-red']} href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>{past?c.pastCta:c.activeCta}</a></div></div>
       </article>})}</div> : <div class="empty-state"><strong>{c.emptyTitle}</strong><p>{c.emptyBody}</p></div>}
   </div>
 </section>
