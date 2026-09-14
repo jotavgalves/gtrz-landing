@@ -8,20 +8,17 @@ const activeEvents = selected.filter(event => ['published','sales_open','sold_ou
 const frequency = settings.frequency || 'session';
 const delayMs = Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
 ---
-{enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden>
-  <div class="event-popup-card">
-    <button class="popup-close" type="button" aria-label={es ? 'Cerrar' : 'Fechar'} data-popup-close>×</button>
-    <small class="popup-kicker">{activeEvents.length > 1 ? (es ? 'EVENTOS GTRZ DISPONIBLES' : 'EVENTOS GTRZ DISPONÍVEIS') : (es ? 'HAY GTRZ EN ESTA CIUDAD' : 'TEM GTRZ NESTA CIDADE')}</small>
-    <h2>{activeEvents.length > 1 ? (es ? '¿DÓNDE NOS VEMOS?' : 'ONDE A GENTE SE VÊ?') : (activeEvents[0]?.title || activeEvents[0]?.slug)}</h2>
-    <p>{activeEvents.length > 1 ? (es ? 'Elige la ciudad y entra directamente a la página del evento.' : 'Escolha a cidade e entre direto na página do evento.') : (activeEvents[0]?.summary || (es ? 'Consulta fecha, lugar y entradas disponibles.' : 'Confira data, local e ingressos disponíveis.'))}</p>
-    <div class="popup-events">
-      {activeEvents.map(event => <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
-        <span class="city-pill">{event.city}{event.state ? ` · ${event.state}` : ''}</span>
-        <strong>{event.title || event.slug}</strong>
-        <small>{event.status === 'sold_out' ? (es ? 'Agotado' : 'Esgotado') : (es ? 'Ver evento y entradas' : 'Ver evento e ingressos')}</small>
-      </a>)}
+{enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
+  <div class="event-popup-card" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
+    <div class="popup-head"><div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{activeEvents.length > 1 ? (es ? 'Eventos GTRZ disponibles' : 'Eventos GTRZ disponíveis') : (es ? 'Hay un evento activo en GTRZ' : 'Tem evento ativo na GTRZ')}</small></div><button class="popup-close" type="button" aria-label={es ? 'Cerrar' : 'Fechar'} data-popup-close>×</button></div>
+    <div class="popup-body">
+      <div class="eyebrow">{es ? 'Agenda abierta' : 'Agenda aberta'}</div>
+      {activeEvents.length === 1 && <div class="city-pill">{activeEvents[0].city}{activeEvents[0].state ? ` · ${activeEvents[0].state}` : ''}</div>}
+      <h2 class="display" id="eventPopupTitle">{activeEvents.length > 1 ? (es ? <>HAY GTRZ<br/>EN MÁS DE UNA <span class="red">CIUDAD.</span></> : <>TEM GTRZ<br/>EM MAIS DE UMA <span class="red">CIDADE.</span></>) : (es ? <>HAY GTRZ<br/>EN TU <span class="red">CIUDAD.</span></> : <>TEM GTRZ<br/>NA SUA <span class="red">CIDADE.</span></>)}</h2>
+      <p>{activeEvents.length > 1 ? (es ? 'Elige la ciudad y entra directamente a la página del evento.' : 'Escolha a cidade e entre direto na página do evento.') : (activeEvents[0]?.summary || (es ? 'Consulta fecha, lugar y entradas disponibles.' : 'Confira data, local e ingressos disponíveis.'))}</p>
+      <div class="popup-events">{activeEvents.map(event => <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click"><span class="city-pill">{event.city}{event.state ? ` · ${event.state}` : ''}</span><strong>{event.title || event.slug}</strong><small>{event.status === 'sold_out' ? (es ? 'Agotado' : 'Esgotado') : (es ? 'Ver evento y entradas' : 'Ver evento e ingressos')}</small></a>)}</div>
+      <button class="popup-continue" type="button" data-popup-close>{es ? 'Continuar en el sitio institucional' : 'Continuar no institucional'}</button>
     </div>
-    <button class="popup-continue" type="button" data-popup-close>{es ? 'Continuar en el sitio institucional' : 'Continuar no institucional'}</button>
   </div>
 </div>}
 <script define:vars={{ frequency, delayMs }}>
@@ -29,24 +26,9 @@ const delayMs = Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
   const key = 'gtrz_event_popup_seen';
   const today = new Date().toISOString().slice(0,10);
   const seen = frequency === 'always' ? false : frequency === 'day' ? localStorage.getItem(key) === today : sessionStorage.getItem(key) === '1';
-  const markSeen = () => {
-    if (frequency === 'day') localStorage.setItem(key,today);
-    else if (frequency !== 'always') sessionStorage.setItem(key,'1');
-  };
-  if (popup && !seen) {
-    setTimeout(()=>{
-      popup.hidden=false;
-      document.body.classList.add('modal-open');
-      markSeen();
-      window.gtrzTrack?.('popup_view',{section:'event_popup'});
-    },delayMs);
-  }
-  popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',()=>{
-    popup.hidden=true;
-    document.body.classList.remove('modal-open');
-    window.gtrzTrack?.('popup_close',{section:'event_popup'});
-  }));
-  popup?.addEventListener('click',(event)=>{
-    if(event.target===popup){popup.hidden=true;document.body.classList.remove('modal-open');window.gtrzTrack?.('popup_close',{section:'event_popup'});}
-  });
+  const markSeen = () => { if (frequency === 'day') localStorage.setItem(key,today); else if (frequency !== 'always') sessionStorage.setItem(key,'1'); };
+  const closePopup = () => { if (!popup) return; popup.hidden=true; popup.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); window.gtrzTrack?.('popup_close',{section:'event_popup'}); };
+  if (popup && !seen) setTimeout(()=>{ popup.hidden=false; popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); markSeen(); window.gtrzTrack?.('popup_view',{section:'event_popup'}); },delayMs);
+  popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
+  popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
 </script>
