@@ -1,7 +1,9 @@
 ---
-import type { CmsEvent, EventPopupSettings, Locale } from '@/lib/cms';
-const { events, locale, settings = {} } = Astro.props as { events: CmsEvent[]; locale: Locale; settings?: EventPopupSettings };
-const es = locale === 'es';
+import type { CmsEvent, Locale, SiteSettings } from '@/lib/cms';
+import { getPublicCopy } from '@/lib/public-copy';
+const { events, locale, siteSettings = {} } = Astro.props as { events: CmsEvent[]; locale: Locale; siteSettings?: SiteSettings };
+const settings=siteSettings.event_popup||{};
+const c=getPublicCopy(siteSettings,locale,'popup');
 const enabled = settings.enabled !== false;
 const selected = settings.selectedEventId ? events.filter(event => event.id === settings.selectedEventId) : events;
 const activeEvents = selected.filter(event => ['published','sales_open','sold_out'].includes(event.status)).slice(0, Math.max(1, Math.min(6, settings.maxEvents || 4)));
@@ -10,14 +12,14 @@ const delayMs = Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
 ---
 {enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
   <div class="event-popup-card" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
-    <div class="popup-head"><div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{activeEvents.length > 1 ? (es ? 'Eventos GTRZ disponibles' : 'Eventos GTRZ disponíveis') : (es ? 'Hay un evento activo en GTRZ' : 'Tem evento ativo na GTRZ')}</small></div><button class="popup-close" type="button" aria-label={es ? 'Cerrar' : 'Fechar'} data-popup-close>×</button></div>
+    <div class="popup-head"><div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{activeEvents.length > 1 ? c.multiHeader : c.singleHeader}</small></div><button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>×</button></div>
     <div class="popup-body">
-      <div class="eyebrow">{es ? 'Agenda abierta' : 'Agenda aberta'}</div>
+      <div class="eyebrow">{c.eyebrow}</div>
       {activeEvents.length === 1 && <div class="city-pill">{activeEvents[0].city}{activeEvents[0].state ? ` · ${activeEvents[0].state}` : ''}</div>}
-      <h2 class="display" id="eventPopupTitle">{activeEvents.length > 1 ? (es ? <>HAY GTRZ<br/>EN MÁS DE UNA <span class="red">CIUDAD.</span></> : <>TEM GTRZ<br/>EM MAIS DE UMA <span class="red">CIDADE.</span></>) : (es ? <>HAY GTRZ<br/>EN TU <span class="red">CIUDAD.</span></> : <>TEM GTRZ<br/>NA SUA <span class="red">CIDADE.</span></>)}</h2>
-      <p>{activeEvents.length > 1 ? (es ? 'Elige la ciudad y entra directamente a la página del evento.' : 'Escolha a cidade e entre direto na página do evento.') : (activeEvents[0]?.summary || (es ? 'Consulta fecha, lugar y entradas disponibles.' : 'Confira data, local e ingressos disponíveis.'))}</p>
-      <div class="popup-events">{activeEvents.map(event => <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click"><span class="city-pill">{event.city}{event.state ? ` · ${event.state}` : ''}</span><strong>{event.title || event.slug}</strong><small>{event.status === 'sold_out' ? (es ? 'Agotado' : 'Esgotado') : (es ? 'Ver evento y entradas' : 'Ver evento e ingressos')}</small></a>)}</div>
-      <button class="popup-continue" type="button" data-popup-close>{es ? 'Continuar en el sitio institucional' : 'Continuar no institucional'}</button>
+      <h2 class="display" id="eventPopupTitle">{activeEvents.length > 1 ? <>{c.multiTitleLine1}<br/>{c.multiTitleLine2} <span class="red">{c.multiTitleAccent}</span></> : <>{c.singleTitleLine1}<br/>{c.singleTitleLine2} <span class="red">{c.singleTitleAccent}</span></>}</h2>
+      <p>{activeEvents.length > 1 ? c.multiBody : (activeEvents[0]?.summary || c.singleFallbackBody)}</p>
+      <div class="popup-events">{activeEvents.map(event => <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click"><span class="city-pill">{event.city}{event.state ? ` · ${event.state}` : ''}</span><strong>{event.title || event.slug}</strong><small>{event.status === 'sold_out' ? c.soldOutLabel : c.eventCta}</small></a>)}</div>
+      <button class="popup-continue" type="button" data-popup-close>{c.continueLabel}</button>
     </div>
   </div>
 </div>}
