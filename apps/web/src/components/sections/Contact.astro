@@ -1,4 +1,12 @@
 ---
-const {locale,content={}}=Astro.props;const es=locale==='es';const c={eyebrow:'GTRZ',title:es?'¿HACEMOS QUE SUCEDA?':'VAMOS FAZER ACONTECER?',cta:es?'Hablar con GTRZ':'Falar com a GTRZ',email:'gtrzeventos@gmail.com',...content};
+const {locale,content={}}=Astro.props;
+const es=locale==='es';
+const c={eyebrow:es?'Proyectos · Alianzas · Producción':'Projetos · Parcerias · Produção',title:es?'¿LO HACEMOS JUNTOS?':'VAMOS FAZER JUNTOS?',body:es?'Para espacios, restaurantes, marcas, artistas y aliados que quieren producir una experiencia con GTRZ.':'Para casas, restaurantes, marcas, artistas e parceiros que querem produzir uma experiência com a GTRZ.',cta:es?'Hablar con GTRZ':'Falar com a GTRZ',email:'gtrzeventos@gmail.com',...content};
+const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
-<section class="contact-section" data-section="contact"><div class="shell"><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2><a class="button primary" href={`mailto:${c.email}`} data-track="contact.email">{c.cta}</a></div></section>
+<section id="contato" class="contact" data-section="contact">
+  <div class="wrap contact-grid">
+    <div class="reveal"><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2></div>
+    <div class="contact-box reveal"><p>{c.body}</p><div class="hero-actions"><a class="btn btn-red" href={`mailto:${c.email}`} data-track="contact.email">{c.cta}</a><a class="btn" href="https://instagram.com/gtrzeventos" target="_blank" rel="noopener" data-track="contact.instagram">Instagram</a></div></div>
+  </div>
+</section>
