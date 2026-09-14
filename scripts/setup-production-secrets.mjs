@@ -97,6 +97,24 @@ async function askHidden(label, { optional = false } = {}) {
   });
 }
 
+async function askAdminPassword() {
+  while (true) {
+    const password = await askHidden('Senha do GTRZ Control');
+    if (password.length < 12) {
+      console.error('A senha deve ter pelo menos 12 caracteres. Tente novamente.\n');
+      continue;
+    }
+
+    const confirmation = await askHidden('Confirme a senha do GTRZ Control');
+    if (password !== confirmation) {
+      console.error('As senhas não coincidem. Tente novamente.\n');
+      continue;
+    }
+
+    return password;
+  }
+}
+
 function setSecret(name, value) {
   const result = run(
     'gh',
@@ -135,12 +153,7 @@ if (!validateAccountId(accountId)) {
   process.exit(1);
 }
 
-const adminPassword = await askHidden('Senha do GTRZ Control');
-if (adminPassword.length < 12) {
-  console.error('A senha administrativa deve ter pelo menos 12 caracteres.');
-  process.exit(1);
-}
-
+const adminPassword = await askAdminPassword();
 const turnstileSecret = await askHidden('GTRZ_TURNSTILE_SECRET_KEY', { optional: true });
 const turnstileSiteKey = await askVisible('GTRZ_TURNSTILE_SITE_KEY (opcional)');
 const sessionSecret = randomBytes(48).toString('hex');
