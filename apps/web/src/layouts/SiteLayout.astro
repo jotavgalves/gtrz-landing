@@ -37,6 +37,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
         if (navigator.sendBeacon) navigator.sendBeacon(url, new Blob([payload], {type:'application/json'}));
         else fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:payload,keepalive:true}).catch(()=>{});
       };
+      window.gtrzTrack = send;
       send('page_view');
       document.addEventListener('click', (event) => {
         const el = event.target.closest('[data-track]');
