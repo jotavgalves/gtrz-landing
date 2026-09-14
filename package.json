@@ -2,6 +2,9 @@
   "name": "gtrz-platform",
   "private": true,
   "packageManager": "pnpm@10.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "workerd"]
+  },
   "scripts": {
     "dev:web": "pnpm --filter @gtrz/web dev",
     "dev:admin": "pnpm --filter @gtrz/admin dev",
