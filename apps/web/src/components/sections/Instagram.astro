@@ -1,0 +1,5 @@
+---
+const { locale } = Astro.props;
+const es = locale === 'es';
+---
+<section id="instagram" class="instagram-section" data-section="instagram"><div class="shell instagram-card"><div><span class="eyebrow">{es?'Síguenos de cerca':'Acompanhe de perto'}</span><h2>{es?'SIGUE A GTRZ EN INSTAGRAM.':'SIGA A GTRZ NO INSTAGRAM.'}</h2><p>{es?'Nuevos eventos, backstage, line-ups, lotes y registros de las fiestas.':'Novos eventos, bastidores, line-ups, lotes e registros das festas.'}</p><strong>@gtrzeventos</strong><div class="actions"><a class="button primary" href="https://instagram.com/gtrzeventos" rel="noopener" target="_blank" data-track="instagram.follow">{es?'Seguir en Instagram':'Seguir no Instagram'}</a></div></div><div class="instagram-mark"><img src="/brand/gtrz-wordmark.svg" alt=""/><span>@gtrzeventos</span></div></div></section>

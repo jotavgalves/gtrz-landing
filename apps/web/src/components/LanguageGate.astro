@@ -1,0 +1,20 @@
+---
+const { locale } = Astro.props;
+---
+<div class="language-gate" data-language-gate hidden>
+  <div class="language-card">
+    <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
+    <span>Venezuela → Brasil</span>
+    <h2>Escolha seu idioma<br/><small>Elige tu idioma</small></h2>
+    <div>
+      <a href="?lang=pt-BR" data-first-language="pt-BR">Português</a>
+      <a href="?lang=es" data-first-language="es">Español</a>
+    </div>
+  </div>
+</div>
+<script define:vars={{ locale }}>
+  const gate = document.querySelector('[data-language-gate]');
+  const saved = localStorage.getItem('gtrz_locale');
+  if (!saved && gate) { gate.hidden = false; document.body.classList.add('modal-open'); }
+  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>localStorage.setItem('gtrz_locale',el.dataset.firstLanguage)));
+</script>

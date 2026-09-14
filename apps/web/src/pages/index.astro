@@ -1,0 +1,31 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import EventPopup from '@/components/EventPopup.astro';
+import Hero from '@/components/sections/Hero.astro';
+import About from '@/components/sections/About.astro';
+import Rhythms from '@/components/sections/Rhythms.astro';
+import Differentials from '@/components/sections/Differentials.astro';
+import Events from '@/components/sections/Events.astro';
+import Community from '@/components/sections/Community.astro';
+import Instagram from '@/components/sections/Instagram.astro';
+import { getHomePage, pickLocale } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+
+const requested = Astro.url.searchParams.get('lang');
+const locale: Locale = requested === 'es' ? 'es' : 'pt-BR';
+const payload = await getHomePage();
+const events = pickLocale(payload.events, locale);
+---
+<SiteLayout locale={locale} title="GTRZ Eventos — Venezuela → Brasil">
+  <main>
+    <Hero locale={locale}/>
+    <About locale={locale}/>
+    <Rhythms locale={locale}/>
+    <Differentials locale={locale}/>
+    <Events locale={locale} events={events}/>
+    <Community locale={locale}/>
+    <Instagram locale={locale}/>
+    <section class="contact-section" data-section="contact"><div class="shell"><span class="eyebrow">GTRZ</span><h2>{locale==='es'?'¿HACEMOS QUE SUCEDA?':'VAMOS FAZER ACONTECER?'}</h2><a class="button primary" href="mailto:gtrzeventos@gmail.com" data-track="contact.email">{locale==='es'?'Hablar con GTRZ':'Falar com a GTRZ'}</a></div></section>
+  </main>
+  <EventPopup events={events} locale={locale}/>
+</SiteLayout>

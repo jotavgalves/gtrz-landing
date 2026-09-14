@@ -1,0 +1,7 @@
+---
+import { defaultContent } from '@/lib/default-content';
+const { locale } = Astro.props;
+const rhythms = defaultContent(locale).rhythms;
+const es = locale === 'es';
+---
+<section id="ritmos" class="dark-section" data-section="rhythms"><div class="shell"><div class="section-head"><div><span class="eyebrow">{es?'El sonido de GTRZ':'O som da GTRZ'}</span><h2>{es?'NUESTROS RITMOS.':'NOSSOS RITMOS.'}</h2></div><p>{es?'Nuestra pista nace del encuentro entre ritmos latinos, urbanos y brasileños.':'Nossa pista nasce do encontro entre ritmos latinos, urbanos e brasileiros.'}</p></div><div class="rhythm-grid">{rhythms.map((name,index)=><article><small>{String(index+1).padStart(2,'0')}</small><strong>{name}</strong></article>)}</div></div></section>

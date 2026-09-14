@@ -1,0 +1,7 @@
+---
+import { defaultContent } from '@/lib/default-content';
+const { locale } = Astro.props;
+const items = defaultContent(locale).differentials;
+const es = locale === 'es';
+---
+<section id="diferenciais" class="paper-section" data-section="differentials"><div class="shell"><div class="section-head"><div><span class="eyebrow">{es?'Qué cambia cuando es GTRZ':'O que muda quando é GTRZ'}</span><h2>{es?'NUESTROS DIFERENCIALES.':'NOSSOS DIFERENCIAIS.'}</h2></div><p>{es?'No hacemos fiestas genéricas con otro logo encima. Cada edición necesita concepto, lenguaje y experiencia.':'Não fazemos festas genéricas com outra logo em cima. Cada edição precisa de conceito, linguagem e experiência.'}</p></div><div class="diff-grid">{items.map(([title,body],index)=><article><small>{String(index+1).padStart(2,'0')}</small><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div></section>

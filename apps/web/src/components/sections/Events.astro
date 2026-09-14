@@ -1,0 +1,6 @@
+---
+import type { CmsEvent, Locale } from '@/lib/cms';
+const { events, locale } = Astro.props as { events: CmsEvent[]; locale: Locale };
+const es = locale === 'es';
+---
+<section id="eventos" class="events-section" data-section="events"><div class="shell"><div class="section-head"><div><span class="eyebrow">Agenda GTRZ</span><h2>EVENTOS.</h2></div><p>{es?'Cada proyecto tiene identidad propia. Entra para ver lugar, line-up y entradas.':'Cada projeto tem identidade própria. Entre para ver local, line-up e ingressos.'}</p></div>{events.length ? <div class="event-grid">{events.map((event)=><a class="event-card" href={`/eventos/${event.slug}`} data-track={`events.${event.slug}`}><span>{event.city}{event.state?` · ${event.state}`:''}</span><h3>{event.title || event.slug}</h3><small>{event.status === 'sales_open' ? (es?'VENTAS ABIERTAS':'VENDAS ABERTAS') : event.status.toUpperCase()}</small></a>)}</div> : <div class="empty-state"><strong>{es?'Nuevos eventos en preparación.':'Novos eventos em preparação.'}</strong><p>{es?'Síguenos en Instagram para recibir las próximas fechas.':'Siga a GTRZ no Instagram para receber as próximas datas.'}</p></div>}</div></section>
