@@ -2,22 +2,26 @@
 const { locale } = Astro.props;
 const es = locale === 'es';
 const nav = es
-  ? [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Freelancers','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']]
-  : [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciais','#diferenciais'],['Quem faz','#quem'],['Freelancers','#trabalhe'],['Parcerias','#parcerias'],['Instagram','#instagram']];
+  ? [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Trabaja con nosotros','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']]
+  : [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciais','#diferenciais'],['Quem faz','#quem'],['Trabalhe conosco','#trabalhe'],['Parcerias','#parcerias'],['Instagram','#instagram']];
 ---
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="#top" data-track="nav.logo"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ" /></a>
-    <nav>{nav.map(([label,href]) => <a href={href}>{label}</a>)}</nav>
-    <div class="header-actions">
-      <div class="language-switch" aria-label="Idioma">
+<header class="header">
+  <div class="header-in">
+    <a class="brand" href="#top" aria-label="GTRZ Eventos" data-track="nav.logo">
+      <img class="brand-img" src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
+    </a>
+    <nav class="nav" aria-label={es ? 'Navegación principal' : 'Navegação principal'}>
+      {nav.map(([label,href]) => <a href={href}>{label}</a>)}
+    </nav>
+    <div class="nav-actions">
+      <div class="lang-switch" aria-label={es ? 'Idioma' : 'Idioma'}>
         <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">PT</a>
         <a class:list={{active:es}} href="?lang=es" data-language="es">ES</a>
       </div>
-      <a class="events-button" href="#eventos" data-track="nav.events">{es ? 'Eventos' : 'Eventos'}</a>
+      <a class="events-btn" href="#eventos" data-track="nav.events">Eventos</a>
     </div>
   </div>
-  <div class="progress-track"><span data-scroll-progress></span></div>
+  <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
 </header>
 <script>
   document.querySelectorAll('[data-language]').forEach((el) => el.addEventListener('click', () => localStorage.setItem('gtrz_locale', el.getAttribute('data-language') || 'pt-BR')));
