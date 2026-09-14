@@ -1,8 +1,8 @@
-import type { SVGProps } from 'react';
+import type { ReactNode, SVGProps } from 'react';
 
 export type IconName='dashboard'|'content'|'events'|'people'|'commercial'|'marketing'|'media'|'analytics'|'settings'|'system'|'external'|'logout'|'menu'|'close'|'plus'|'save'|'trash'|'refresh'|'copy'|'check'|'search'|'arrow'|'eye'|'edit'|'archive'|'link'|'calendar'|'image'|'globe'|'activity';
 
-const paths:Record<IconName,JSX.Element>={
+const paths:Record<IconName,ReactNode>={
   dashboard:<><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
   content:<><path d="M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M7 8h10M7 12h10M7 16h6"/></>,
   events:<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 18h2"/></>,
