@@ -11,6 +11,7 @@ export interface CmsSectionRow {
 }
 export interface CmsSection { id:string; type:string; position:number; enabled:boolean; config:Record<string,unknown>; content:Record<string,any>; }
 export interface CmsEvent { id:string; slug:string; status:string; city:string; state?:string; starts_at:string; ends_at?:string; locale?:string; title?:string; summary?:string; }
+export interface CmsTeamMember { id:string; name:string; media_id?:string|null; instagram_url?:string|null; position:number; locale?:string; role_label?:string|null; bio?:string|null; }
 export interface EventPopupSettings {
   enabled?: boolean;
   frequency?: 'always'|'session'|'day';
@@ -23,10 +24,10 @@ export interface SiteSettings {
   social?: Record<string,unknown>;
   general?: Record<string,unknown>;
 }
-export interface HomePayload { page:unknown; sections:CmsSectionRow[]; events:CmsEvent[]; settings:SiteSettings; }
+export interface HomePayload { page:unknown; sections:CmsSectionRow[]; events:CmsEvent[]; team:CmsTeamMember[]; settings:SiteSettings; }
 const API_BASE = import.meta.env.PUBLIC_API_BASE || '';
 
-export async function getHomePage():Promise<HomePayload>{try{const r=await fetch(`${API_BASE}/api/public/site`,{headers:{accept:'application/json'}});if(!r.ok)throw new Error(`CMS ${r.status}`);return await r.json();}catch{return{page:null,sections:[],events:[],settings:{}}}}
+export async function getHomePage():Promise<HomePayload>{try{const r=await fetch(`${API_BASE}/api/public/site`,{headers:{accept:'application/json'}});if(!r.ok)throw new Error(`CMS ${r.status}`);return await r.json();}catch{return{page:null,sections:[],events:[],team:[],settings:{}}}}
 export function pickLocale<T extends {locale?:string}>(rows:T[],locale:Locale){return rows.filter((row)=>row.locale===locale||!row.locale)}
 export function parseJson<T>(value:string|undefined,fallback:T):T{if(!value)return fallback;try{return JSON.parse(value) as T}catch{return fallback}}
 
