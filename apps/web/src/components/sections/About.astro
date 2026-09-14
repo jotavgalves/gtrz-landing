@@ -1,4 +1,27 @@
 ---
-const {locale,content={}}=Astro.props;const es=locale==='es';const c={eyebrow:es?'Sobre GTRZ':'Sobre a GTRZ',title:es?'NO ES SOLO UNA FIESTA.':'NÃO É SÓ UMA FESTA.',body1:es?'GTRZ nació en Venezuela, creada por venezolanos con ganas de transformar encuentros en experiencias con identidad. En Brasil, el proyecto encontró nuevos caminos y hoy es construido en conjunto por venezolanos y brasileños.':'A GTRZ nasceu na Venezuela, criada por venezuelanos com vontade de transformar encontros em experiências com identidade. No Brasil, o projeto ganhou novos caminhos e hoje é construído em conjunto por venezuelanos e brasileiros.',body2:es?'Desde la dirección creativa hasta la operación, cada evento necesita personalidad propia, música, cultura, cuidado y presencia.':'Da direção criativa à operação, cada evento precisa ter personalidade própria, música, cultura, cuidado e presença.',...content};
+const {locale,content={}}=Astro.props;
+const es=locale==='es';
+const c={
+  eyebrow:es?'Sobre GTRZ':'Sobre a GTRZ',
+  title:es?'NO ES SOLO UNA FIESTA.':'NÃO É SÓ UMA FESTA.',
+  body1:es?'GTRZ nació en Venezuela, creada por venezolanos con ganas de transformar encuentros en experiencias con identidad. En Brasil, el proyecto encontró nuevos caminos y hoy es construido en conjunto por venezolanos y brasileños.':'A GTRZ nasceu na Venezuela, criada por venezuelanos com vontade de transformar encontros em experiências com identidade. No Brasil, o projeto ganhou novos caminhos e hoje é construído em conjunto por venezuelanos e brasileiros.',
+  body2:es?'Desde la dirección creativa hasta la operación, cada evento necesita personalidad propia, música, cultura, cuidado y presencia.':'Da direção criativa à operação, cada evento precisa ter personalidade própria, música, cultura, cuidado e presença.',
+  note:es?'Producción de eventos · Dirección creativa · Experiencias de marca · Cultura nocturna':'Produção de eventos · Direção criativa · Experiências de marca · Cultura noturna',
+  ...content
+};
+const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
 ---
-<section id="sobre" class="paper-section" data-section="about"><div class="shell split"><div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div><div class="body-copy"><p>{c.body1}</p><p>{c.body2}</p></div></div></section>
+<section id="sobre" class="about" data-section="about">
+  <div class="wrap about-grid">
+    <div class="reveal"><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2></div>
+    <div class="about-copy reveal"><p>{c.body1}</p><p>{c.body2}</p><div class="about-note">{c.note}</div></div>
+  </div>
+</section>
+<section class="numbers" aria-label={es?'GTRZ en números':'GTRZ em números'}>
+  <div class="wrap numbers-grid">
+    <div class="number-card"><strong>2</strong><span>{es?'Países de origen y construcción':'Países na nossa história'}</span></div>
+    <div class="number-card"><strong>2</strong><span>{es?'Culturas construyendo juntas':'Culturas construindo juntas'}</span></div>
+    <div class="number-card"><strong>PT + ES</strong><span>{es?'Comunicación bilingüe':'Comunicação bilíngue'}</span></div>
+    <div class="number-card"><strong>1</strong><span>{es?'Marca, múltiples experiencias':'Marca, múltiplas experiências'}</span></div>
+  </div>
+</section>
