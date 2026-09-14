@@ -4,6 +4,7 @@ import { audit } from '../../services/audit';
 import { createRevision, getRevision, listRevisions } from '../../services/revisions';
 
 export const eventsAdminRoutes = new Hono<{ Bindings: Env }>();
+const has=(value:unknown,key:string)=>Object.prototype.hasOwnProperty.call(value||{},key);
 
 async function eventSnapshot(env:Env,eventId:string){
   const event=await env.DB.prepare('SELECT * FROM events WHERE id=? LIMIT 1').bind(eventId).first<any>();
@@ -68,15 +69,34 @@ eventsAdminRoutes.patch('/events/:id',async(c)=>{
   if(!current)return c.json({error:'not_found'},404);
   await c.env.DB.prepare(`
     UPDATE events SET
-      slug=COALESCE(?,slug),status=COALESCE(?,status),city=COALESCE(?,city),state=COALESCE(?,state),
-      country=COALESCE(?,country),venue_name=COALESCE(?,venue_name),venue_address=COALESCE(?,venue_address),
-      starts_at=COALESCE(?,starts_at),ends_at=COALESCE(?,ends_at),theme_json=COALESCE(?,theme_json),
-      hero_media_id=COALESCE(?,hero_media_id),logo_media_id=COALESCE(?,logo_media_id),updated_at=CURRENT_TIMESTAMP,
+      slug=CASE WHEN ? THEN ? ELSE slug END,
+      status=CASE WHEN ? THEN ? ELSE status END,
+      city=CASE WHEN ? THEN ? ELSE city END,
+      state=CASE WHEN ? THEN ? ELSE state END,
+      country=CASE WHEN ? THEN ? ELSE country END,
+      venue_name=CASE WHEN ? THEN ? ELSE venue_name END,
+      venue_address=CASE WHEN ? THEN ? ELSE venue_address END,
+      starts_at=CASE WHEN ? THEN ? ELSE starts_at END,
+      ends_at=CASE WHEN ? THEN ? ELSE ends_at END,
+      theme_json=CASE WHEN ? THEN ? ELSE theme_json END,
+      hero_media_id=CASE WHEN ? THEN ? ELSE hero_media_id END,
+      logo_media_id=CASE WHEN ? THEN ? ELSE logo_media_id END,
+      updated_at=CURRENT_TIMESTAMP,
       published_at=CASE WHEN ? IN ('published','sales_open','sold_out') AND published_at IS NULL THEN CURRENT_TIMESTAMP ELSE published_at END
     WHERE id=?
   `).bind(
-    b.slug??null,b.status??null,b.city??null,b.state??null,b.country??null,b.venueName??null,b.venueAddress??null,
-    b.startsAt??null,b.endsAt??null,b.theme?JSON.stringify(b.theme):null,b.heroMediaId??null,b.logoMediaId??null,
+    has(b,'slug')?1:0,b.slug??null,
+    has(b,'status')?1:0,b.status??null,
+    has(b,'city')?1:0,b.city??null,
+    has(b,'state')?1:0,b.state||null,
+    has(b,'country')?1:0,b.country??null,
+    has(b,'venueName')?1:0,b.venueName||null,
+    has(b,'venueAddress')?1:0,b.venueAddress||null,
+    has(b,'startsAt')?1:0,b.startsAt??null,
+    has(b,'endsAt')?1:0,b.endsAt||null,
+    has(b,'theme')?1:0,has(b,'theme')?JSON.stringify(b.theme||{}):null,
+    has(b,'heroMediaId')?1:0,b.heroMediaId||null,
+    has(b,'logoMediaId')?1:0,b.logoMediaId||null,
     b.status??null,eventId
   ).run();
   for(const [locale,l] of Object.entries<any>(b.locales||{})){
@@ -149,8 +169,27 @@ eventsAdminRoutes.post('/events/:id/tickets',async(c)=>{
 eventsAdminRoutes.patch('/events/:eventId/tickets/:ticketId',async(c)=>{
   const eventId=c.req.param('eventId'),ticketId=c.req.param('ticketId'),b=await c.req.json<any>();
   await saveEventRevision(c.env,eventId);
-  await c.env.DB.prepare(`UPDATE event_tickets SET name=COALESCE(?,name),price_cents=COALESCE(?,price_cents),currency=COALESCE(?,currency),sales_url=COALESCE(?,sales_url),status=COALESCE(?,status),position=COALESCE(?,position),starts_at=COALESCE(?,starts_at),ends_at=COALESCE(?,ends_at) WHERE id=? AND event_id=?`)
-    .bind(b.name??null,b.priceCents??null,b.currency??null,b.salesUrl??null,b.status??null,b.position??null,b.startsAt??null,b.endsAt??null,ticketId,eventId).run();
+  await c.env.DB.prepare(`UPDATE event_tickets SET
+    name=CASE WHEN ? THEN ? ELSE name END,
+    price_cents=CASE WHEN ? THEN ? ELSE price_cents END,
+    currency=CASE WHEN ? THEN ? ELSE currency END,
+    sales_url=CASE WHEN ? THEN ? ELSE sales_url END,
+    status=CASE WHEN ? THEN ? ELSE status END,
+    position=CASE WHEN ? THEN ? ELSE position END,
+    starts_at=CASE WHEN ? THEN ? ELSE starts_at END,
+    ends_at=CASE WHEN ? THEN ? ELSE ends_at END
+    WHERE id=? AND event_id=?`)
+    .bind(
+      has(b,'name')?1:0,b.name??null,
+      has(b,'priceCents')?1:0,b.priceCents??null,
+      has(b,'currency')?1:0,b.currency??null,
+      has(b,'salesUrl')?1:0,b.salesUrl||null,
+      has(b,'status')?1:0,b.status??null,
+      has(b,'position')?1:0,b.position??null,
+      has(b,'startsAt')?1:0,b.startsAt||null,
+      has(b,'endsAt')?1:0,b.endsAt||null,
+      ticketId,eventId
+    ).run();
   await audit(c.env,'update','event_ticket',ticketId,{eventId});return c.json({ok:true});
 });
 
@@ -170,8 +209,21 @@ eventsAdminRoutes.post('/events/:id/artists',async(c)=>{
 
 eventsAdminRoutes.patch('/events/:eventId/artists/:artistId',async(c)=>{
   const eventId=c.req.param('eventId'),artistId=c.req.param('artistId'),b=await c.req.json<any>();await saveEventRevision(c.env,eventId);
-  await c.env.DB.prepare(`UPDATE event_artists SET name=COALESCE(?,name),role=COALESCE(?,role),media_id=COALESCE(?,media_id),instagram_url=COALESCE(?,instagram_url),position=COALESCE(?,position) WHERE id=? AND event_id=?`)
-    .bind(b.name??null,b.role??null,b.mediaId??null,b.instagramUrl??null,b.position??null,artistId,eventId).run();
+  await c.env.DB.prepare(`UPDATE event_artists SET
+    name=CASE WHEN ? THEN ? ELSE name END,
+    role=CASE WHEN ? THEN ? ELSE role END,
+    media_id=CASE WHEN ? THEN ? ELSE media_id END,
+    instagram_url=CASE WHEN ? THEN ? ELSE instagram_url END,
+    position=CASE WHEN ? THEN ? ELSE position END
+    WHERE id=? AND event_id=?`)
+    .bind(
+      has(b,'name')?1:0,b.name??null,
+      has(b,'role')?1:0,b.role||null,
+      has(b,'mediaId')?1:0,b.mediaId||null,
+      has(b,'instagramUrl')?1:0,b.instagramUrl||null,
+      has(b,'position')?1:0,b.position??null,
+      artistId,eventId
+    ).run();
   await audit(c.env,'update','event_artist',artistId,{eventId});return c.json({ok:true});
 });
 
