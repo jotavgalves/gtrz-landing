@@ -2,6 +2,7 @@
 import Header from '@/components/Header.astro';
 import LanguageGate from '@/components/LanguageGate.astro';
 import '@/styles/global.css';
+import '@/styles/pages.css';
 interface Props { title?: string; locale: 'pt-BR' | 'es'; }
 const { title = 'GTRZ Eventos', locale } = Astro.props;
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
@@ -39,7 +40,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
       send('page_view');
       document.addEventListener('click', (event) => {
         const el = event.target.closest('[data-track]');
-        if (el) send('cta_click',{ element: el.dataset.track, section: el.closest('[data-section]')?.dataset.section });
+        if (el) send(el.dataset.trackEvent || 'cta_click',{ element: el.dataset.track, section: el.closest('[data-section]')?.dataset.section });
       });
       const viewed = new Set();
       const sectionObserver = new IntersectionObserver((entries) => entries.forEach((entry) => {
