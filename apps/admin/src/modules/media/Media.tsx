@@ -1,0 +1,1 @@
+import { Panel } from '../../components/StateViews';export function Media(){return <Panel title="Biblioteca de mídia" eyebrow="R2"><p className="muted">Assets oficiais da GTRZ, eventos, equipe, parceiros e campanhas ficam no R2 e são referenciados por ID pelo CMS. Não haverá mais duplicação de arquivos entre raiz, public e admin.</p></Panel>}

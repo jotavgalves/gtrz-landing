@@ -1,0 +1,2 @@
+import { Panel } from '../../components/StateViews';
+export function Marketing(){return <Panel title="Marketing" eyebrow="Campanhas"><div className="feature-cards"><article><strong>Popups</strong><p>Ative por evento, cidade, período, idioma e frequência.</p></article><article><strong>Links rastreáveis</strong><p>Crie /r/influencer, /r/parceiro e acompanhe a origem até a conversão.</p></article><article><strong>Campanhas</strong><p>Agrupe links, UTMs, eventos e resultados em uma única campanha.</p></article></div></Panel>}

@@ -1,0 +1,4 @@
+import { useEffect,useState } from 'react';
+import { api } from '../../lib/api';
+import { Empty,Panel } from '../../components/StateViews';
+export function Content(){const [pages,setPages]=useState<any[]>([]);useEffect(()=>{api<any>('/api/admin/pages').then(r=>setPages(r.results||[])).catch(()=>{});},[]);return <Panel title="Páginas e seções" eyebrow="CMS" action={<button>Nova página</button>}>{pages.length?<div className="list">{pages.map(p=><article key={p.id}><div><strong>/{p.slug}</strong><span>{p.template} · {p.status}</span></div><button onClick={()=>alert('O editor por blocos será aberto para '+p.slug)}>Editar blocos</button></article>)}</div>:<Empty>Nenhuma página retornada pelo ambiente atual.</Empty>}<p className="hint">Modelo: blocos tipados, ordenáveis, PT/ES e com revisão. O painel não injeta HTML, CSS ou JavaScript arbitrário.</p></Panel>}
