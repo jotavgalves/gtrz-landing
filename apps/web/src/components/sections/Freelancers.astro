@@ -1,0 +1,11 @@
+---
+const {locale,content={}}=Astro.props as {locale:'pt-BR'|'es';content:Record<string,any>};
+const es=locale==='es';
+const c={eyebrow:es?'Sé parte de la operación':'Faça parte da operação',title:es?'TRABAJA CON GTRZ.':'TRABALHE COM A GTRZ.',body:es?'Los eventos dependen de una buena red de profesionales. Registra tu perfil para futuras producciones de GTRZ.':'Eventos dependem de uma boa rede de profissionais. Cadastre seu perfil para futuras produções da GTRZ.',cta:es?'Registrarme como freelancer':'Cadastrar como freelancer',...content};
+---
+<section id="trabalhe" class="paper-section people-cta-section" data-section="freelancers">
+  <div class="shell people-cta-grid">
+    <div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div>
+    <div class="people-cta-copy"><p>{c.body}</p><div class="role-cloud"><span>Produção</span><span>Recepção</span><span>Bar</span><span>Foto</span><span>Vídeo</span><span>Design</span><span>Social</span><span>Apoio</span></div><a class="button primary" href={`/trabalhe-conosco?lang=${locale}`} data-track="freelancers.open">{c.cta}</a></div>
+  </div>
+</section>
