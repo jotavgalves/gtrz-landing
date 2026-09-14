@@ -7,7 +7,7 @@ const id = () => crypto.randomUUID();
 async function audit(env:Env, action:string, entityType?:string, entityId?:string, metadata:unknown={}){ await env.DB.prepare('INSERT INTO audit_logs (action, entity_type, entity_id, metadata_json) VALUES (?,?,?,?)').bind(action,entityType||null,entityId||null,JSON.stringify(metadata)).run(); }
 
 adminRoutes.post('/auth/login', async (c) => {
-  const body = await c.req.json<{ password?: string }>().catch(() => ({}));
+  const body: { password?: string } = await c.req.json<{ password?: string }>().catch((): { password?: string } => ({}));
   if (!c.env.ADMIN_PASSWORD || !c.env.SESSION_SECRET) return c.json({ error: 'admin_not_configured' }, 503);
   if (!body.password || body.password !== c.env.ADMIN_PASSWORD) return c.json({ error: 'invalid_credentials' }, 401);
   const session = await createSession(c.env); await audit(c.env,'login');
