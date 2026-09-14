@@ -13,7 +13,7 @@ import { Analytics } from './modules/analytics/Analytics';
 import { System } from './modules/system/System';
 
 type View='dashboard'|'content'|'events'|'people'|'commercial'|'marketing'|'media'|'analytics'|'system';
-const items:[View,string,string][]=[['dashboard','Dashboard','Visão geral'],['content','Conteúdo','Páginas e seções'],['events','Eventos','Agenda e ingressos'],['people','Pessoas','Equipe e freelancers'],['commercial','Comercial','Parcerias e leads'],['marketing','Marketing','Popups e campanhas'],['media','Mídia','Biblioteca'],['analytics','Analytics','Aquisição e conversão'],['system','Sistema','Usuários e auditoria']];
+const items:[View,string,string][]=[['dashboard','Dashboard','Visão geral'],['content','Conteúdo','Páginas e seções'],['events','Eventos','Agenda e ingressos'],['people','Pessoas','Equipe e freelancers'],['commercial','Comercial','Parcerias e leads'],['marketing','Marketing','Popups e campanhas'],['media','Mídia','Biblioteca'],['analytics','Analytics','Aquisição e conversão'],['system','Sistema','Auditoria e governança']];
 
 function Login({onDone}:{onDone:()=>void}){
   const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
@@ -28,10 +28,11 @@ function Login({onDone}:{onDone:()=>void}){
 
 export function App(){
   const [authenticated,setAuthenticated]=useState(false);const [checking,setChecking]=useState(true);const [view,setView]=useState<View>('dashboard');
+  const environment=(import.meta.env.VITE_APP_ENV||'local').toUpperCase();
   useEffect(()=>{api('/api/admin/auth/me').then(()=>setAuthenticated(true)).catch(()=>setAuthenticated(false)).finally(()=>setChecking(false));},[]);
   if(checking)return <main className="login"><div className="session-check"><div className="control-logo">GTRZ <span>CONTROL</span></div><p>Verificando sessão…</p></div></main>;
   if(!authenticated)return <Login onDone={()=>setAuthenticated(true)}/>;
   const C={dashboard:Dashboard,content:Content,events:Events,people:People,commercial:Commercial,marketing:Marketing,media:Media,analytics:Analytics,system:System}[view];
   const exit=async()=>{try{await logout();}finally{setAuthenticated(false)}};
-  return <div className="app"><aside><div className="control-logo">GTRZ <span>CONTROL</span></div><nav>{items.map(([id,label,desc])=><button className={view===id?'active':''} onClick={()=>setView(id)} key={id}><strong>{label}</strong><small>{desc}</small></button>)}</nav></aside><main className="workspace"><header className="topbar"><div><small>GTRZ PLATFORM</small><strong>{items.find(x=>x[0]===view)?.[1]}</strong></div><div className="topbar-actions"><div className="environment">STAGING</div><button onClick={exit}>Sair</button></div></header><div className="content"><C/></div></main></div>
+  return <div className="app"><aside><div className="control-logo">GTRZ <span>CONTROL</span></div><nav>{items.map(([id,label,desc])=><button className={view===id?'active':''} onClick={()=>setView(id)} key={id}><strong>{label}</strong><small>{desc}</small></button>)}</nav></aside><main className="workspace"><header className="topbar"><div><small>GTRZ PLATFORM</small><strong>{items.find(x=>x[0]===view)?.[1]}</strong></div><div className="topbar-actions"><div className="environment">{environment}</div><button onClick={exit}>Sair</button></div></header><div className="content"><C/></div></main></div>
 }
