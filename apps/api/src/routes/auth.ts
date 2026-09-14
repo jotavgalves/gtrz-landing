@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
+import { audit } from '../services/audit';
 import {
   checkLoginLock,
   clearLoginFailures,
@@ -14,11 +15,6 @@ import {
 } from '../security';
 
 export const authRoutes = new Hono<{ Bindings: Env }>();
-
-async function audit(env:Env, action:string, metadata:unknown={}){
-  await env.DB.prepare('INSERT INTO audit_logs (action, entity_type, metadata_json) VALUES (?,?,?)')
-    .bind(action,'admin_session',JSON.stringify(metadata)).run();
-}
 
 function sessionCookie(c:any, raw:string, maxAge:number){
   const secure = new URL(c.req.url).protocol === 'https:' ? '; Secure' : '';
@@ -38,13 +34,13 @@ authRoutes.post('/login', async(c)=>{
   const valid=Boolean(body.password) && await safeSecretEqual(body.password||'',c.env.ADMIN_PASSWORD);
   if(!valid){
     const failed=await registerLoginFailure(c.env,actorHash);
-    await audit(c.env,'login_failed',{locked:Boolean(failed.lockedUntil)});
+    await audit(c.env,'login_failed','admin_session',undefined,{locked:Boolean(failed.lockedUntil)});
     return c.json({error:'invalid_credentials'},401);
   }
   await clearLoginFailures(c.env,actorHash);
   const session=await createSession(c.env);
   c.header('set-cookie',sessionCookie(c,session.raw,43200));
-  await audit(c.env,'login');
+  await audit(c.env,'login','admin_session');
   return c.json({ok:true,expiresAt:session.expiresAt});
 });
 
@@ -53,6 +49,6 @@ authRoutes.get('/me',requireAdmin,async(c)=>c.json({ok:true}));
 authRoutes.post('/logout',async(c)=>{
   await revokeSession(c.env,readAdminToken(c));
   c.header('set-cookie',sessionCookie(c,'',0));
-  await audit(c.env,'logout');
+  await audit(c.env,'logout','admin_session');
   return c.json({ok:true});
 });
