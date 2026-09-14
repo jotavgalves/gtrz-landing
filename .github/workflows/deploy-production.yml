@@ -1,0 +1,111 @@
+name: GTRZ Production Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: gtrz-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GTRZ_ADMIN_PASSWORD: ${{ secrets.GTRZ_ADMIN_PASSWORD }}
+      GTRZ_SESSION_SECRET: ${{ secrets.GTRZ_SESSION_SECRET }}
+      GTRZ_TURNSTILE_SECRET_KEY: ${{ secrets.GTRZ_TURNSTILE_SECRET_KEY }}
+      PUBLIC_API_BASE: https://api.gtrz.com.br
+      VITE_API_BASE: https://api.gtrz.com.br
+      PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.GTRZ_TURNSTILE_SITE_KEY }}
+      VITE_TURNSTILE_SITE_KEY: ${{ secrets.GTRZ_TURNSTILE_SITE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check Cloudflare credentials
+        id: cloudflare
+        shell: bash
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Cloudflare credentials are not configured in GitHub secrets; deployment is being skipped safely."
+          fi
+
+      - name: Install dependencies
+        if: steps.cloudflare.outputs.ready == 'true'
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Validate platform
+        if: steps.cloudflare.outputs.ready == 'true'
+        run: |
+          pnpm typecheck
+          pnpm build
+
+      - name: Deploy API and provision bindings
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/api
+        run: pnpm exec wrangler deploy
+
+      - name: Apply D1 migrations
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/api
+        run: pnpm exec wrangler d1 migrations apply DB --remote
+
+      - name: Configure API secrets
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/api
+        shell: bash
+        run: |
+          if [ -n "$GTRZ_SESSION_SECRET" ]; then
+            printf '%s' "$GTRZ_SESSION_SECRET" | pnpm exec wrangler secret put SESSION_SECRET
+          else
+            echo "GTRZ_SESSION_SECRET is absent; admin authentication will remain disabled."
+          fi
+
+          if [ -n "$GTRZ_ADMIN_PASSWORD" ]; then
+            printf '%s' "$GTRZ_ADMIN_PASSWORD" | pnpm exec wrangler secret put ADMIN_PASSWORD
+          else
+            echo "GTRZ_ADMIN_PASSWORD is absent; admin authentication will remain disabled."
+          fi
+
+          if [ -n "$GTRZ_TURNSTILE_SECRET_KEY" ]; then
+            printf '%s' "$GTRZ_TURNSTILE_SECRET_KEY" | pnpm exec wrangler secret put TURNSTILE_SECRET_KEY
+          else
+            echo "Turnstile secret is absent; Turnstile remains optional until configured."
+          fi
+
+      - name: Deploy API after secret updates
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/api
+        run: pnpm exec wrangler deploy --keep-vars
+
+      - name: Deploy institutional site
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/web
+        run: |
+          pnpm build
+          pnpm exec wrangler deploy
+
+      - name: Deploy GTRZ Control
+        if: steps.cloudflare.outputs.ready == 'true'
+        working-directory: apps/admin
+        run: |
+          pnpm build
+          pnpm exec wrangler deploy
