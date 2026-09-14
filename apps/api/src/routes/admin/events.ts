@@ -1,0 +1,182 @@
+import { Hono } from 'hono';
+import type { Env } from '../../env';
+import { audit } from '../../services/audit';
+import { createRevision, getRevision, listRevisions } from '../../services/revisions';
+
+export const eventsAdminRoutes = new Hono<{ Bindings: Env }>();
+
+async function eventSnapshot(env:Env,eventId:string){
+  const event=await env.DB.prepare('SELECT * FROM events WHERE id=? LIMIT 1').bind(eventId).first<any>();
+  if(!event)return null;
+  const [localizations,tickets,artists]=await Promise.all([
+    env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=? ORDER BY locale').bind(eventId).all<any>(),
+    env.DB.prepare('SELECT * FROM event_tickets WHERE event_id=? ORDER BY position,id').bind(eventId).all<any>(),
+    env.DB.prepare('SELECT * FROM event_artists WHERE event_id=? ORDER BY position,id').bind(eventId).all<any>()
+  ]);
+  return {event,localizations:localizations.results,tickets:tickets.results,artists:artists.results};
+}
+
+async function saveEventRevision(env:Env,eventId:string){
+  const snapshot=await eventSnapshot(env,eventId);
+  if(snapshot)await createRevision(env,'event',eventId,snapshot);
+  return snapshot;
+}
+
+eventsAdminRoutes.get('/events',async(c)=>{
+  return c.json(await c.env.DB.prepare(`
+    SELECT e.*,COALESCE(pt.title,es.title,e.slug) title
+    FROM events e
+    LEFT JOIN event_localizations pt ON pt.event_id=e.id AND pt.locale='pt-BR'
+    LEFT JOIN event_localizations es ON es.event_id=e.id AND es.locale='es'
+    ORDER BY e.starts_at DESC
+  `).all());
+});
+
+eventsAdminRoutes.get('/events/:id',async(c)=>{
+  const snapshot=await eventSnapshot(c.env,c.req.param('id'));
+  if(!snapshot)return c.json({error:'not_found'},404);
+  return c.json(snapshot);
+});
+
+eventsAdminRoutes.post('/events',async(c)=>{
+  const b=await c.req.json<any>().catch(()=>null);
+  if(!b?.slug||!b?.city||!b?.startsAt)return c.json({error:'invalid_event'},400);
+  const eventId=crypto.randomUUID();
+  await c.env.DB.prepare(`
+    INSERT INTO events(id,slug,status,city,state,country,venue_name,venue_address,starts_at,ends_at,theme_json,hero_media_id,logo_media_id)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).bind(
+    eventId,String(b.slug).trim(),b.status||'draft',String(b.city).trim(),b.state||null,b.country||'BR',
+    b.venueName||null,b.venueAddress||null,b.startsAt,b.endsAt||null,JSON.stringify(b.theme||{}),
+    b.heroMediaId||null,b.logoMediaId||null
+  ).run();
+  for(const [locale,l] of Object.entries<any>(b.locales||{})){
+    if(!l?.title)continue;
+    await c.env.DB.prepare(`
+      INSERT INTO event_localizations(event_id,locale,title,summary,description,seo_title,seo_description)
+      VALUES(?,?,?,?,?,?,?)
+    `).bind(eventId,locale,l.title,l.summary||null,l.description||null,l.seoTitle||null,l.seoDescription||null).run();
+  }
+  await audit(c.env,'create','event',eventId,{slug:b.slug});
+  return c.json({id:eventId},201);
+});
+
+eventsAdminRoutes.patch('/events/:id',async(c)=>{
+  const eventId=c.req.param('id');
+  const b=await c.req.json<any>().catch(()=>({}));
+  const current=await saveEventRevision(c.env,eventId);
+  if(!current)return c.json({error:'not_found'},404);
+  await c.env.DB.prepare(`
+    UPDATE events SET
+      slug=COALESCE(?,slug),status=COALESCE(?,status),city=COALESCE(?,city),state=COALESCE(?,state),
+      country=COALESCE(?,country),venue_name=COALESCE(?,venue_name),venue_address=COALESCE(?,venue_address),
+      starts_at=COALESCE(?,starts_at),ends_at=COALESCE(?,ends_at),theme_json=COALESCE(?,theme_json),
+      hero_media_id=COALESCE(?,hero_media_id),logo_media_id=COALESCE(?,logo_media_id),updated_at=CURRENT_TIMESTAMP,
+      published_at=CASE WHEN ? IN ('published','sales_open','sold_out') AND published_at IS NULL THEN CURRENT_TIMESTAMP ELSE published_at END
+    WHERE id=?
+  `).bind(
+    b.slug??null,b.status??null,b.city??null,b.state??null,b.country??null,b.venueName??null,b.venueAddress??null,
+    b.startsAt??null,b.endsAt??null,b.theme?JSON.stringify(b.theme):null,b.heroMediaId??null,b.logoMediaId??null,
+    b.status??null,eventId
+  ).run();
+  for(const [locale,l] of Object.entries<any>(b.locales||{})){
+    if(!l?.title)continue;
+    await c.env.DB.prepare(`
+      INSERT INTO event_localizations(event_id,locale,title,summary,description,seo_title,seo_description)
+      VALUES(?,?,?,?,?,?,?)
+      ON CONFLICT(event_id,locale) DO UPDATE SET
+        title=excluded.title,summary=excluded.summary,description=excluded.description,
+        seo_title=excluded.seo_title,seo_description=excluded.seo_description
+    `).bind(eventId,locale,l.title,l.summary||null,l.description||null,l.seoTitle||null,l.seoDescription||null).run();
+  }
+  await audit(c.env,'update','event',eventId,b);
+  return c.json({ok:true});
+});
+
+eventsAdminRoutes.delete('/events/:id',async(c)=>{
+  const eventId=c.req.param('id');
+  const current=await saveEventRevision(c.env,eventId);
+  if(!current)return c.json({error:'not_found'},404);
+  await c.env.DB.prepare("UPDATE events SET status='archived',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(eventId).run();
+  await audit(c.env,'archive','event',eventId);
+  return c.json({ok:true});
+});
+
+eventsAdminRoutes.get('/events/:id/revisions',async(c)=>{
+  return c.json(await listRevisions(c.env,'event',c.req.param('id')));
+});
+
+eventsAdminRoutes.post('/events/:id/revisions/:revisionId/restore',async(c)=>{
+  const eventId=c.req.param('id');
+  const rev=await getRevision(c.env,c.req.param('revisionId'));
+  if(!rev||rev.entity_type!=='event'||rev.entity_id!==eventId)return c.json({error:'not_found'},404);
+  const snapshot=JSON.parse(rev.snapshot_json||'{}');
+  if(!snapshot.event?.id)return c.json({error:'invalid_snapshot'},400);
+  await saveEventRevision(c.env,eventId);
+  const e=snapshot.event;
+  await c.env.DB.prepare(`
+    UPDATE events SET slug=?,status=?,city=?,state=?,country=?,venue_name=?,venue_address=?,starts_at=?,ends_at=?,theme_json=?,hero_media_id=?,logo_media_id=?,published_at=?,updated_at=CURRENT_TIMESTAMP WHERE id=?
+  `).bind(e.slug,e.status,e.city,e.state,e.country,e.venue_name,e.venue_address,e.starts_at,e.ends_at,e.theme_json||'{}',e.hero_media_id,e.logo_media_id,e.published_at,eventId).run();
+  await c.env.DB.prepare('DELETE FROM event_localizations WHERE event_id=?').bind(eventId).run();
+  for(const l of snapshot.localizations||[]){
+    await c.env.DB.prepare('INSERT INTO event_localizations(event_id,locale,title,summary,description,seo_title,seo_description) VALUES(?,?,?,?,?,?,?)')
+      .bind(eventId,l.locale,l.title,l.summary,l.description,l.seo_title,l.seo_description).run();
+  }
+  await c.env.DB.prepare('DELETE FROM event_tickets WHERE event_id=?').bind(eventId).run();
+  for(const t of snapshot.tickets||[]){
+    await c.env.DB.prepare(`INSERT INTO event_tickets(id,event_id,name,price_cents,currency,sales_url,status,position,starts_at,ends_at) VALUES(?,?,?,?,?,?,?,?,?,?)`)
+      .bind(t.id,eventId,t.name,t.price_cents,t.currency,t.sales_url,t.status,t.position,t.starts_at,t.ends_at).run();
+  }
+  await c.env.DB.prepare('DELETE FROM event_artists WHERE event_id=?').bind(eventId).run();
+  for(const a of snapshot.artists||[]){
+    await c.env.DB.prepare(`INSERT INTO event_artists(id,event_id,name,role,media_id,instagram_url,position) VALUES(?,?,?,?,?,?,?)`)
+      .bind(a.id,eventId,a.name,a.role,a.media_id,a.instagram_url,a.position).run();
+  }
+  await audit(c.env,'restore','event',eventId,{revisionId:rev.id});
+  return c.json({ok:true});
+});
+
+eventsAdminRoutes.post('/events/:id/tickets',async(c)=>{
+  const eventId=c.req.param('id');const b=await c.req.json<any>();
+  if(!b?.name)return c.json({error:'ticket_name_required'},400);
+  await saveEventRevision(c.env,eventId);
+  const id=crypto.randomUUID();
+  await c.env.DB.prepare(`INSERT INTO event_tickets(id,event_id,name,price_cents,currency,sales_url,status,position,starts_at,ends_at) VALUES(?,?,?,?,?,?,?,?,?,?)`)
+    .bind(id,eventId,b.name,b.priceCents??null,b.currency||'BRL',b.salesUrl||null,b.status||'active',Number(b.position||0),b.startsAt||null,b.endsAt||null).run();
+  await audit(c.env,'create','event_ticket',id,{eventId});return c.json({id},201);
+});
+
+eventsAdminRoutes.patch('/events/:eventId/tickets/:ticketId',async(c)=>{
+  const eventId=c.req.param('eventId'),ticketId=c.req.param('ticketId'),b=await c.req.json<any>();
+  await saveEventRevision(c.env,eventId);
+  await c.env.DB.prepare(`UPDATE event_tickets SET name=COALESCE(?,name),price_cents=COALESCE(?,price_cents),currency=COALESCE(?,currency),sales_url=COALESCE(?,sales_url),status=COALESCE(?,status),position=COALESCE(?,position),starts_at=COALESCE(?,starts_at),ends_at=COALESCE(?,ends_at) WHERE id=? AND event_id=?`)
+    .bind(b.name??null,b.priceCents??null,b.currency??null,b.salesUrl??null,b.status??null,b.position??null,b.startsAt??null,b.endsAt??null,ticketId,eventId).run();
+  await audit(c.env,'update','event_ticket',ticketId,{eventId});return c.json({ok:true});
+});
+
+eventsAdminRoutes.delete('/events/:eventId/tickets/:ticketId',async(c)=>{
+  const eventId=c.req.param('eventId'),ticketId=c.req.param('ticketId');await saveEventRevision(c.env,eventId);
+  await c.env.DB.prepare('DELETE FROM event_tickets WHERE id=? AND event_id=?').bind(ticketId,eventId).run();
+  await audit(c.env,'delete','event_ticket',ticketId,{eventId});return c.json({ok:true});
+});
+
+eventsAdminRoutes.post('/events/:id/artists',async(c)=>{
+  const eventId=c.req.param('id'),b=await c.req.json<any>();if(!b?.name)return c.json({error:'artist_name_required'},400);
+  await saveEventRevision(c.env,eventId);const id=crypto.randomUUID();
+  await c.env.DB.prepare('INSERT INTO event_artists(id,event_id,name,role,media_id,instagram_url,position) VALUES(?,?,?,?,?,?,?)')
+    .bind(id,eventId,b.name,b.role||null,b.mediaId||null,b.instagramUrl||null,Number(b.position||0)).run();
+  await audit(c.env,'create','event_artist',id,{eventId});return c.json({id},201);
+});
+
+eventsAdminRoutes.patch('/events/:eventId/artists/:artistId',async(c)=>{
+  const eventId=c.req.param('eventId'),artistId=c.req.param('artistId'),b=await c.req.json<any>();await saveEventRevision(c.env,eventId);
+  await c.env.DB.prepare(`UPDATE event_artists SET name=COALESCE(?,name),role=COALESCE(?,role),media_id=COALESCE(?,media_id),instagram_url=COALESCE(?,instagram_url),position=COALESCE(?,position) WHERE id=? AND event_id=?`)
+    .bind(b.name??null,b.role??null,b.mediaId??null,b.instagramUrl??null,b.position??null,artistId,eventId).run();
+  await audit(c.env,'update','event_artist',artistId,{eventId});return c.json({ok:true});
+});
+
+eventsAdminRoutes.delete('/events/:eventId/artists/:artistId',async(c)=>{
+  const eventId=c.req.param('eventId'),artistId=c.req.param('artistId');await saveEventRevision(c.env,eventId);
+  await c.env.DB.prepare('DELETE FROM event_artists WHERE id=? AND event_id=?').bind(artistId,eventId).run();
+  await audit(c.env,'delete','event_artist',artistId,{eventId});return c.json({ok:true});
+});
