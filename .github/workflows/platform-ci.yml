@@ -3,6 +3,7 @@ name: GTRZ Platform CI
 on:
   push:
     branches:
+      - main
       - rebuild/gtrz-platform-v1
   pull_request:
     paths:
@@ -11,6 +12,7 @@ on:
       - 'migrations/**'
       - 'package.json'
       - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
 
 permissions:
   contents: read
