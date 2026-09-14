@@ -9,7 +9,7 @@ dashboardAdminRoutes.get('/dashboard', async (c) => {
     c.env.DB.prepare("SELECT COUNT(*) total FROM events WHERE status IN ('published','sales_open','sold_out')").first<{ total:number }>(),
     c.env.DB.prepare("SELECT COUNT(*) total FROM freelancer_applications WHERE status='new'").first<{ total:number }>(),
     c.env.DB.prepare("SELECT COUNT(*) total FROM partnership_leads WHERE status='new'").first<{ total:number }>(),
-    c.env.DB.prepare("SELECT COUNT(DISTINCT session_id) total FROM analytics_sessions WHERE last_seen_at >= datetime('now','-30 days')").first<{ total:number }>()
+    c.env.DB.prepare("SELECT COUNT(*) total FROM analytics_sessions_daily WHERE day >= date('now','-30 days')").first<{ total:number }>()
   ]);
   const metrics = await c.env.DB.prepare(
     "SELECT metric, SUM(value) value FROM analytics_daily WHERE day >= date('now','-30 days') GROUP BY metric ORDER BY metric"
