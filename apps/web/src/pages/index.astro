@@ -11,7 +11,7 @@ const events=pickLocale(payload.events,locale);
 const team=pickLocale(payload.team,locale);
 const sections=localizedSections(payload.sections,locale);
 ---
-<SiteLayout locale={locale} title="GTRZ Eventos — Venezuela → Brasil">
+<SiteLayout locale={locale} settings={payload.settings}>
   <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events} team={team}/>)}</main>
   <EventPopup events={events} locale={locale} settings={payload.settings?.event_popup}/>
 </SiteLayout>
