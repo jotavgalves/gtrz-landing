@@ -1,4 +1,14 @@
 ---
-const {locale,content={}}=Astro.props;const es=locale==='es';const c={eyebrow:es?'Síguenos de cerca':'Acompanhe de perto',title:es?'SIGUE A GTRZ EN INSTAGRAM.':'SIGA A GTRZ NO INSTAGRAM.',body:es?'Nuevos eventos, backstage, line-ups, lotes y registros de las fiestas.':'Novos eventos, bastidores, line-ups, lotes e registros das festas.',handle:'@gtrzeventos',url:'https://instagram.com/gtrzeventos',...content};
+const {locale,content={}}=Astro.props;
+const es=locale==='es';
+const c={eyebrow:es?'Síguenos de cerca':'Acompanhe de perto',title:es?'SIGUE A GTRZ EN INSTAGRAM.':'SIGA A GTRZ NO INSTAGRAM.',body:es?'Nuevos eventos, backstage, line-ups, lotes, registros de las fiestas y todo lo que ocurre antes y después de la pista.':'Novos eventos, bastidores, line-ups, lotes, registros das festas e tudo que acontece antes e depois da pista.',handle:'@gtrzeventos',url:'https://instagram.com/gtrzeventos',...content};
+const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
-<section id="instagram" class="instagram-section" data-section="instagram"><div class="shell instagram-card"><div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2><p>{c.body}</p><strong>{c.handle}</strong><div class="actions"><a class="button primary" href={c.url} rel="noopener" target="_blank" data-track="instagram.follow">{es?'Seguir en Instagram':'Seguir no Instagram'}</a></div></div><div class="instagram-mark"><img src="/brand/gtrz-wordmark.svg" alt=""/><span>{c.handle}</span></div></div></section>
+<section id="instagram" class="instagram" data-section="instagram">
+  <div class="wrap">
+    <div class="insta-card reveal">
+      <div class="insta-copy"><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2><p>{c.body}</p><div class="insta-handle">{c.handle}</div><div class="hero-actions"><a class="btn btn-red" href={c.url} rel="noopener" target="_blank" data-track="instagram.follow">{es?'Seguir en Instagram':'Seguir no Instagram'}</a></div></div>
+      <div class="insta-preview" aria-hidden="true"><div><div class="insta-preview-top"><div class="insta-avatar"><img src="/brand/gtrz-symbol.svg" alt="" /></div><div><strong>{c.handle}</strong><br/><small>GTRZ Eventos</small></div></div><div class="insta-preview-grid"><div class="insta-tile"></div><div class="insta-tile"></div><div class="insta-tile"></div><div class="insta-tile"></div><div class="insta-tile"></div><div class="insta-tile"></div></div></div><small>{es?'Eventos · cultura · backstage · próximas fechas':'Eventos · cultura · bastidores · próximas datas'}</small></div>
+    </div>
+  </div>
+</section>
