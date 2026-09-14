@@ -1,19 +1,24 @@
 ---
 import SiteLayout from '@/layouts/SiteLayout.astro';
 import { publicApi } from '@/lib/api';
+import { getHomePage } from '@/lib/cms';
+import { getPublicCopy } from '@/lib/public-copy';
 import type { Locale } from '@/lib/cms';
 const {slug}=Astro.params;
 const locale:Locale=Astro.url.searchParams.get('lang')==='es'?'es':'pt-BR';
+const site=await getHomePage();
+const c=getPublicCopy(site.settings,locale,'eventPage');
 let payload:any=null;
 try{payload=await publicApi<any>(`/api/public/events/${encodeURIComponent(slug||'')}`)}catch{Astro.response.status=404}
 const loc=payload?.localizations?.find((x:any)=>x.locale===locale)||payload?.localizations?.[0];
-const event=payload?.event;const tickets=payload?.tickets||[];const artists=payload?.artists||[];const es=locale==='es';
+const event=payload?.event;const tickets=payload?.tickets||[];const artists=payload?.artists||[];
+const ticketStatus=(status:string)=>status==='active'?c.availableLabel:status==='sold_out'?c.soldOutLabel:status==='closed'?c.closedLabel:status==='draft'?c.draftLabel:status;
 ---
-<SiteLayout locale={locale} title={loc?.seo_title||loc?.title||'GTRZ Eventos'}>
+<SiteLayout locale={locale} title={loc?.seo_title||loc?.title||site.settings?.chrome?.[locale==='es'?'metaTitleEs':'metaTitlePt']||'GTRZ Eventos'} settings={site.settings}>
   {event ? <main class="event-detail" style={`--event-accent:${JSON.parse(event.theme_json||'{}').primary||'#ff1a12'}`}>
-    <section class="event-hero" data-section="event_hero"><div class="shell"><a class="back-link" href={`/?lang=${locale}`}>← GTRZ</a><span class="eyebrow">{event.city}{event.state?` · ${event.state}`:''}</span><h1>{loc?.title||event.slug}</h1><p>{loc?.summary||''}</p><div class="event-meta"><div><small>{es?'FECHA':'DATA'}</small><strong>{new Date(event.starts_at).toLocaleDateString(es?'es-VE':'pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</strong></div><div><small>{es?'LUGAR':'LOCAL'}</small><strong>{event.venue_name||event.city}</strong></div></div></div></section>
-    {loc?.description&&<section class="event-content paper-section" data-section="event_about"><div class="shell"><span class="eyebrow">{es?'Sobre el evento':'Sobre o evento'}</span><p>{loc.description}</p></div></section>}
-    {artists.length>0&&<section class="dark-section" data-section="event_lineup"><div class="shell"><div class="section-head"><div><span class="eyebrow">GTRZ</span><h2>LINE-UP.</h2></div></div><div class="artist-grid">{artists.map((artist:any)=><article><strong>{artist.name}</strong><span>{artist.role||''}</span></article>)}</div></div></section>}
-    <section class="tickets-section" data-section="event_tickets"><div class="shell"><div class="section-head"><div><span class="eyebrow">{es?'Entradas':'Ingressos'}</span><h2>{es?'ELIGE TU ENTRADA.':'ESCOLHA SEU INGRESSO.'}</h2></div></div>{tickets.length?<div class="ticket-grid">{tickets.map((ticket:any)=><article><div><small>{ticket.status==='active'?(es?'DISPONIBLE':'DISPONÍVEL'):ticket.status}</small><h3>{ticket.name}</h3>{ticket.price_cents!=null&&<strong>{new Intl.NumberFormat(es?'es-VE':'pt-BR',{style:'currency',currency:ticket.currency||'BRL'}).format(ticket.price_cents/100)}</strong>}</div>{ticket.sales_url&&ticket.status==='active'&&<a class="button primary" href={ticket.sales_url} target="_blank" rel="noopener" data-track={`ticket.${ticket.id}`}>{es?'Comprar':'Comprar'}</a>}</article>)}</div>:<div class="empty-state">{es?'Las entradas todavía no están disponibles.':'Os ingressos ainda não estão disponíveis.'}</div>}</div></section>
-  </main>:<main class="not-found"><div class="shell"><span class="eyebrow">404</span><h1>{locale==='es'?'EVENTO NO ENCONTRADO.':'EVENTO NÃO ENCONTRADO.'}</h1><a class="button primary" href={`/?lang=${locale}`}>GTRZ</a></div></main>}
+    <section class="event-hero" data-section="event_hero"><div class="shell"><a class="back-link" href={`/?lang=${locale}`}>{c.backLabel}</a><span class="eyebrow">{event.city}{event.state?` · ${event.state}`:''}</span><h1>{loc?.title||event.slug}</h1><p>{loc?.summary||''}</p><div class="event-meta"><div><small>{c.dateLabel}</small><strong>{new Date(event.starts_at).toLocaleDateString(locale==='es'?'es-VE':'pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</strong></div><div><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div></div></div></section>
+    {loc?.description&&<section class="event-content paper-section" data-section="event_about"><div class="shell"><span class="eyebrow">{c.aboutLabel}</span><p>{loc.description}</p></div></section>}
+    {artists.length>0&&<section class="dark-section" data-section="event_lineup"><div class="shell"><div class="section-head"><div><span class="eyebrow">{c.lineupEyebrow}</span><h2>{c.lineupTitle}</h2></div></div><div class="artist-grid">{artists.map((artist:any)=><article><strong>{artist.name}</strong><span>{artist.role||''}</span></article>)}</div></div></section>}
+    <section class="tickets-section" data-section="event_tickets"><div class="shell"><div class="section-head"><div><span class="eyebrow">{c.ticketsEyebrow}</span><h2>{c.ticketsTitle}</h2></div></div>{tickets.length?<div class="ticket-grid">{tickets.map((ticket:any)=><article><div><small>{ticketStatus(ticket.status)}</small><h3>{ticket.name}</h3>{ticket.price_cents!=null&&<strong>{new Intl.NumberFormat(locale==='es'?'es-VE':'pt-BR',{style:'currency',currency:ticket.currency||'BRL'}).format(ticket.price_cents/100)}</strong>}</div>{ticket.sales_url&&ticket.status==='active'&&<a class="button primary" href={ticket.sales_url} target="_blank" rel="noopener" data-track={`ticket.${ticket.id}`}>{c.buyLabel}</a>}</article>)}</div>:<div class="empty-state">{c.noTickets}</div>}</div></section>
+  </main>:<main class="not-found"><div class="shell"><span class="eyebrow">404</span><h1>{c.notFoundTitle}</h1><a class="button primary" href={`/?lang=${locale}`}>{c.notFoundCta}</a></div></main>}
 </SiteLayout>
