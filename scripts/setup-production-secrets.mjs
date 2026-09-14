@@ -6,12 +6,12 @@ import process from 'node:process';
 import readline from 'node:readline/promises';
 
 const REPO = 'jotavgalves/gtrz-landing';
-const shell = process.platform === 'win32';
 
 function run(command, args, options = {}) {
   return spawnSync(command, args, {
     encoding: 'utf8',
-    shell,
+    shell: false,
+    windowsHide: true,
     ...options
   });
 }
@@ -52,7 +52,7 @@ async function askHidden(label, { optional = false } = {}) {
     }
   }
 
-  process.stdout.write(`${label}${optional ? ' (opcional)' : ''}: `);
+  process.stdout.write(`${label}${optional ? ' (opcional)' : ''} — cole/digite e pressione Enter: `);
   process.stdin.setRawMode(true);
   process.stdin.resume();
   process.stdin.setEncoding('utf8');
@@ -60,10 +60,14 @@ async function askHidden(label, { optional = false } = {}) {
   return await new Promise((resolve) => {
     let value = '';
 
-    const finish = () => {
+    const restore = () => {
       process.stdin.off('data', onData);
-      process.stdin.setRawMode(false);
+      if (process.stdin.isTTY) process.stdin.setRawMode(false);
       process.stdin.pause();
+    };
+
+    const finish = () => {
+      restore();
       process.stdout.write('\n');
       resolve(value.trim());
     };
@@ -71,16 +75,21 @@ async function askHidden(label, { optional = false } = {}) {
     const onData = (chunk) => {
       for (const char of String(chunk)) {
         if (char === '\u0003') {
+          restore();
           process.stdout.write('\n');
-          process.stdin.setRawMode(false);
           process.exit(130);
         }
         if (char === '\r' || char === '\n') return finish();
         if (char === '\u007f' || char === '\b') {
-          value = value.slice(0, -1);
+          if (value.length) {
+            value = value.slice(0, -1);
+            process.stdout.write('\b \b');
+          }
           continue;
         }
+        if (char === '\u001b') continue;
         value += char;
+        process.stdout.write('*');
       }
     };
 
@@ -109,13 +118,14 @@ function validateAccountId(value) {
 
 console.log('\nGTRZ — configuração segura de secrets de produção');
 console.log(`Repositório: ${REPO}`);
-console.log('Nenhum valor será salvo em arquivo ou impresso no terminal.\n');
+console.log('Nenhum valor será salvo em arquivo ou impresso no terminal.');
+console.log('Nos campos secretos aparecerão apenas asteriscos para confirmar a digitação.\n');
 
 requireGh();
 
 const cloudflareToken = await askHidden('CLOUDFLARE_API_TOKEN');
 if (!cloudflareToken) {
-  console.error('CLOUDFLARE_API_TOKEN é obrigatório.');
+  console.error('\nCLOUDFLARE_API_TOKEN é obrigatório. Cole o token antes de pressionar Enter.');
   process.exit(1);
 }
 
