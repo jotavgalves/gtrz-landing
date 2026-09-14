@@ -19,10 +19,30 @@ export interface EventPopupSettings {
   selectedEventId?: string|null;
   maxEvents?: number;
 }
+export interface ChromeSettings {
+  metaTitlePt?: string;
+  metaTitleEs?: string;
+  metaDescriptionPt?: string;
+  metaDescriptionEs?: string;
+  footerPt?: string;
+  footerEs?: string;
+  eventsLabelPt?: string;
+  eventsLabelEs?: string;
+  gateEyebrow?: string;
+  gateTitlePrefix?: string;
+  gateTitleHighlight?: string;
+  gateBodyPt?: string;
+  gateBodyEs?: string;
+  gateHintPt?: string;
+  gateHintEs?: string;
+  navPt?: Array<[string,string]>;
+  navEs?: Array<[string,string]>;
+}
 export interface SiteSettings {
   event_popup?: EventPopupSettings;
   social?: Record<string,unknown>;
   general?: Record<string,unknown>;
+  chrome?: ChromeSettings;
 }
 export interface HomePayload { page:unknown; sections:CmsSectionRow[]; events:CmsEvent[]; team:CmsTeamMember[]; settings:SiteSettings; }
 const API_BASE = import.meta.env.PUBLIC_API_BASE || '';
