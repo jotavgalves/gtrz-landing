@@ -12,7 +12,7 @@ publicRoutes.get('/site', async (c) => {
     c.env.DB.prepare(`SELECT s.id,s.type,s.position,s.enabled,s.config_json,l.locale,l.content_json FROM page_sections s LEFT JOIN section_localizations l ON l.section_id=s.id WHERE s.page_id=? AND s.enabled=1 ORDER BY s.position`).bind(page.id).all(),
     c.env.DB.prepare(`SELECT e.id,e.slug,e.status,e.city,e.state,e.starts_at,e.ends_at,l.locale,l.title,l.summary FROM events e LEFT JOIN event_localizations l ON l.event_id=e.id WHERE e.status IN ('published','sales_open','sold_out') ORDER BY e.starts_at`).all(),
     c.env.DB.prepare(`SELECT t.id,t.name,t.media_id,t.instagram_url,t.position,l.locale,l.role_label,l.bio FROM team_members t LEFT JOIN team_localizations l ON l.team_member_id=t.id WHERE t.active=1 ORDER BY t.position,l.locale`).all(),
-    c.env.DB.prepare("SELECT key,value_json FROM site_settings WHERE key IN ('event_popup','social','general','chrome')").all<any>()
+    c.env.DB.prepare("SELECT key,value_json FROM site_settings WHERE key IN ('event_popup','social','general','chrome','copy')").all<any>()
   ]);
   const settings:Record<string,unknown>={};
   for(const row of settingsRows.results){try{settings[row.key]=JSON.parse(row.value_json)}catch{settings[row.key]={}}}
