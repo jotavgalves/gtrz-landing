@@ -1,25 +1,26 @@
 ---
 import type { ChromeSettings,Locale } from '@/lib/cms';
 const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
-const titlePrefix=chrome.gateTitlePrefix||'COMO VOCÊ QUER';
-const titleHighlight=chrome.gateTitleHighlight||'ENTRAR?';
-const eyebrow=chrome.gateEyebrow||'Venezuela → Brasil';
-const bodyPt=chrome.gateBodyPt||'Escolha o idioma da experiência.';
-const bodyEs=chrome.gateBodyEs||'Elige el idioma de la experiencia.';
-const hintPt=chrome.gateHintPt||'Você pode mudar o idioma novamente no menu do site.';
-const hintEs=chrome.gateHintEs||'Puedes cambiar el idioma nuevamente en el menú.';
+const es=locale==='es';
+const eyebrow=es?(chrome.gateEyebrowEs||chrome.gateEyebrow||'Venezuela → Brasil'):(chrome.gateEyebrowPt||chrome.gateEyebrow||'Venezuela → Brasil');
+const titlePrefix=es?(chrome.gateTitlePrefixEs||'¿CÓMO QUIERES'):(chrome.gateTitlePrefixPt||chrome.gateTitlePrefix||'COMO VOCÊ QUER');
+const titleHighlight=es?(chrome.gateTitleHighlightEs||'ENTRAR?'):(chrome.gateTitleHighlightPt||chrome.gateTitleHighlight||'ENTRAR?');
+const body=es?(chrome.gateBodyEs||'Elige el idioma de la experiencia.'):(chrome.gateBodyPt||'Escolha o idioma da experiência.');
+const hint=es?(chrome.gateHintEs||'Puedes cambiar el idioma nuevamente en el menú.'):(chrome.gateHintPt||'Você pode mudar o idioma novamente no menu do site.');
+const optionPt=chrome.gateOptionPt||'Português';
+const optionEs=chrome.gateOptionEs||'Español';
 ---
 <div class="language-gate" data-language-gate hidden aria-hidden="true">
   <div class="language-card" role="dialog" aria-modal="true" aria-labelledby="languageTitle">
     <img src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
     <div class="eyebrow">{eyebrow}</div>
     <h2 class="display" id="languageTitle">{titlePrefix}<br/><span class="red">{titleHighlight}</span></h2>
-    <p>{bodyPt}<br/>{bodyEs}</p>
+    <p>{body}</p>
     <div class="language-options">
-      <a href="?lang=pt-BR" data-first-language="pt-BR">Português</a>
-      <a href="?lang=es" data-first-language="es">Español</a>
+      <a href="?lang=pt-BR" data-first-language="pt-BR">{optionPt}</a>
+      <a href="?lang=es" data-first-language="es">{optionEs}</a>
     </div>
-    <p class="language-hint">{hintPt}<br/>{hintEs}</p>
+    <p class="language-hint">{hint}</p>
   </div>
 </div>
 <script define:vars={{ locale }}>
