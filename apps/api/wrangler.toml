@@ -1,21 +1,32 @@
 name = "gtrz-api"
 main = "src/index.ts"
-compatibility_date = "2026-09-01"
+compatibility_date = "2026-09-14"
+workers_dev = false
+
+[observability]
+enabled = true
 
 [vars]
-APP_ENV = "staging"
-CORS_ALLOWED_ORIGINS = "https://staging.gtrz.com.br,http://localhost:4321,http://localhost:5173"
+APP_ENV = "production"
+CORS_ALLOWED_ORIGINS = "https://gtrz.com.br,https://www.gtrz.com.br,https://control.gtrz.com.br"
 
+[[routes]]
+pattern = "api.gtrz.com.br"
+custom_domain = true
+
+# Wrangler 4.45+ can provision draft D1 bindings automatically on the first deploy.
+# It writes the generated database ID into the local config during that deployment.
 [[d1_databases]]
 binding = "DB"
-database_name = "gtrz-staging"
-database_id = "REPLACE_WITH_D1_ID"
+database_name = "gtrz-prod"
 migrations_dir = "../../migrations"
 
+# R2 bucket names are deterministic and auto-provisioned if they do not exist.
 [[r2_buckets]]
 binding = "MEDIA"
-bucket_name = "gtrz-media-staging"
+bucket_name = "gtrz-media-prod"
 
+# Analytics Engine datasets are created automatically on first write.
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
-dataset = "gtrz_staging"
+dataset = "gtrz_prod"
