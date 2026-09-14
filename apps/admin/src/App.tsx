@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { api, login, logout } from './lib/api';
+import { Turnstile } from './components/Turnstile';
 import { Dashboard } from './modules/dashboard/Dashboard';
 import { Content } from './modules/content/Content';
 import { Events } from './modules/events/Events';
@@ -16,8 +17,13 @@ const items:[View,string,string][]=[['dashboard','Dashboard','Visão geral'],['c
 
 function Login({onDone}:{onDone:()=>void}){
   const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
-  const submit=async(e:FormEvent)=>{e.preventDefault();setError('');setBusy(true);try{await login(password);onDone();}catch(err:any){setError(err.message)}finally{setBusy(false)}};
-  return <main className="login"><form onSubmit={submit}><div className="control-logo">GTRZ <span>CONTROL</span></div><h1>Administração</h1><p>Acesso restrito.</p><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Senha administrativa" autoFocus/><button className="primary" disabled={busy}>{busy?'Validando…':'Entrar'}</button>{error&&<small className="error">{error}</small>}</form></main>
+  const submit=async(e:FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();setError('');setBusy(true);
+    const formData=new FormData(e.currentTarget);
+    const token=String(formData.get('cf-turnstile-response')||'')||undefined;
+    try{await login(password,token);onDone();}catch(err:any){setError(err.message)}finally{setBusy(false)}
+  };
+  return <main className="login"><form onSubmit={submit}><div className="control-logo">GTRZ <span>CONTROL</span></div><h1>Administração</h1><p>Acesso restrito.</p><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Senha administrativa" autoFocus/><Turnstile/><button className="primary" disabled={busy}>{busy?'Validando…':'Entrar'}</button>{error&&<small className="error">{error}</small>}</form></main>
 }
 
 export function App(){
