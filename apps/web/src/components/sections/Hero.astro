@@ -5,26 +5,32 @@ const { locale, content = {} } = Astro.props as { locale: Locale; content?: Reco
 const defaults = defaultContent(locale).hero;
 const c: Record<string, any> = { ...defaults, ...content };
 const es = locale === 'es';
+const titleParts = String(c.title || '').trim().split(/\s+/);
+const titleAccent = titleParts.pop() || '';
+const titleLead = titleParts.join(' ');
+const originParts = String(c.originTitle || '').trim().split(/\s+/);
+const originAccent = originParts.length >= 2 ? originParts.splice(-2).join(' ') : originParts.pop() || '';
+const originLead = originParts.join(' ');
 ---
 <section id="top" class="hero" data-section="hero">
-  <div class="shell hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">{c.eyebrow}</span>
-      <h1>{c.title}</h1>
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <div class="eyebrow">{c.eyebrow}</div>
+      <h1 class="display">{titleLead} <span class="red">{titleAccent}</span></h1>
       <p>{c.body}</p>
-      <div class="actions">
-        <a class="button primary" href="#eventos" data-track="hero.events">{c.primaryCta || 'Ver eventos'}</a>
-        <a class="button" href="#sobre" data-track="hero.about">{c.secondaryCta || (es ? 'Conocer GTRZ' : 'Conhecer a GTRZ')}</a>
+      <div class="hero-actions">
+        <a class="btn btn-red" href="#eventos" data-track="hero.events">{c.primaryCta || 'Ver eventos'}</a>
+        <a class="btn" href="#sobre" data-track="hero.about">{c.secondaryCta || (es ? 'Conocer GTRZ' : 'Conhecer a GTRZ')}</a>
       </div>
     </div>
-    <aside class="origin-card">
-      <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
-      <div>
+    <aside class="hero-side reveal">
+      <img class="hero-side-logo" src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
+      <div class="hero-origin">
         <small>{c.originEyebrow || (es ? 'DE VENEZUELA A BRASIL' : 'DA VENEZUELA PARA O BRASIL')}</small>
-        <h2>{c.originTitle}</h2>
+        <strong>{originLead}<br/><span class="red">{originAccent}</span></strong>
         <p>{c.originBody}</p>
       </div>
-      <div class="route"><b>VENEZUELA</b><i></i><b>BRASIL</b></div>
+      <div class="hero-origin-route"><span>VENEZUELA</span><i></i><span>BRASIL</span></div>
     </aside>
   </div>
 </section>
