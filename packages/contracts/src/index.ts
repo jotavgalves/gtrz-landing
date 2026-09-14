@@ -25,7 +25,8 @@ export const analyticsEventSchema = z.object({
   utmSource: z.string().max(120).optional(),
   utmMedium: z.string().max(120).optional(),
   utmCampaign: z.string().max(160).optional(),
-  utmContent: z.string().max(160).optional()
+  utmContent: z.string().max(160).optional(),
+  trackingLink: z.string().max(160).optional()
 });
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;
 
