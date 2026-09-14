@@ -1,5 +1,16 @@
 ---
-import SiteLayout from '@/layouts/SiteLayout.astro';import EventPopup from '@/components/EventPopup.astro';import SectionRenderer from '@/components/SectionRenderer.astro';import {getHomePage,pickLocale,localizedSections} from '@/lib/cms';import type {Locale} from '@/lib/cms';
-const requested=Astro.url.searchParams.get('lang');const locale:Locale=requested==='es'?'es':'pt-BR';const payload=await getHomePage();const events=pickLocale(payload.events,locale);const sections=localizedSections(payload.sections,locale);
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import EventPopup from '@/components/EventPopup.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import {getHomePage,pickLocale,localizedSections} from '@/lib/cms';
+import type {Locale} from '@/lib/cms';
+const requested=Astro.url.searchParams.get('lang');
+const locale:Locale=requested==='es'?'es':'pt-BR';
+const payload=await getHomePage();
+const events=pickLocale(payload.events,locale);
+const sections=localizedSections(payload.sections,locale);
 ---
-<SiteLayout locale={locale} title="GTRZ Eventos — Venezuela → Brasil"><main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events}/>)}</main><EventPopup events={events} locale={locale}/></SiteLayout>
+<SiteLayout locale={locale} title="GTRZ Eventos — Venezuela → Brasil">
+  <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events}/>)}</main>
+  <EventPopup events={events} locale={locale} settings={payload.settings?.event_popup}/>
+</SiteLayout>
