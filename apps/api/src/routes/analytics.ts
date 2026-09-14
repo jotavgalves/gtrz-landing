@@ -4,6 +4,16 @@ import type { Env } from '../env';
 
 export const analyticsRoutes = new Hono<{ Bindings: Env }>();
 
+function dailyIncrement(env:Env, metric:string, dimensions:string[]){
+  const unique=[...new Set(['',...dimensions.filter(Boolean)])].slice(0,8);
+  const statements=unique.map((dimension)=>env.DB.prepare(`
+    INSERT INTO analytics_daily(day,metric,dimension_key,value)
+    VALUES(date('now'),?,?,1)
+    ON CONFLICT(day,metric,dimension_key) DO UPDATE SET value=value+1
+  `).bind(metric,dimension.slice(0,300)));
+  return env.DB.batch(statements);
+}
+
 analyticsRoutes.post('/collect', async (c) => {
   const parsed = analyticsEventSchema.safeParse(await c.req.json().catch(() => null));
   if (!parsed.success) return c.body(null, 204);
@@ -20,6 +30,15 @@ analyticsRoutes.post('/collect', async (c) => {
     ],
     doubles: [1]
   });
+
+  c.executionCtx.waitUntil(dailyIncrement(c.env,e.eventName,[
+    `path:${e.path}`,
+    e.section ? `section:${e.section}` : '',
+    e.element ? `element:${e.element}` : '',
+    e.utmSource ? `source:${e.utmSource}` : '',
+    e.utmCampaign ? `campaign:${e.utmCampaign}` : '',
+    country ? `country:${country}` : ''
+  ]));
   return c.body(null, 204);
 });
 
@@ -36,7 +55,10 @@ analyticsRoutes.get('/redirect/:slug', async (c) => {
     blobs: [slug, link.destination_path, link.source, link.medium, link.campaign_id || '', link.content || ''],
     doubles: [1]
   });
-  c.executionCtx.waitUntil(c.env.DB.prepare('UPDATE tracking_links SET click_count = click_count + 1, last_clicked_at = CURRENT_TIMESTAMP WHERE id = ?').bind(link.id).run());
+  c.executionCtx.waitUntil(Promise.all([
+    c.env.DB.prepare('UPDATE tracking_links SET click_count = click_count + 1, last_clicked_at = CURRENT_TIMESTAMP WHERE id = ?').bind(link.id).run(),
+    dailyIncrement(c.env,'tracking_link_click',[`link:${slug}`,`source:${link.source}`,`medium:${link.medium}`,link.campaign_id?`campaign:${link.campaign_id}`:''])
+  ]).then(()=>undefined));
 
   const url = new URL(link.destination_path, c.req.url);
   url.searchParams.set('utm_source', link.source);
