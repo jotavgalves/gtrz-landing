@@ -1,0 +1,6 @@
+---
+const apiBase = import.meta.env.PUBLIC_API_BASE || '';
+const slug = String(Astro.params.slug || '').trim();
+if (!slug || !apiBase) return Astro.redirect('/',302);
+return Astro.redirect(`${apiBase}/r/${encodeURIComponent(slug)}`,302);
+---
