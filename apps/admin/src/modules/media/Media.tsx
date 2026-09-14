@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { API_BASE, api } from '../../lib/api';
 import { Empty, Panel } from '../../components/StateViews';
 
@@ -22,7 +23,7 @@ export function Media(){
   };
   return <Panel title="Biblioteca de mídia" eyebrow="Cloudflare R2">
     <form className="media-upload" onSubmit={upload}>
-      <div><strong>Novo asset</strong><p>JPEG, PNG ou WebP. Limite de 8 MB. SVG não é aceito pelo upload público do painel.</p></div>
+      <div><strong>Novo asset</strong><p>JPEG, PNG ou WebP. Limite de 8 MB. SVG não é aceito pelo upload do painel.</p></div>
       <div className="form-grid">
         <label><span>Arquivo</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setFile(e.target.files?.[0]||null)} required/></label>
         <label><span>Texto alternativo PT</span><input value={altPt} onChange={e=>setAltPt(e.target.value)} placeholder="Descrição acessível da imagem"/></label>
