@@ -23,15 +23,22 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <slot />
     <script define:vars={{ apiBase, locale }}>
       const sessionKey = 'gtrz_session_id';
+      const attributionKey = 'gtrz_attribution';
       let sessionId = localStorage.getItem(sessionKey);
       if (!sessionId) { sessionId = crypto.randomUUID(); localStorage.setItem(sessionKey, sessionId); }
       const params = new URLSearchParams(location.search);
-      const acquisition = {
+      const incoming = {
         utmSource: params.get('utm_source') || undefined,
         utmMedium: params.get('utm_medium') || undefined,
         utmCampaign: params.get('utm_campaign') || undefined,
-        utmContent: params.get('utm_content') || undefined
+        utmContent: params.get('utm_content') || undefined,
+        trackingLink: params.get('gtrz_link') || undefined
       };
+      let storedAttribution = {};
+      try { storedAttribution = JSON.parse(sessionStorage.getItem(attributionKey) || '{}'); } catch {}
+      const hasIncoming = Object.values(incoming).some(Boolean);
+      const acquisition = hasIncoming ? incoming : storedAttribution;
+      if (hasIncoming) sessionStorage.setItem(attributionKey, JSON.stringify(incoming));
       const send = (eventName, extra = {}) => {
         const payload = JSON.stringify({ eventName, path: location.pathname, language: locale, referrer: document.referrer || undefined, sessionId, ...acquisition, ...extra });
         const url = `${apiBase}/api/analytics/collect`;
