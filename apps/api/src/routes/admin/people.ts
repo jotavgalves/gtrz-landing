@@ -71,3 +71,10 @@ peopleAdminRoutes.patch('/team/:id',async(c)=>{
   }
   await audit(c.env,'update','team_member',id);return c.json({ok:true});
 });
+
+peopleAdminRoutes.delete('/team/:id',async(c)=>{
+  const id=c.req.param('id');
+  await c.env.DB.prepare('DELETE FROM team_members WHERE id=?').bind(id).run();
+  await audit(c.env,'delete','team_member',id);
+  return c.json({ok:true});
+});
