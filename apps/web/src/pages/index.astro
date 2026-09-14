@@ -8,9 +8,10 @@ const requested=Astro.url.searchParams.get('lang');
 const locale:Locale=requested==='es'?'es':'pt-BR';
 const payload=await getHomePage();
 const events=pickLocale(payload.events,locale);
+const team=pickLocale(payload.team,locale);
 const sections=localizedSections(payload.sections,locale);
 ---
 <SiteLayout locale={locale} title="GTRZ Eventos — Venezuela → Brasil">
-  <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events}/>)}</main>
+  <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events} team={team}/>)}</main>
   <EventPopup events={events} locale={locale} settings={payload.settings?.event_popup}/>
 </SiteLayout>
