@@ -1,11 +1,23 @@
 ---
 const {locale,content={}}=Astro.props as {locale:'pt-BR'|'es';content:Record<string,any>};
 const es=locale==='es';
-const c={eyebrow:es?'Marcas · Espacios · Artistas · Proveedores':'Marcas · Casas · Artistas · Fornecedores',title:es?'ALIANZAS QUE TIENEN SENTIDO.':'PARCERIAS QUE FAZEM SENTIDO.',body:es?'GTRZ está abierta a colaboraciones que sumen experiencia para el público y valor para ambas partes.':'A GTRZ está aberta a colaborações que agreguem experiência para o público e valor para os dois lados.',cta:es?'Proponer una alianza':'Propor uma parceria',...content};
+const c={eyebrow:es?'Marcas · Espacios · Artistas · Proveedores':'Marcas · Casas · Artistas · Fornecedores',title:es?'ALIANZAS QUE TIENEN SENTIDO.':'PARCERIAS QUE FAZEM SENTIDO.',body:es?'GTRZ está abierta a colaboraciones que sumen experiencia para el público y valor para ambas partes. Puede significar recibir un evento, activar una marca, desarrollar una acción conjunta, conectar artistas o construir una producción desde cero.':'A GTRZ está aberta a colaborações que agreguem experiência para o público e valor para os dois lados. Isso pode significar receber um evento, ativar uma marca, desenvolver uma ação conjunta, conectar artistas ou construir uma produção do zero.',cta:es?'Proponer una alianza':'Propor uma parceria',...content};
+const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
-<section id="parcerias" class="dark-section partnership-section" data-section="partnerships">
-  <div class="shell people-cta-grid">
-    <div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div>
-    <div class="people-cta-copy"><p>{c.body}</p><div class="partnership-types"><div><strong>{es?'Espacios':'Casas e espaços'}</strong><span>{es?'Recibir producciones GTRZ.':'Receber produções GTRZ.'}</span></div><div><strong>{es?'Marcas':'Marcas'}</strong><span>{es?'Patrocinios y activaciones.':'Patrocínios e ativações.'}</span></div><div><strong>{es?'Artistas':'Artistas'}</strong><span>{es?'Line-ups y proyectos culturales.':'Line-ups e projetos culturais.'}</span></div><div><strong>{es?'Proveedores':'Fornecedores'}</strong><span>{es?'Operación, estructura y servicios.':'Operação, estrutura e serviços.'}</span></div></div><a class="button primary" href={`/parcerias?lang=${locale}`} data-track="partnerships.open">{c.cta}</a></div>
+<section id="parcerias" class="partner-strip" data-section="partnerships">
+  <div class="wrap partner-strip-grid">
+    <div class="partner-brand reveal"><img src="/brand/gtrz-full.svg" alt="GTRZ Eventos" /></div>
+    <div class="partner-copy reveal">
+      <div class="eyebrow">{c.eyebrow}</div>
+      <h2 class="display">{lead} <span class="red">{accent}</span></h2>
+      <p>{c.body}</p>
+      <div class="partner-types">
+        <div class="partner-type"><small>{es?'Espacios':'Casas e espaços'}</small><span>{es?'Lugares interesados en recibir producciones y formatos de GTRZ.':'Locais interessados em receber produções e formatos da GTRZ.'}</span></div>
+        <div class="partner-type"><small>{es?'Marcas':'Marcas'}</small><span>{es?'Patrocinio, activaciones y experiencias con presencia relevante.':'Patrocínio, ativações, experiências e presença relevante dentro do evento.'}</span></div>
+        <div class="partner-type"><small>{es?'Artistas y proyectos':'Artistas e projetos'}</small><span>{es?'Conexiones para line-up, colaboraciones culturales y proyectos especiales.':'Conexões para line-up, collabs culturais e projetos especiais.'}</span></div>
+        <div class="partner-type"><small>{es?'Proveedores':'Fornecedores'}</small><span>{es?'Sonido, luz, estructura, alimentación, seguridad, escenografía y operación.':'Som, luz, estrutura, alimentação, segurança, cenografia e operação.'}</span></div>
+      </div>
+      <div class="hero-actions"><a class="btn btn-red" href={`/parcerias?lang=${locale}`} data-track="partnerships.open">{c.cta}</a><a class="btn" href="#eventos">{es?'Conocer nuestros eventos':'Conhecer nossos eventos'}</a></div>
+    </div>
   </div>
 </section>

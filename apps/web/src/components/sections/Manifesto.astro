@@ -1,0 +1,11 @@
+---
+const { locale } = Astro.props as { locale: 'pt-BR' | 'es' };
+const es = locale === 'es';
+---
+<section class="manifesto" data-section="manifesto">
+  <div class="wrap reveal">
+    <div class="eyebrow">{es ? 'Manifiesto' : 'Manifesto'}</div>
+    <h2 class="display">{es ? 'HACER QUE SUCEDA ES NUESTRO LENGUAJE.' : 'FAZER ACONTECER É A NOSSA LINGUAGEM.'}</h2>
+    <p>{es ? 'GTRZ no necesita parecer más grande de lo que es. Necesita parecer tan bien pensada como realmente es: fuerte, autoral, cercana al público y obsesionada con la entrega.' : 'A GTRZ não precisa parecer maior do que é. Precisa parecer tão bem pensada quanto realmente é: forte, autoral, próxima do público e obcecada por entrega.'}</p>
+  </div>
+</section>

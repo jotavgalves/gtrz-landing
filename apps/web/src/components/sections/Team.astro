@@ -3,14 +3,15 @@ import type { CmsTeamMember } from '@/lib/cms';
 const {locale,content={},team=[]}=Astro.props as {locale:'pt-BR'|'es';content:Record<string,any>;team:CmsTeamMember[]};
 const es=locale==='es';
 const apiBase=import.meta.env.PUBLIC_API_BASE||'';
-const c={eyebrow:es?'Quién hace que suceda':'Quem faz acontecer',title:es?'POR DETRÁS DE GTRZ.':'POR TRÁS DA GTRZ.',body:es?'Venezolanos y brasileños construyendo juntos cada experiencia.':'Venezuelanos e brasileiros construindo juntos cada experiência.',...content};
+const c={eyebrow:es?'Quién hace que suceda':'Quem faz acontecer',title:es?'POR DETRÁS DE GTRZ.':'POR TRÁS DA GTRZ.',body:es?'Sin apariencia de organigrama corporativo. Rostros, funciones y personalidad de quienes construyen cada experiencia.':'Sem cara de organograma corporativo. Rostos, funções e a personalidade de quem constrói cada experiência.',...content};
+const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
 ---
-<section id="quem" class="dark-section" data-section="team">
-  <div class="shell">
-    <div class="section-head"><div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div><p>{c.body}</p></div>
-    {team.length ? <div class="team-grid">{team.map(member=><article class="team-card">
-      <div class="team-photo">{member.media_id?<img src={`${apiBase}/api/media/${member.media_id}`} alt={member.name} loading="lazy"/>:<div class="team-placeholder" aria-hidden="true">GTRZ</div>}</div>
-      <div class="team-copy"><small>{member.role_label||'GTRZ'}</small><h3>{member.name}</h3>{member.bio&&<p>{member.bio}</p>}{member.instagram_url&&<a href={member.instagram_url} target="_blank" rel="noopener" data-track={`team.instagram.${member.id}`} data-track-event="instagram_click">Instagram ↗</a>}</div>
+<section id="quem" class="faces" data-section="team">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2></div><p>{c.body}</p></div>
+    {team.length ? <div class="faces-grid">{team.map(member=><article class="person reveal">
+      {member.media_id&&<div class="person-photo"><img src={`${apiBase}/api/media/${member.media_id}`} alt={member.name} loading="lazy"/></div>}
+      <div class="person-copy"><small>{member.role_label||'GTRZ'}</small><h3>{member.name}</h3>{member.bio&&<p>{member.bio}</p>}{member.instagram_url&&<a href={member.instagram_url} target="_blank" rel="noopener" data-track={`team.instagram.${member.id}`} data-track-event="instagram_click">Instagram ↗</a>}</div>
     </article>)}</div> : <div class="empty-state">{es?'El equipo aparecerá aquí cuando sea publicado desde GTRZ Control.':'A equipe aparecerá aqui quando for publicada pelo GTRZ Control.'}</div>}
   </div>
 </section>

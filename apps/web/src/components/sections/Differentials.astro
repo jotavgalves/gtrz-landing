@@ -1,4 +1,14 @@
 ---
-import { defaultContent } from '@/lib/default-content';const {locale,content={}}=Astro.props;const es=locale==='es';const defaults=defaultContent(locale).differentials.map(([title,body])=>({title,body}));const items=Array.isArray(content.items)?content.items:defaults;const c={eyebrow:es?'Qué cambia cuando es GTRZ':'O que muda quando é GTRZ',title:es?'NUESTROS DIFERENCIALES.':'NOSSOS DIFERENCIAIS.',body:es?'No hacemos fiestas genéricas con otro logo encima. Cada edición necesita concepto, lenguaje y experiencia.':'Não fazemos festas genéricas com outra logo em cima. Cada edição precisa de conceito, linguagem e experiência.',...content};
+import { defaultContent } from '@/lib/default-content';
+const {locale,content={}}=Astro.props;
+const es=locale==='es';
+const defaults=defaultContent(locale).differentials.map(([title,body])=>({title,body}));
+const items=Array.isArray(content.items)?content.items:defaults;
+const c={eyebrow:es?'Qué cambia cuando es GTRZ':'O que muda quando é GTRZ',title:es?'NUESTROS DIFERENCIALES.':'NOSSOS DIFERENCIAIS.',body:es?'No hacemos fiestas genéricas con otro logo encima. Cada edición necesita concepto, lenguaje y experiencia.':'Não fazemos festas genéricas com outra logo em cima. Cada edição precisa de conceito, linguagem e experiência.',...content};
 ---
-<section id="diferenciais" class="paper-section" data-section="differentials"><div class="shell"><div class="section-head"><div><span class="eyebrow">{c.eyebrow}</span><h2>{c.title}</h2></div><p>{c.body}</p></div><div class="diff-grid">{items.map((item:any,index:number)=><article><small>{String(index+1).padStart(2,'0')}</small><div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div></div></section>
+<section id="diferenciais" class="differentials" data-section="differentials">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
+    <div class="diff-grid">{items.map((item:any,index:number)=><article class="diff-card reveal"><b>{String(index+1).padStart(2,'0')}</b><div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div>
+  </div>
+</section>

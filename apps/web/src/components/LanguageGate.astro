@@ -1,20 +1,29 @@
 ---
 const { locale } = Astro.props;
 ---
-<div class="language-gate" data-language-gate hidden>
-  <div class="language-card">
-    <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
-    <span>Venezuela → Brasil</span>
-    <h2>Escolha seu idioma<br/><small>Elige tu idioma</small></h2>
-    <div>
+<div class="language-gate" data-language-gate hidden aria-hidden="true">
+  <div class="language-card" role="dialog" aria-modal="true" aria-labelledby="languageTitle">
+    <img src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
+    <div class="eyebrow">Venezuela → Brasil</div>
+    <h2 class="display" id="languageTitle">COMO VOCÊ<br/>QUER <span class="red">ENTRAR?</span></h2>
+    <p>Escolha o idioma da experiência.<br/>Elige el idioma de la experiencia.</p>
+    <div class="language-options">
       <a href="?lang=pt-BR" data-first-language="pt-BR">Português</a>
       <a href="?lang=es" data-first-language="es">Español</a>
     </div>
+    <p class="language-hint">Você pode mudar o idioma novamente no menu do site.<br/>Puedes cambiar el idioma nuevamente en el menú.</p>
   </div>
 </div>
 <script define:vars={{ locale }}>
   const gate = document.querySelector('[data-language-gate]');
   const saved = localStorage.getItem('gtrz_locale');
-  if (!saved && gate) { gate.hidden = false; document.body.classList.add('modal-open'); }
-  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>localStorage.setItem('gtrz_locale',el.dataset.firstLanguage)));
+  if (!saved && gate) {
+    gate.hidden = false;
+    gate.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+  }
+  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
+    localStorage.setItem('gtrz_locale',el.dataset.firstLanguage);
+    document.body.classList.remove('modal-open');
+  }));
 </script>
