@@ -1,17 +1,25 @@
 ---
-const { locale } = Astro.props;
+import type { ChromeSettings,Locale } from '@/lib/cms';
+const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
+const titlePrefix=chrome.gateTitlePrefix||'COMO VOCÊ QUER';
+const titleHighlight=chrome.gateTitleHighlight||'ENTRAR?';
+const eyebrow=chrome.gateEyebrow||'Venezuela → Brasil';
+const bodyPt=chrome.gateBodyPt||'Escolha o idioma da experiência.';
+const bodyEs=chrome.gateBodyEs||'Elige el idioma de la experiencia.';
+const hintPt=chrome.gateHintPt||'Você pode mudar o idioma novamente no menu do site.';
+const hintEs=chrome.gateHintEs||'Puedes cambiar el idioma nuevamente en el menú.';
 ---
 <div class="language-gate" data-language-gate hidden aria-hidden="true">
   <div class="language-card" role="dialog" aria-modal="true" aria-labelledby="languageTitle">
     <img src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
-    <div class="eyebrow">Venezuela → Brasil</div>
-    <h2 class="display" id="languageTitle">COMO VOCÊ<br/>QUER <span class="red">ENTRAR?</span></h2>
-    <p>Escolha o idioma da experiência.<br/>Elige el idioma de la experiencia.</p>
+    <div class="eyebrow">{eyebrow}</div>
+    <h2 class="display" id="languageTitle">{titlePrefix}<br/><span class="red">{titleHighlight}</span></h2>
+    <p>{bodyPt}<br/>{bodyEs}</p>
     <div class="language-options">
       <a href="?lang=pt-BR" data-first-language="pt-BR">Português</a>
       <a href="?lang=es" data-first-language="es">Español</a>
     </div>
-    <p class="language-hint">Você pode mudar o idioma novamente no menu do site.<br/>Puedes cambiar el idioma nuevamente en el menú.</p>
+    <p class="language-hint">{hintPt}<br/>{hintEs}</p>
   </div>
 </div>
 <script define:vars={{ locale }}>
