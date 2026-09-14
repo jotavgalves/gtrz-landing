@@ -3,6 +3,7 @@ import type { Env } from '../../env';
 import { audit } from '../../services/audit';
 
 export const peopleAdminRoutes = new Hono<{ Bindings: Env }>();
+const has=(value:unknown,key:string)=>Object.prototype.hasOwnProperty.call(value||{},key);
 
 peopleAdminRoutes.get('/freelancers',async(c)=>{
   return c.json(await c.env.DB.prepare('SELECT * FROM freelancer_applications ORDER BY created_at DESC LIMIT 500').all());
@@ -12,9 +13,9 @@ peopleAdminRoutes.patch('/freelancers/:id',async(c)=>{
   const id=c.req.param('id');const b=await c.req.json<any>();
   await c.env.DB.prepare(`
     UPDATE freelancer_applications
-    SET status=COALESCE(?,status),notes=COALESCE(?,notes),updated_at=CURRENT_TIMESTAMP
+    SET status=COALESCE(?,status),notes=CASE WHEN ? THEN ? ELSE notes END,updated_at=CURRENT_TIMESTAMP
     WHERE id=?
-  `).bind(b.status??null,b.notes??null,id).run();
+  `).bind(b.status??null,has(b,'notes')?1:0,b.notes||null,id).run();
   await audit(c.env,'update','freelancer',id);
   return c.json({ok:true});
 });
@@ -27,9 +28,9 @@ peopleAdminRoutes.patch('/partnerships/:id',async(c)=>{
   const id=c.req.param('id');const b=await c.req.json<any>();
   await c.env.DB.prepare(`
     UPDATE partnership_leads
-    SET status=COALESCE(?,status),notes=COALESCE(?,notes),owner_user_id=COALESCE(?,owner_user_id),updated_at=CURRENT_TIMESTAMP
+    SET status=COALESCE(?,status),notes=CASE WHEN ? THEN ? ELSE notes END,owner_user_id=CASE WHEN ? THEN ? ELSE owner_user_id END,updated_at=CURRENT_TIMESTAMP
     WHERE id=?
-  `).bind(b.status??null,b.notes??null,b.ownerUserId??null,id).run();
+  `).bind(b.status??null,has(b,'notes')?1:0,b.notes||null,has(b,'ownerUserId')?1:0,b.ownerUserId||null,id).run();
   await audit(c.env,'update','partnership',id);
   return c.json({ok:true});
 });
@@ -55,6 +56,7 @@ peopleAdminRoutes.post('/team',async(c)=>{
   await c.env.DB.prepare('INSERT INTO team_members(id,name,role_key,media_id,instagram_url,position,active) VALUES(?,?,?,?,?,?,?)')
     .bind(id,b.name,b.roleKey||null,b.mediaId||null,b.instagramUrl||null,Number(b.position||0),b.active===false?0:1).run();
   for(const [locale,l] of Object.entries<any>(b.locales||{})){
+    if(!['pt-BR','es'].includes(locale))continue;
     await c.env.DB.prepare('INSERT INTO team_localizations(team_member_id,locale,role_label,bio) VALUES(?,?,?,?)')
       .bind(id,locale,l.roleLabel||null,l.bio||null).run();
   }
@@ -63,9 +65,25 @@ peopleAdminRoutes.post('/team',async(c)=>{
 
 peopleAdminRoutes.patch('/team/:id',async(c)=>{
   const id=c.req.param('id'),b=await c.req.json<any>();
-  await c.env.DB.prepare(`UPDATE team_members SET name=COALESCE(?,name),role_key=COALESCE(?,role_key),media_id=COALESCE(?,media_id),instagram_url=COALESCE(?,instagram_url),position=COALESCE(?,position),active=COALESCE(?,active) WHERE id=?`)
-    .bind(b.name??null,b.roleKey??null,b.mediaId??null,b.instagramUrl??null,b.position??null,b.active===undefined?null:(b.active?1:0),id).run();
+  await c.env.DB.prepare(`UPDATE team_members SET
+    name=CASE WHEN ? THEN ? ELSE name END,
+    role_key=CASE WHEN ? THEN ? ELSE role_key END,
+    media_id=CASE WHEN ? THEN ? ELSE media_id END,
+    instagram_url=CASE WHEN ? THEN ? ELSE instagram_url END,
+    position=CASE WHEN ? THEN ? ELSE position END,
+    active=CASE WHEN ? THEN ? ELSE active END
+    WHERE id=?`)
+    .bind(
+      has(b,'name')?1:0,b.name??null,
+      has(b,'roleKey')?1:0,b.roleKey||null,
+      has(b,'mediaId')?1:0,b.mediaId||null,
+      has(b,'instagramUrl')?1:0,b.instagramUrl||null,
+      has(b,'position')?1:0,b.position??null,
+      has(b,'active')?1:0,b.active?1:0,
+      id
+    ).run();
   for(const [locale,l] of Object.entries<any>(b.locales||{})){
+    if(!['pt-BR','es'].includes(locale))continue;
     await c.env.DB.prepare(`INSERT INTO team_localizations(team_member_id,locale,role_label,bio) VALUES(?,?,?,?) ON CONFLICT(team_member_id,locale) DO UPDATE SET role_label=excluded.role_label,bio=excluded.bio`)
       .bind(id,locale,l.roleLabel||null,l.bio||null).run();
   }
