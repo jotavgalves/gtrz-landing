@@ -1,9 +1,13 @@
 ---
-const { locale } = Astro.props;
+import type { ChromeSettings,Locale } from '@/lib/cms';
+const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
 const es = locale === 'es';
-const nav = es
-  ? [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Trabaja con nosotros','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']]
-  : [['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciais','#diferenciais'],['Quem faz','#quem'],['Trabalhe conosco','#trabalhe'],['Parcerias','#parcerias'],['Instagram','#instagram']];
+const defaultPt:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciais','#diferenciais'],['Quem faz','#quem'],['Trabalhe conosco','#trabalhe'],['Parcerias','#parcerias'],['Instagram','#instagram']];
+const defaultEs:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Trabaja con nosotros','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']];
+const configured=es?chrome.navEs:chrome.navPt;
+const nav=Array.isArray(configured)&&configured.length?configured:(es?defaultEs:defaultPt);
+const safeNav=nav.filter(item=>Array.isArray(item)&&item.length>=2).map(([label,href])=>[String(label),String(href).startsWith('#')||String(href).startsWith('/')?String(href):'#'] as [string,string]);
+const eventsLabel=es?(chrome.eventsLabelEs||'Eventos'):(chrome.eventsLabelPt||'Eventos');
 ---
 <header class="header">
   <div class="header-in">
@@ -11,14 +15,14 @@ const nav = es
       <img class="brand-img" src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
     </a>
     <nav class="nav" aria-label={es ? 'Navegación principal' : 'Navegação principal'}>
-      {nav.map(([label,href]) => <a href={href}>{label}</a>)}
+      {safeNav.map(([label,href]) => <a href={href}>{label}</a>)}
     </nav>
     <div class="nav-actions">
-      <div class="lang-switch" aria-label={es ? 'Idioma' : 'Idioma'}>
+      <div class="lang-switch" aria-label="Idioma">
         <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">PT</a>
         <a class:list={{active:es}} href="?lang=es" data-language="es">ES</a>
       </div>
-      <a class="events-btn" href="#eventos" data-track="nav.events">Eventos</a>
+      <a class="events-btn" href="#eventos" data-track="nav.events">{eventsLabel}</a>
     </div>
   </div>
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>

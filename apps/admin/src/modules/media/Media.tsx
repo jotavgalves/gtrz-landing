@@ -1,36 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { API_BASE, api } from '../../lib/api';
-import { Empty, Panel } from '../../components/StateViews';
+import { Badge, Empty, Notice, Panel } from '../../components/StateViews';
+import { Icon } from '../../components/Icons';
 
-type Asset={id:string;file_name:string;mime_type:string;size_bytes:number;alt_pt?:string;alt_es?:string;created_at:string};
+type Asset={id:string;file_name:string;mime_type:string;size_bytes:number;width?:number;height?:number;alt_pt?:string;alt_es?:string;created_at:string;usage_count?:number};
 
 export function Media(){
-  const [assets,setAssets]=useState<Asset[]>([]);
-  const [file,setFile]=useState<File|null>(null);
-  const [altPt,setAltPt]=useState('');
-  const [altEs,setAltEs]=useState('');
-  const [busy,setBusy]=useState(false);
-  const [message,setMessage]=useState('');
-  const load=()=>api<any>('/api/media').then(r=>setAssets(r.results||[])).catch(e=>setMessage(e.message));
+  const [assets,setAssets]=useState<Asset[]>([]);const [file,setFile]=useState<File|null>(null);const [altPt,setAltPt]=useState('');const [altEs,setAltEs]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [query,setQuery]=useState('');const [selected,setSelected]=useState<Asset|null>(null);const [editing,setEditing]=useState<Asset|null>(null);
+  const load=()=>api<any>('/api/media').then(r=>{setAssets(r.results||[]);if(selected){const fresh=(r.results||[]).find((x:Asset)=>x.id===selected.id);if(fresh)setSelected(fresh)}}).catch(e=>setMessage(e.message));
   useEffect(()=>{load();},[]);
-  const upload=async(e:FormEvent)=>{
-    e.preventDefault(); if(!file)return;
-    setBusy(true);setMessage('');
-    const form=new FormData();form.set('file',file);form.set('altPt',altPt);form.set('altEs',altEs);
-    try{await api('/api/media',{method:'POST',body:form});setFile(null);setAltPt('');setAltEs('');setMessage('Imagem enviada para a biblioteca.');await load();}
-    catch(err:any){setMessage(err.message)}finally{setBusy(false)}
-  };
-  return <Panel title="Biblioteca de mídia" eyebrow="Cloudflare R2">
-    <form className="media-upload" onSubmit={upload}>
-      <div><strong>Novo asset</strong><p>JPEG, PNG ou WebP. Limite de 8 MB. SVG não é aceito pelo upload do painel.</p></div>
-      <div className="form-grid">
-        <label><span>Arquivo</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setFile(e.target.files?.[0]||null)} required/></label>
-        <label><span>Texto alternativo PT</span><input value={altPt} onChange={e=>setAltPt(e.target.value)} placeholder="Descrição acessível da imagem"/></label>
-        <label><span>Texto alternativo ES</span><input value={altEs} onChange={e=>setAltEs(e.target.value)} placeholder="Descripción accesible de la imagen"/></label>
-      </div>
-      <div className="editor-footer"><span>{message}</span><button className="primary" disabled={busy||!file}>{busy?'Enviando…':'Enviar imagem'}</button></div>
-    </form>
-    {assets.length?<div className="media-grid">{assets.map(asset=><article key={asset.id}><div className="media-preview"><img src={`${API_BASE}/api/media/${asset.id}`} alt={asset.alt_pt||''}/></div><div className="media-meta"><strong>{asset.file_name}</strong><span>{asset.mime_type} · {(asset.size_bytes/1024).toFixed(0)} KB</span><small>{asset.alt_pt||'Sem alt PT'} / {asset.alt_es||'Sem alt ES'}</small><code>{asset.id}</code></div></article>)}</div>:<Empty>A biblioteca ainda está vazia neste ambiente.</Empty>}
-  </Panel>;
+  const filtered=useMemo(()=>assets.filter(a=>!query||`${a.file_name} ${a.alt_pt||''} ${a.alt_es||''}`.toLowerCase().includes(query.toLowerCase())),[assets,query]);
+  const upload=async(e:FormEvent)=>{e.preventDefault();if(!file)return;setBusy(true);setMessage('');const form=new FormData();form.set('file',file);form.set('altPt',altPt);form.set('altEs',altEs);try{await api('/api/media',{method:'POST',body:form});setFile(null);setAltPt('');setAltEs('');setMessage('Imagem enviada para a biblioteca.');await load()}catch(err:any){setMessage(err.message)}finally{setBusy(false)}};
+  const saveAsset=async()=>{if(!editing)return;setBusy(true);try{await api(`/api/media/${editing.id}`,{method:'PATCH',body:JSON.stringify({fileName:editing.file_name,altPt:editing.alt_pt||'',altEs:editing.alt_es||''})});setMessage('Metadados da imagem salvos.');setEditing(null);await load()}catch(e:any){setMessage(e.message)}finally{setBusy(false)}};
+  const deleteAsset=async(asset:Asset)=>{if(!confirm(`Excluir “${asset.file_name}” permanentemente da biblioteca?`))return;setBusy(true);try{await api(`/api/media/${asset.id}`,{method:'DELETE'});setSelected(null);setEditing(null);setMessage('Imagem removida da biblioteca.');await load()}catch(e:any){setMessage(e.message==='media_in_use'?'Esta imagem está em uso no site, evento ou equipe. Remova as referências antes de excluir.':e.message)}finally{setBusy(false)}};
+  const choose=(asset:Asset)=>{setSelected(asset);setEditing({...asset})};
+  return <div className="module-stack"><Panel title="Biblioteca de mídia" eyebrow="Cloudflare R2" description="Assets oficiais utilizados pelo institucional, eventos, equipe e metadados sociais." action={<label className="search-box media-search"><Icon name="search" size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar imagem…"/></label>}>
+    {message&&<Notice tone={message.toLowerCase().includes('uso')||message.toLowerCase().includes('erro')?'error':'success'}>{message}</Notice>}
+    <div className="media-layout"><div className="media-main"><form className="media-upload" onSubmit={upload}><div className="media-upload-head"><span className="upload-icon"><Icon name="plus"/></span><div><strong>Novo asset</strong><p>JPEG, PNG ou WebP · até 8 MB. Imagens ficam armazenadas no R2.</p></div></div><div className="form-grid"><label className="wide file-drop"><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setFile(e.target.files?.[0]||null)} required/><Icon name="image" size={22}/><span>{file?file.name:'Selecionar imagem do computador'}</span><small>{file?`${(file.size/1024/1024).toFixed(2)} MB`:'Clique para escolher o arquivo'}</small></label><label><span>Texto alternativo PT</span><input value={altPt} onChange={e=>setAltPt(e.target.value)} placeholder="Descrição acessível da imagem"/></label><label><span>Texto alternativo ES</span><input value={altEs} onChange={e=>setAltEs(e.target.value)} placeholder="Descripción accesible de la imagen"/></label></div><button className="primary" disabled={busy||!file}><Icon name="plus" size={15}/>{busy?'Enviando…':'Enviar para biblioteca'}</button></form>{filtered.length?<div className="media-grid premium-media-grid">{filtered.map(asset=><button type="button" className={`media-tile ${selected?.id===asset.id?'selected':''}`} key={asset.id} onClick={()=>choose(asset)}><div className="media-preview"><img src={`${API_BASE}/api/media/${asset.id}`} alt={asset.alt_pt||''} loading="lazy"/><span className="media-usage">{asset.usage_count||0} usos</span></div><div className="media-meta"><strong>{asset.file_name}</strong><span>{asset.mime_type.replace('image/','').toUpperCase()} · {(asset.size_bytes/1024).toFixed(0)} KB</span></div></button>)}</div>:<Empty icon="media">A biblioteca ainda está vazia ou não há resultado para a busca.</Empty>}</div><aside className="media-inspector">{editing?<><div className="media-inspector-preview"><img src={`${API_BASE}/api/media/${editing.id}`} alt=""/></div><div className="media-inspector-head"><div><Badge tone={(editing.usage_count||0)>0?'blue':'neutral'}>{editing.usage_count||0} USOS</Badge><h3>Detalhes do asset</h3></div><button className="icon-button" onClick={()=>{setSelected(null);setEditing(null)}}><Icon name="close"/></button></div><label className="field"><span>Nome do arquivo</span><input value={editing.file_name} onChange={e=>setEditing(v=>v?{...v,file_name:e.target.value}:v)}/></label><label className="field"><span>Alt text · Português</span><textarea value={editing.alt_pt||''} onChange={e=>setEditing(v=>v?{...v,alt_pt:e.target.value}:v)}/></label><label className="field"><span>Alt text · Español</span><textarea value={editing.alt_es||''} onChange={e=>setEditing(v=>v?{...v,alt_es:e.target.value}:v)}/></label><div className="asset-facts"><div><span>ID</span><code>{editing.id}</code></div><div><span>Formato</span><strong>{editing.mime_type}</strong></div><div><span>Tamanho</span><strong>{(editing.size_bytes/1024).toFixed(0)} KB</strong></div><div><span>Enviado</span><strong>{new Date(editing.created_at).toLocaleDateString('pt-BR')}</strong></div></div><button className="primary full" disabled={busy} onClick={saveAsset}><Icon name="save" size={15}/> Salvar metadados</button><button className="danger full" disabled={busy||(editing.usage_count||0)>0} onClick={()=>deleteAsset(editing)}><Icon name="trash" size={15}/> Excluir asset</button>{(editing.usage_count||0)>0&&<p className="hint">Para excluir, primeiro remova esta imagem de todos os lugares onde está sendo usada.</p>}</>:<div className="settings-empty"><Icon name="media" size={30}/><strong>Selecione um asset</strong><span>Veja usos, edite textos alternativos ou remova arquivos não utilizados.</span></div>}</aside></div>
+  </Panel></div>;
 }

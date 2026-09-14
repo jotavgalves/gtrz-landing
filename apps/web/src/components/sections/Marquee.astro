@@ -1,6 +1,11 @@
+---
+const { locale='pt-BR', content={} } = Astro.props as { locale?:'pt-BR'|'es'; content?:Record<string,any> };
+const defaults=locale==='es'?['GTRZ EVENTOS','RECIFE','JOÃO PESSOA','CULTURA LATINA','EXPERIENCIAS','PRODUCCIÓN']:['GTRZ EVENTOS','RECIFE','JOÃO PESSOA','CULTURA LATINA','EXPERIÊNCIAS','PRODUÇÃO'];
+const items=Array.isArray(content.marqueeItems)&&content.marqueeItems.length?content.marqueeItems:defaults;
+---
 <div class="runner" aria-hidden="true">
   <div class="runner-track">
-    <div class="runner-group"><span>GTRZ EVENTOS</span><span>RECIFE</span><span>JOÃO PESSOA</span><span>CULTURA LATINA</span><span>EXPERIÊNCIAS</span><span>PRODUÇÃO</span></div>
-    <div class="runner-group"><span>GTRZ EVENTOS</span><span>RECIFE</span><span>JOÃO PESSOA</span><span>CULTURA LATINA</span><span>EXPERIÊNCIAS</span><span>PRODUÇÃO</span></div>
+    <div class="runner-group">{items.map((item:any)=><span>{typeof item==='string'?item:item?.name||''}</span>)}</div>
+    <div class="runner-group">{items.map((item:any)=><span>{typeof item==='string'?item:item?.name||''}</span>)}</div>
   </div>
 </div>

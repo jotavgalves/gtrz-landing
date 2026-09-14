@@ -15,13 +15,13 @@ import Contact from './sections/Contact.astro';
 const {section,locale,events,team=[]}=Astro.props as {section:CmsSection;locale:Locale;events:CmsEvent[];team?:CmsTeamMember[]};
 const props={locale,content:section.content,config:section.config,events,team};
 ---
-{section.type==='hero'&&<><Hero {...props}/><Marquee/></>}
+{section.type==='hero'&&<><Hero {...props}/><Marquee locale={locale} content={section.content}/></>}
 {section.type==='about'&&<About {...props}/>} 
 {section.type==='rhythms'&&<Rhythms {...props}/>} 
 {section.type==='differentials'&&<Differentials {...props}/>} 
 {section.type==='events'&&<Events {...props}/>} 
 {section.type==='team'&&<Team {...props}/>} 
 {section.type==='freelancers'&&<Freelancers {...props}/>} 
-{section.type==='partnerships'&&<><Partnerships {...props}/><Manifesto locale={locale}/></>} 
+{section.type==='partnerships'&&<><Partnerships {...props}/><Manifesto locale={locale} content={section.content}/></>} 
 {section.type==='instagram'&&<Instagram {...props}/>} 
 {section.type==='contact'&&<Contact {...props}/>} 
