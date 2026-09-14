@@ -4,6 +4,7 @@ import type { Env } from './env';
 import { publicRoutes } from './routes/public';
 import { adminRoutes } from './routes/admin';
 import { analyticsRoutes } from './routes/analytics';
+import { mediaRoutes } from './routes/media';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -21,6 +22,7 @@ app.get('/health', (c) => c.json({ ok: true, service: 'gtrz-api', env: c.env.APP
 app.route('/api/public', publicRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/analytics', analyticsRoutes);
+app.route('/api/media', mediaRoutes);
 app.get('/r/:slug', async (c) => analyticsRoutes.fetch(new Request(new URL(`/redirect/${c.req.param('slug')}`, c.req.url), c.req.raw), c.env, c.executionCtx));
 
 app.onError((error, c) => {
