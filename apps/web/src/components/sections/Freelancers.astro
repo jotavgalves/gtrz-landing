@@ -6,6 +6,18 @@ const c={
   title:es?'TRABAJA CON GTRZ.':'TRABALHE COM A GTRZ.',
   body:es?'Los eventos dependen de una buena red de profesionales. GTRZ mantiene una base de freelancers para formar equipos según cada producción.':'Eventos dependem de uma boa rede de profissionais. A GTRZ mantém um banco de freelancers para montar equipes conforme cada produção.',
   cta:es?'Registrarme como freelancer':'Cadastrar como freelancer',
+  card1Index:es?'01 · Base de freelancers':'01 · Banco de freelancers',
+  card1Title:es?'¿QUIERES TRABAJAR CON NOSOTROS?':'QUER TRABALHAR COM A GENTE?',
+  card1Body:es?'Registra tu perfil para ser considerado en próximas producciones. El registro no es una vacante específica ni crea vínculo laboral: sirve para que GTRZ encuentre profesionales compatibles cuando surja demanda.':'Cadastre seu perfil para ser considerado nas próximas produções. O cadastro não é uma vaga específica nem cria vínculo empregatício: ele serve para a GTRZ encontrar profissionais compatíveis quando surgir demanda.',
+  card1Points:es?['Producción','Recepción','Bar','Audiovisual','Foto','Diseño','Social','Apoyo']:['Produção','Recepção','Bar','Audiovisual','Foto','Design','Social','Apoio'],
+  card2Index:es?'02 · Cómo funciona':'02 · Como funciona',
+  card2Title:es?'ENTRASTE EN NUESTRO RADAR.':'ENTROU NO NOSSO RADAR.',
+  card2Body:es?'Cuando una producción necesite equipo, filtramos la base por ciudad, disponibilidad y función. Si tu perfil encaja, GTRZ entra en contacto con briefing, diaria, horario y condiciones de ese trabajo.':'Quando uma produção precisar de equipe, filtramos o banco por cidade, disponibilidade e função. Se o perfil fizer sentido, a GTRZ entra em contato diretamente com briefing, diária, horário e condições daquele trabalho.',
+  card2Points:es?['Registro gratuito','Por demanda','Pago por job','Sin promesa de contratación']:['Cadastro gratuito','Por demanda','Pagamento por job','Sem promessa de contratação'],
+  card2Cta:es?'Dudas sobre trabajos':'Dúvidas sobre freelas',
+  providerTitle:es?'¿También eres proveedor o prestas un servicio especializado?':'Também é fornecedor ou presta um serviço especializado?',
+  providerBody:es?'Estructura, seguridad, iluminación, sonido, escenografía, alimentación, transporte u otros servicios pueden entrar por el canal de alianzas.':'Estrutura, segurança, iluminação, som, cenografia, alimentação, transporte ou outro serviço para eventos podem entrar pelo canal de parcerias.',
+  providerCta:es?'Ir a alianzas':'Ir para parcerias',
   ...content
 };
 const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';const lead=parts.join(' ');
@@ -16,15 +28,15 @@ const parts=String(c.title).trim().split(/\s+/);const accent=parts.pop()||'';con
     <div class="collab-grid">
       <article class="collab-card reveal">
         <img class="collab-logo" src="/brand/gtrz-symbol.svg" alt="" />
-        <div><span class="index">01 · {es?'Base de freelancers':'Banco de freelancers'}</span><h3 class="display">{es?'¿QUIERES TRABAJAR CON NOSOTROS?':'QUER TRABALHAR COM A GENTE?'}</h3><p>{es?'Registra tu perfil para ser considerado en próximas producciones. El registro no es una vacante específica ni crea vínculo laboral: sirve para que GTRZ encuentre profesionales compatibles cuando surja demanda.':'Cadastre seu perfil para ser considerado nas próximas produções. O cadastro não é uma vaga específica nem cria vínculo empregatício: ele serve para a GTRZ encontrar profissionais compatíveis quando surgir demanda.'}</p><div class="collab-points"><span>Produção</span><span>Recepção</span><span>Bar</span><span>Audiovisual</span><span>Foto</span><span>Design</span><span>Social</span><span>Apoio</span></div></div>
+        <div><span class="index">{c.card1Index}</span><h3 class="display">{c.card1Title}</h3><p>{c.card1Body}</p><div class="collab-points">{(Array.isArray(c.card1Points)?c.card1Points:[]).map((point:any)=><span>{point}</span>)}</div></div>
         <a class="btn btn-red" href={`/trabalhe-conosco?lang=${locale}`} data-track="freelancers.open">{c.cta}</a>
       </article>
       <article class="collab-card dark reveal">
         <img class="collab-logo" src="/brand/gtrz-symbol.svg" alt="" />
-        <div><span class="index">02 · {es?'Cómo funciona':'Como funciona'}</span><h3 class="display">{es?'ENTRASTE EN NUESTRO RADAR.':'ENTROU NO NOSSO RADAR.'}</h3><p>{es?'Cuando una producción necesite equipo, filtramos la base por ciudad, disponibilidad y función. Si tu perfil encaja, GTRZ entra en contacto con briefing, diaria, horario y condiciones de ese trabajo.':'Quando uma produção precisar de equipe, filtramos o banco por cidade, disponibilidade e função. Se o perfil fizer sentido, a GTRZ entra em contato diretamente com briefing, diária, horário e condições daquele trabalho.'}</p><div class="collab-points"><span>{es?'Registro gratuito':'Cadastro gratuito'}</span><span>{es?'Por demanda':'Por demanda'}</span><span>{es?'Pago por job':'Pagamento por job'}</span><span>{es?'Sin promesa de contratación':'Sem promessa de contratação'}</span></div></div>
-        <a class="btn" href="#contato">{es?'Dudas sobre trabajos':'Dúvidas sobre freelas'}</a>
+        <div><span class="index">{c.card2Index}</span><h3 class="display">{c.card2Title}</h3><p>{c.card2Body}</p><div class="collab-points">{(Array.isArray(c.card2Points)?c.card2Points:[]).map((point:any)=><span>{point}</span>)}</div></div>
+        <a class="btn" href="#contato">{c.card2Cta}</a>
       </article>
     </div>
-    <div class="recruitment reveal"><div><strong>{es?'¿También eres proveedor o prestas un servicio especializado?':'Também é fornecedor ou presta um serviço especializado?'}</strong><span>{es?'Estructura, seguridad, iluminación, sonido, escenografía, alimentación, transporte u otros servicios pueden entrar por el canal de alianzas.':'Estrutura, segurança, iluminação, som, cenografia, alimentação, transporte ou outro serviço para eventos podem entrar pelo canal de parcerias.'}</span></div><a class="btn" href="#parcerias">{es?'Ir a alianzas':'Ir para parcerias'}</a></div>
+    <div class="recruitment reveal"><div><strong>{c.providerTitle}</strong><span>{c.providerBody}</span></div><a class="btn" href="#parcerias">{c.providerCta}</a></div>
   </div>
 </section>
