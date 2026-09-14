@@ -48,9 +48,9 @@ marketingAdminRoutes.post('/campaigns',async(c)=>{
 marketingAdminRoutes.get('/analytics/overview',async(c)=>{
   const [daily,sources,links,campaigns]=await Promise.all([
     c.env.DB.prepare("SELECT day,metric,dimension_key,value FROM analytics_daily WHERE day >= date('now','-90 days') ORDER BY day ASC").all(),
-    c.env.DB.prepare(`SELECT source,COUNT(*) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') GROUP BY source ORDER BY visitors DESC LIMIT 30`).all(),
-    c.env.DB.prepare(`SELECT tracking_link,COUNT(*) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') AND tracking_link IS NOT NULL GROUP BY tracking_link ORDER BY visitors DESC LIMIT 50`).all(),
-    c.env.DB.prepare(`SELECT campaign,COUNT(*) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') AND campaign IS NOT NULL GROUP BY campaign ORDER BY visitors DESC LIMIT 50`).all()
+    c.env.DB.prepare(`SELECT source,COUNT(DISTINCT session_hash) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') GROUP BY source ORDER BY visitors DESC LIMIT 30`).all(),
+    c.env.DB.prepare(`SELECT tracking_link,COUNT(DISTINCT session_hash) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') AND tracking_link IS NOT NULL GROUP BY tracking_link ORDER BY visitors DESC LIMIT 50`).all(),
+    c.env.DB.prepare(`SELECT campaign,COUNT(DISTINCT session_hash) visitors FROM analytics_sessions_daily WHERE day >= date('now','-30 days') AND campaign IS NOT NULL GROUP BY campaign ORDER BY visitors DESC LIMIT 50`).all()
   ]);
   return c.json({daily:daily.results,sources:sources.results,links:links.results,campaigns:campaigns.results});
 });
