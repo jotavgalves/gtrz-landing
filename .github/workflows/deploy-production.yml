@@ -27,6 +27,7 @@ jobs:
       VITE_API_BASE: https://api.gtrz.com.br
       PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.GTRZ_TURNSTILE_SITE_KEY }}
       VITE_TURNSTILE_SITE_KEY: ${{ secrets.GTRZ_TURNSTILE_SITE_KEY }}
+      VITE_APP_ENV: production
 
     steps:
       - uses: actions/checkout@v4
