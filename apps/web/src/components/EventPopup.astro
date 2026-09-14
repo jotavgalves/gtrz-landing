@@ -6,18 +6,18 @@ const es = locale === 'es';
 ---
 {active && <div class="event-popup" data-event-popup hidden>
   <div class="event-popup-card">
-    <button class="popup-close" type="button" aria-label="Fechar" data-popup-close>×</button>
+    <button class="popup-close" type="button" aria-label={es ? 'Cerrar' : 'Fechar'} data-popup-close>×</button>
     <span class="city-pill">{active.city}{active.state ? ` · ${active.state}` : ''}</span>
     <small>{es ? 'HAY GTRZ EN ESTA CIUDAD' : 'TEM GTRZ NESTA CIDADE'}</small>
     <h2>{active.title || active.slug}</h2>
     <p>{active.summary || (es ? 'Consulta fecha, lugar y entradas disponibles.' : 'Confira data, local e ingressos disponíveis.')}</p>
-    <a href={`/eventos/${active.slug}`} data-track="popup.event">{es ? 'Ver evento' : 'Ver evento'}</a>
+    <a href={`/eventos/${active.slug}?lang=${locale}`} data-track="popup.event" data-track-event="popup_click">Ver evento</a>
   </div>
 </div>}
 <script>
-  const popup = document.querySelector('[data-event-popup]');
+  const popup = document.querySelector<HTMLElement>('[data-event-popup]');
   if (popup && !sessionStorage.getItem('gtrz_event_popup_seen')) {
     setTimeout(()=>{ popup.hidden=false; sessionStorage.setItem('gtrz_event_popup_seen','1'); },700);
   }
-  document.querySelector('[data-popup-close]')?.addEventListener('click',()=>{ if(popup) popup.hidden=true; });
+  document.querySelector<HTMLButtonElement>('[data-popup-close]')?.addEventListener('click',()=>{ if(popup) popup.hidden=true; });
 </script>
