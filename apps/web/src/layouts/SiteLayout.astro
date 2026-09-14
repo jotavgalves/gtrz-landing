@@ -23,6 +23,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <Header locale={locale} />
     <LanguageGate locale={locale} />
     <slot />
+    <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>GTRZ Eventos · Venezuela → Brasil</span></div></footer>
     <script define:vars={{ apiBase, locale }}>
       const sessionKey = 'gtrz_session_id';
       const attributionKey = 'gtrz_attribution';
