@@ -1,8 +1,8 @@
 -- Expand the Home rhythms section into four editable curatorial groups.
--- Remove the old flat `items` list so the Control mirrors the new visual structure.
+-- Keep a complete rhythm inventory in `items` so the generic Control editor remains useful.
 
 UPDATE section_localizations
-SET content_json = json_remove(json_set(
+SET content_json = json_set(
   COALESCE(content_json, '{}'),
   '$.eyebrow', 'Curadoria de pista',
   '$.title', 'NÃO EXISTE UMA ÚNICA PISTA LATINA.',
@@ -20,13 +20,14 @@ SET content_json = json_remove(json_set(
   '$.group4Title', 'Brasil & crossover',
   '$.group4Body', 'Pontes com o público local e novas misturas.',
   '$.group4Items', json('["Funk","Pagodão","Latin Pop","Afro-Latin","House Latino","Urban Mix"]'),
+  '$.items', json('["Reggaeton","Dembow","Perreo","Latin Trap","RKT","Cachengue","Salsa","Merengue","Bachata","Timba","Reparto Cubano","Cumbia","Vallenato","Champeta","Guaracha","Funk","Pagodão","Latin Pop","Afro-Latin","House Latino","Urban Mix"]'),
   '$.footerLabel', 'CURADORIA, NÃO PLAYLIST.',
   '$.countLabel', 'REFERÊNCIAS DE PISTA'
-), '$.items')
+)
 WHERE section_id = 'home_rhythms' AND locale = 'pt-BR';
 
 UPDATE section_localizations
-SET content_json = json_remove(json_set(
+SET content_json = json_set(
   COALESCE(content_json, '{}'),
   '$.eyebrow', 'Curaduría de pista',
   '$.title', 'NO EXISTE UNA SOLA PISTA LATINA.',
@@ -44,7 +45,8 @@ SET content_json = json_remove(json_set(
   '$.group4Title', 'Brasil & crossover',
   '$.group4Body', 'Puentes con el público local y nuevas mezclas.',
   '$.group4Items', json('["Funk","Pagodão","Latin Pop","Afro-Latin","House Latino","Urban Mix"]'),
+  '$.items', json('["Reggaeton","Dembow","Perreo","Latin Trap","RKT","Cachengue","Salsa","Merengue","Bachata","Timba","Reparto Cubano","Cumbia","Vallenato","Champeta","Guaracha","Funk","Pagodão","Latin Pop","Afro-Latin","House Latino","Urban Mix"]'),
   '$.footerLabel', 'CURADURÍA, NO PLAYLIST.',
   '$.countLabel', 'REFERENCIAS DE PISTA'
-), '$.items')
+)
 WHERE section_id = 'home_rhythms' AND locale = 'es';
