@@ -32,32 +32,69 @@ const items:NavItem[]=[
 ];
 
 function ControlBrand({compact=false}:{compact?:boolean}){
-  return <div className={`control-brand ${compact?'compact':''}`}><span className="control-mark">G</span>{!compact&&<div><strong>GTRZ</strong><small>CONTROL</small></div>}</div>;
+  return <div className={`control-brand ${compact?'compact':''}`}>
+    <img className="control-brand-logo" src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
+    {!compact&&<><span className="control-brand-divider"/><small>CONTROL</small></>}
+  </div>;
 }
 
 function Login({onDone}:{onDone:()=>void}){
-  const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+  const [password,setPassword]=useState('');
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [showPassword,setShowPassword]=useState(false);
+  const [locale,setLocale]=useState<'pt'|'es'>('pt');
+  const es=locale==='es';
+  const copy=es?{
+    eyebrow:'GTRZ / BRASIL',
+    titleA:'CONTROL QUE',titleB:'IMPULSA.',
+    description:'Toda la operación en un solo lugar. Contenido, eventos, personas, medios, campañas y datos, conectando Venezuela y Brasil.',
+    platform:'PLATAFORMA DE OPERACIÓN',restricted:'ACCESO RESTRINGIDO',loginTitle:'Entrar al Control',
+    loginBody:'Usa la contraseña administrativa configurada para el ambiente de producción.',password:'CONTRASEÑA ADMINISTRATIVA',enter:'Entrar',validating:'Validando acceso…',
+    security:'Sesión segura · cookie HttpOnly · expiración automática',footer:'PRODUCCIÓN · CULTURA · EXPERIENCIA'
+  }:{
+    eyebrow:'GTRZ / BRASIL',
+    titleA:'CONTROLE QUE',titleB:'IMPULSIONA.',
+    description:'Toda a operação em um só lugar. Conteúdo, eventos, pessoas, mídia, campanhas e dados, conectando Venezuela e Brasil.',
+    platform:'PLATAFORMA DE OPERAÇÃO',restricted:'ACESSO RESTRITO',loginTitle:'Entrar no Control',
+    loginBody:'Use a senha administrativa configurada para o ambiente de produção.',password:'SENHA ADMINISTRATIVA',enter:'Entrar',validating:'Validando acesso…',
+    security:'Sessão segura · cookie HttpOnly · expiração automática',footer:'PRODUÇÃO · CULTURA · EXPERIÊNCIA'
+  };
   const submit=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();setError('');setBusy(true);
     const formData=new FormData(e.currentTarget);
     const token=String(formData.get('cf-turnstile-response')||'')||undefined;
     try{await login(password,token);onDone();}catch(err:any){setError(err.message)}finally{setBusy(false)}
   };
-  return <main className="login-shell">
-    <section className="login-art">
-      <div className="login-art-top"><ControlBrand/><span>PLATAFORMA DE OPERAÇÃO</span></div>
-      <div className="login-statement"><span>GTRZ / BRASIL</span><h1>CONTROLE<br/>SEM <em>RUÍDO.</em></h1><p>Conteúdo, eventos, pessoas, mídia, campanhas e dados em um único lugar.</p></div>
-      <div className="login-art-foot"><span>PRODUÇÃO · CULTURA · EXPERIÊNCIA</span><span>VENEZUELA ↔ BRASIL</span></div>
+  return <main className="login-shell login-shell-v2">
+    <section className="login-art login-art-v2">
+      <img className="login-symbol-watermark" src="/brand/gtrz-symbol.svg" alt="" aria-hidden="true" />
+      <div className="login-art-top login-art-top-v2">
+        <ControlBrand/>
+        <div className="login-platform-label"><span/>{copy.platform}<br/>GTRZ BRASIL</div>
+      </div>
+      <div className="login-statement login-statement-v2">
+        <div className="login-kicker"><strong>{copy.eyebrow}</strong><span/></div>
+        <h1>{copy.titleA}<br/><em>QUE</em> <b>{copy.titleB}</b></h1>
+        <p>{copy.description}</p>
+      </div>
+      <div className="login-art-foot login-art-foot-v2"><span>{copy.footer}</span><span>VENEZUELA ↔ BRASIL</span></div>
     </section>
-    <section className="login-panel"><form onSubmit={submit}>
-      <div className="login-form-head"><span className="login-lock"><Icon name="system" size={18}/></span><div><small>ACESSO RESTRITO</small><h2>Entrar no Control</h2></div></div>
-      <p>Use a senha administrativa configurada para o ambiente de produção.</p>
-      <label className="field"><span>Senha administrativa</span><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••••••" autoFocus autoComplete="current-password"/></label>
-      <Turnstile/>
-      <button className="primary login-submit" disabled={busy||!password}>{busy?'Validando acesso…':<><span>Entrar</span><Icon name="arrow" size={17}/></>}</button>
-      {error&&<div className="notice notice-error"><span>{error}</span></div>}
-      <small className="login-security">Sessão segura · cookie HttpOnly · expiração automática</small>
-    </form></section>
+    <section className="login-panel login-panel-v2">
+      <form className="login-card-v2" onSubmit={submit}>
+        <div className="login-form-head login-form-head-v2">
+          <span className="login-lock"><Icon name="system" size={20}/></span>
+          <div><small>{copy.restricted}</small><h2>{copy.loginTitle}</h2></div>
+        </div>
+        <p>{copy.loginBody}</p>
+        <label className="field login-password-field"><span>{copy.password}</span><div className="login-password-wrap"><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••••••" autoFocus autoComplete="current-password"/><button type="button" className="login-password-toggle" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar senha':'Mostrar senha'}><Icon name="eye" size={18}/></button></div></label>
+        <Turnstile/>
+        <button className="primary login-submit login-submit-v2" disabled={busy||!password}>{busy?copy.validating:<><span>{copy.enter}</span><Icon name="arrow" size={18}/></>}</button>
+        {error&&<div className="notice notice-error"><span>{error}</span></div>}
+        <div className="login-security-v2"><Icon name="system" size={15}/><span>{copy.security}</span></div>
+      </form>
+      <div className="login-language-switch" aria-label="Idioma"><button className={locale==='pt'?'active':''} type="button" onClick={()=>setLocale('pt')}>PT</button><button className={locale==='es'?'active':''} type="button" onClick={()=>setLocale('es')}>ES</button></div>
+    </section>
   </main>;
 }
 
