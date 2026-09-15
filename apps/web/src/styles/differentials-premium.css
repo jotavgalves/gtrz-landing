@@ -1,0 +1,160 @@
+.differentials.diff-editorial{
+  padding:clamp(92px,9vw,148px) 0;
+  background:#fff;
+  color:#0a0a0a;
+  border-top:1px solid #ece8e3;
+  border-bottom:1px solid #ece8e3;
+}
+.diff-editorial .diff-intro{
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(320px,.72fr);
+  gap:clamp(44px,7vw,110px);
+  align-items:end;
+  margin-bottom:clamp(56px,7vw,92px);
+}
+.diff-editorial .diff-intro-title{min-width:0;overflow:visible;padding-top:.08em}
+.diff-editorial .diff-intro h2{
+  margin:16px 0 0;
+  max-width:900px;
+  font-size:clamp(4.4rem,7.7vw,8rem);
+  line-height:.91;
+  letter-spacing:-.045em;
+  overflow:visible;
+}
+.diff-editorial .diff-intro-copy{
+  max-width:520px;
+  padding-left:24px;
+  border-left:2px solid #ff1a12;
+  align-self:end;
+}
+.diff-editorial .diff-intro-copy p{
+  margin:0;
+  color:#5e5854;
+  font-size:clamp(1rem,1.25vw,1.15rem);
+  line-height:1.75;
+}
+.diff-editorial-grid{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:12px;
+  align-items:stretch;
+}
+.diff-editorial-card{
+  position:relative;
+  min-width:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
+}
+.diff-editorial-card.is-featured{
+  grid-column:span 6;
+  min-height:340px;
+  padding:34px;
+  border:1px solid #d9d4ce;
+  border-top:3px solid #111;
+  border-radius:14px;
+  background:#f7f5f2;
+}
+.diff-editorial-card.is-featured.is-anchor{
+  background:#0a0a0a;
+  color:#fff;
+  border-color:#0a0a0a;
+  border-top-color:#ff1a12;
+}
+.diff-editorial-card.is-supporting{
+  grid-column:span 3;
+  min-height:230px;
+  padding:27px 10px 8px 0;
+  border-top:1px solid #cfc9c2;
+  background:#fff;
+}
+.diff-editorial-card:hover{transform:translateY(-3px)}
+.diff-editorial-card.is-supporting:hover{border-top-color:#ff1a12}
+.diff-category{
+  color:#ff1a12;
+  font-size:.67rem;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.diff-card-copy h3{
+  margin:0 0 14px;
+  max-width:15ch;
+  font-size:clamp(1.5rem,2.15vw,2.25rem);
+  line-height:1.02;
+  letter-spacing:-.035em;
+}
+.diff-editorial-card.is-featured .diff-card-copy h3{
+  max-width:13ch;
+  font-size:clamp(2.5rem,4.15vw,4.45rem);
+  line-height:.94;
+  letter-spacing:-.045em;
+}
+.diff-card-copy p{
+  margin:0;
+  max-width:42ch;
+  color:#66605c;
+  font-size:.92rem;
+  line-height:1.65;
+}
+.diff-editorial-card.is-anchor .diff-card-copy p{color:#aaa29e}
+.diff-editorial-card.is-anchor:after{
+  content:"";
+  position:absolute;
+  width:270px;
+  height:270px;
+  right:-135px;
+  top:-135px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:50%;
+  box-shadow:0 0 0 42px rgba(255,255,255,.025),0 0 0 84px rgba(255,255,255,.012);
+  pointer-events:none;
+}
+.diff-closing{
+  display:grid;
+  grid-template-columns:160px 1fr;
+  gap:34px;
+  align-items:start;
+  margin-top:clamp(58px,7vw,92px);
+  padding-top:30px;
+  border-top:2px solid #111;
+}
+.diff-closing span{
+  color:#ff1a12;
+  font-size:.66rem;
+  font-weight:950;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.diff-closing strong{
+  display:block;
+  max-width:1050px;
+  font-family:"Arial Narrow",Impact,Haettenschweiler,sans-serif;
+  font-size:clamp(2.3rem,4.8vw,5.15rem);
+  line-height:.92;
+  letter-spacing:-.04em;
+  text-transform:uppercase;
+}
+@media (max-width:980px){
+  .diff-editorial .diff-intro{grid-template-columns:1fr;gap:28px}
+  .diff-editorial .diff-intro-copy{max-width:680px}
+  .diff-editorial-card.is-supporting{grid-column:span 6}
+  .diff-closing{grid-template-columns:120px 1fr}
+}
+@media (max-width:700px){
+  .differentials.diff-editorial{padding:76px 0 84px}
+  .diff-editorial .diff-intro{margin-bottom:48px}
+  .diff-editorial .diff-intro h2{font-size:clamp(3.9rem,18vw,6.4rem);line-height:.92}
+  .diff-editorial .diff-intro-copy{padding-left:18px}
+  .diff-editorial-grid{grid-template-columns:1fr;gap:10px}
+  .diff-editorial-card.is-featured,.diff-editorial-card.is-supporting{grid-column:1;min-height:auto}
+  .diff-editorial-card.is-featured{padding:27px;min-height:300px}
+  .diff-editorial-card.is-supporting{padding:24px 0 28px}
+  .diff-editorial-card.is-featured .diff-card-copy h3{font-size:clamp(2.5rem,12vw,3.8rem)}
+  .diff-card-copy h3{max-width:18ch}
+  .diff-closing{grid-template-columns:1fr;gap:18px;margin-top:54px}
+  .diff-closing strong{font-size:clamp(2.4rem,12vw,4rem)}
+}
