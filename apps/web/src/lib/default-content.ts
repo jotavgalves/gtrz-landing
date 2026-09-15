@@ -30,12 +30,12 @@ const content = {
       countLabel: 'REFERÊNCIAS DE PISTA'
     },
     differentials: [
-      ['Identidade própria','Cada edição recebe direção visual e linguagem próprias.'],
-      ['Brasil + Venezuela','Uma ponte real entre públicos, referências e culturas.'],
-      ['Comunicação bilíngue','Português e espanhol fazem parte da experiência.'],
-      ['Curadoria de pista','Line-up, ritmos e dinâmica da noite fazem parte do conceito.'],
-      ['Experiência completa','Pensamos visual, entrada, bar, equipe e ambientação.'],
-      ['Comunidade','Cada evento deve ser ponto de encontro, não apenas venda de ingresso.']
+      {category:'PISTA',title:'Curadoria de pista',body:'O repertório acompanha o público e o momento da noite. A pista muda, e a curadoria muda junto.',featured:true},
+      {category:'IDENTIDADE',title:'Cada edição tem linguagem própria',body:'Nome, direção visual, comunicação e ambientação são pensados para aquele evento — não reaproveitados como molde.',featured:true},
+      {category:'COMUNICAÇÃO',title:'Latino sem rótulo único',body:'Português e espanhol convivem com naturalidade, sem reduzir um público diverso a uma única nacionalidade.'},
+      {category:'OPERAÇÃO',title:'Produção do começo ao fim',body:'Equipe, entrada, bar, fornecedores, artistas e cronograma fazem parte da mesma experiência.'},
+      {category:'PÚBLICO',title:'Pista multicultural',body:'Colombianos, argentinos, cubanos, venezuelanos, brasileiros e outros públicos latinos dividem a mesma noite sem precisar caber em uma única bandeira.'},
+      {category:'COMUNIDADE',title:'Uma noite que dá vontade de repetir',body:'O objetivo não é só encher. É criar uma experiência que faça sentido para quem chega e dê vontade de voltar.'}
     ]
   },
   es: {
@@ -67,12 +67,12 @@ const content = {
       countLabel: 'REFERENCIAS DE PISTA'
     },
     differentials: [
-      ['Identidad propia','Cada edición recibe dirección visual y lenguaje propios.'],
-      ['Brasil + Venezuela','Un puente real entre públicos, referencias y culturas.'],
-      ['Comunicación bilingüe','Portugués y español forman parte de la experiencia.'],
-      ['Curaduría de pista','Line-up, ritmos y dinámica de la noche forman parte del concepto.'],
-      ['Experiencia completa','Pensamos visual, ingreso, bar, equipo y ambientación.'],
-      ['Comunidad','Cada evento debe ser un punto de encuentro, no solo venta de entradas.']
+      {category:'PISTA',title:'Curaduría de pista',body:'El repertorio acompaña al público y el momento de la noche. La pista cambia, y la curaduría cambia con ella.',featured:true},
+      {category:'IDENTIDAD',title:'Cada edición tiene lenguaje propio',body:'Nombre, dirección visual, comunicación y ambientación se piensan para ese evento, no se reutilizan como una plantilla.',featured:true},
+      {category:'COMUNICACIÓN',title:'Latino sin una sola etiqueta',body:'Portugués y español conviven con naturalidad, sin reducir a un público diverso a una sola nacionalidad.'},
+      {category:'OPERACIÓN',title:'Producción de principio a fin',body:'Equipo, ingreso, bar, proveedores, artistas y cronograma forman parte de una misma experiencia.'},
+      {category:'PÚBLICO',title:'Pista multicultural',body:'Colombianos, argentinos, cubanos, venezolanos, brasileños y otros públicos latinos comparten la misma noche sin tener que caber bajo una sola bandera.'},
+      {category:'COMUNIDAD',title:'Una noche que dan ganas de repetir',body:'El objetivo no es solo llenar. Es crear una experiencia que tenga sentido para quien llega y dé ganas de volver.'}
     ]
   }
 };

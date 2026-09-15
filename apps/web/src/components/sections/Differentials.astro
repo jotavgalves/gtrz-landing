@@ -2,13 +2,44 @@
 import { defaultContent } from '@/lib/default-content';
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
-const defaults=defaultContent(locale).differentials.map(([title,body])=>({title,body}));
-const items=Array.isArray(content.items)?content.items:defaults;
-const c={eyebrow:es?'Qué cambia cuando es GTRZ':'O que muda quando é GTRZ',title:es?'NUESTROS DIFERENCIALES.':'NOSSOS DIFERENCIAIS.',body:es?'No hacemos fiestas genéricas con otro logo encima. Cada edición necesita concepto, lenguaje y experiencia.':'Não fazemos festas genéricas com outra logo em cima. Cada edição precisa de conceito, linguagem e experiência.',...content};
+const defaults=defaultContent(locale).differentials;
+const rawItems=Array.isArray(content.items)?content.items:defaults;
+const normalize=(item:any,index:number)=>{
+  if(Array.isArray(item)) return {category:es?'DIFERENCIAL':'DIFERENCIAL',title:item[0],body:item[1],featured:index<2};
+  return {category:item?.category||'GTRZ',title:item?.title||'',body:item?.body||'',featured:typeof item?.featured==='boolean'?item.featured:index<2};
+};
+const items=rawItems.map(normalize);
+const c={
+  eyebrow:es?'La forma GTRZ de producir':'O jeito GTRZ de produzir',
+  title:es?'NO ES PONER UN LOGO Y LLAMARLO FIESTA.':'NÃO É SÓ COLOCAR UMA LOGO NA FESTA.',
+  body:es?'Cada edición se construye como una experiencia propia. Concepto, música, comunicación, operación y lectura del público tienen que funcionar juntos antes, durante y después de la pista.':'Cada edição é construída como uma experiência própria. Conceito, música, comunicação, operação e leitura de público precisam funcionar juntos — antes, durante e depois da pista.',
+  manifesto:es?'CONCEPTO SIN OPERACIÓN ES SOLO UNA IDEA. OPERACIÓN SIN IDENTIDAD ES SOLO OTRA FIESTA.':'CONCEITO SEM OPERAÇÃO É SÓ IDEIA. OPERAÇÃO SEM IDENTIDADE É SÓ MAIS UMA FESTA.',
+  ...content
+};
 ---
-<section id="diferenciais" class="differentials" data-section="differentials">
+<section id="diferenciais" class="differentials diff-editorial" data-section="differentials">
   <div class="wrap">
-    <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
-    <div class="diff-grid">{items.map((item:any,index:number)=><article class="diff-card reveal"><b>{String(index+1).padStart(2,'0')}</b><div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div>
+    <header class="diff-intro reveal">
+      <div class="diff-intro-title">
+        <div class="eyebrow">{c.eyebrow}</div>
+        <h2 class="display">{c.title}</h2>
+      </div>
+      <div class="diff-intro-copy"><p>{c.body}</p></div>
+    </header>
+
+    <div class="diff-editorial-grid">
+      {items.map((item:any,index:number)=><article class:list={['diff-editorial-card','reveal',item.featured?'is-featured':'is-supporting',index===0?'is-anchor':'']}>
+        <div class="diff-category">{item.category}</div>
+        <div class="diff-card-copy">
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </div>
+      </article>)}
+    </div>
+
+    <div class="diff-closing reveal">
+      <span>GTRZ / MÉTODO</span>
+      <strong>{c.manifesto}</strong>
+    </div>
   </div>
 </section>
