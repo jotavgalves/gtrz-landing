@@ -20,7 +20,7 @@ type NavItem={id:View;label:string;desc:string;icon:IconName;group:'Operação'|
 const items:NavItem[]=[
   {id:'dashboard',label:'Dashboard',desc:'Visão geral',icon:'dashboard',group:'Operação'},
   {id:'content',label:'Conteúdo',desc:'Páginas e seções',icon:'content',group:'Operação'},
-  {id:'copy',label:'Textos do site',desc:'PT + ES de toda interface pública',icon:'content',group:'Operação'},
+  {id:'copy',label:'Textos do site',desc:'Interface pública · PT/ES',icon:'content',group:'Operação'},
   {id:'events',label:'Eventos',desc:'Agenda, identidade e ingressos',icon:'events',group:'Operação'},
   {id:'people',label:'Pessoas',desc:'Equipe e freelancers',icon:'people',group:'Operação'},
   {id:'commercial',label:'Comercial',desc:'Parcerias e leads',icon:'commercial',group:'Crescimento'},
@@ -124,8 +124,8 @@ export function App(){
         <div className="topbar-context"><button className="icon-button mobile-menu" onClick={()=>setMenuOpen(true)} aria-label="Abrir menu"><Icon name="menu"/></button><div><small>GTRZ CONTROL / {current.group.toUpperCase()}</small><strong>{current.label}</strong></div></div>
         <div className="topbar-actions"><a className="topbar-link" href="https://gtrz.com.br/" target="_blank" rel="noreferrer"><span>Visualizar site</span><Icon name="external" size={15}/></a><div className="environment"><span/>{environment}</div><button className="icon-button" onClick={exit} title="Sair"><Icon name="logout" size={18}/></button></div>
       </header>
-      <div className="content-shell">
-        <div className="page-intro"><div><span>{current.group}</span><h1>{current.label}</h1><p>{current.desc}</p></div><div className="page-intro-line"/></div>
+      <div className={`content-shell ${view==='copy'?'content-shell-editor':''}`}>
+        {view!=='copy'&&<div className="page-intro"><div><span>{current.group}</span><h1>{current.label}</h1><p>{current.desc}</p></div><div className="page-intro-line"/></div>}
         <div className="content">{view==='dashboard'?<Dashboard onNavigate={go}/>:view==='content'?<Content/>:view==='copy'?<PublicCopy/>:view==='events'?<Events/>:view==='people'?<People/>:view==='commercial'?<Commercial/>:view==='marketing'?<Marketing/>:view==='media'?<Media/>:view==='analytics'?<Analytics/>:view==='settings'?<Settings/>:<System/>}</div>
       </div>
     </main>
