@@ -7,7 +7,7 @@ const c={
   body:es?'Nuevos eventos, backstage, line-ups, lotes, registros de las fiestas y todo lo que ocurre antes y después de la pista.':'Novos eventos, bastidores, line-ups, lotes, registros das festas e tudo que acontece antes e depois da pista.',
   handle:'@gtrzeventos',url:'https://instagram.com/gtrzeventos',
   cta:es?'Seguir en Instagram':'Seguir no Instagram',
-  liveLabel:es?'Perfil oficial · contenido en vivo':'Perfil oficial · conteúdo ao vivo',
+  profileName:'GTRZ Eventos',
   embedFallback:es?'Abrir @gtrzeventos en Instagram':'Abrir @gtrzeventos no Instagram',
   ...content
 };
@@ -25,19 +25,37 @@ const embedUrl=String(c.url||'https://instagram.com/gtrzeventos').replace('://in
         <div class="hero-actions"><a class="btn btn-red" href={c.url} rel="noopener" target="_blank" data-track="instagram.follow">{c.cta}</a></div>
       </div>
 
-      <div class="insta-native-frame" data-instagram-live>
-        <div class="insta-native-label"><span></span>{c.liveLabel}</div>
-        <div class="insta-native-embed">
-          <blockquote
-            class="instagram-media"
-            data-instgrm-permalink={embedUrl}
-            data-instgrm-version="14"
-          >
-            <a href={c.url} target="_blank" rel="noopener">{c.embedFallback}</a>
-          </blockquote>
+      <div class="insta-native-frame">
+        <div class="insta-native-head">
+          <a class="insta-native-brand" href={c.url} target="_blank" rel="noopener" aria-label={c.embedFallback}>
+            <span class="insta-native-avatar"><img src="/brand/gtrz-symbol.svg" alt="" /></span>
+            <span class="insta-native-name"><strong>{c.handle}</strong><small>{c.profileName}</small></span>
+          </a>
+          <a class="insta-native-open" href={c.url} target="_blank" rel="noopener" aria-label={c.embedFallback}>Instagram <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <div class="insta-native-viewport">
+          <div class="insta-native-embed" data-instagram-crop>
+            <blockquote
+              class="instagram-media"
+              data-instgrm-permalink={embedUrl}
+              data-instgrm-version="14"
+            >
+              <a href={c.url} target="_blank" rel="noopener">{c.embedFallback}</a>
+            </blockquote>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script is:inline>
+    document.querySelectorAll('[data-instagram-crop]').forEach((root) => {
+      const viewport = root.closest('.insta-native-viewport');
+      const sync = () => viewport?.classList.toggle('is-ready', Boolean(root.querySelector('iframe')));
+      sync();
+      new MutationObserver(sync).observe(root, { childList: true, subtree: true });
+    });
+  </script>
   <script is:inline async src="https://www.instagram.com/embed.js"></script>
 </section>
