@@ -47,14 +47,14 @@ function Login({onDone}:{onDone:()=>void}){
   const es=locale==='es';
   const copy=es?{
     eyebrow:'GTRZ / BRASIL',
-    titleA:'CONTROL QUE',titleB:'IMPULSA.',
+    titleA:'CONTROL',titleB:'IMPULSA.',
     description:'Toda la operación en un solo lugar. Contenido, eventos, personas, medios, campañas y datos, conectando Venezuela y Brasil.',
     platform:'PLATAFORMA DE OPERACIÓN',restricted:'ACCESO RESTRINGIDO',loginTitle:'Entrar al Control',
     loginBody:'Usa la contraseña administrativa configurada para el ambiente de producción.',password:'CONTRASEÑA ADMINISTRATIVA',enter:'Entrar',validating:'Validando acceso…',
     security:'Sesión segura · cookie HttpOnly · expiración automática',footer:'PRODUCCIÓN · CULTURA · EXPERIENCIA'
   }:{
     eyebrow:'GTRZ / BRASIL',
-    titleA:'CONTROLE QUE',titleB:'IMPULSIONA.',
+    titleA:'CONTROLE',titleB:'IMPULSIONA.',
     description:'Toda a operação em um só lugar. Conteúdo, eventos, pessoas, mídia, campanhas e dados, conectando Venezuela e Brasil.',
     platform:'PLATAFORMA DE OPERAÇÃO',restricted:'ACESSO RESTRITO',loginTitle:'Entrar no Control',
     loginBody:'Use a senha administrativa configurada para o ambiente de produção.',password:'SENHA ADMINISTRATIVA',enter:'Entrar',validating:'Validando acesso…',
