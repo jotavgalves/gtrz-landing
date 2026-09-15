@@ -3,11 +3,11 @@ import type { Locale } from './cms';
 const content = {
   'pt-BR': {
     hero: {
-      eyebrow: 'Produção · cultura · experiência',
-      title: 'EXPERIÊNCIAS QUE TÊM IDENTIDADE.',
-      body: 'A GTRZ produz festas e experiências culturais com linguagem própria. Nascemos na Venezuela, fomos criados por venezuelanos e hoje, no Brasil, somos construídos por venezuelanos e brasileiros.',
-      originTitle: 'DUAS CULTURAS. UMA MARCA.',
-      originBody: 'Nossa história cruza países, sotaques e referências. A GTRZ carrega sua origem venezuelana e cresce no Brasil com uma construção feita também por brasileiros.'
+      eyebrow: 'Eventos latinos · curadoria · produção',
+      title: 'FESTAS LATINAS COM IDENTIDADE PRÓPRIA.',
+      body: 'A GTRZ produz eventos latinos com curadoria de pista, identidade visual própria e comunicação bilíngue. Nascida na Venezuela, hoje é construída no Brasil por venezuelanos e brasileiros — do conceito à última música da noite.',
+      originTitle: 'VENEZUELA NA ORIGEM. BRASIL NA PISTA.',
+      originBody: 'A GTRZ nasceu na Venezuela e ganhou corpo no Brasil. Essa mistura aparece na música, na comunicação, na equipe e na forma como cada evento é pensado.'
     },
     rhythms: ['Reggaeton','Dembow','Salsa','Merengue','Bachata','Latin Pop','Funk','Urban Mix'],
     differentials: [
@@ -21,11 +21,11 @@ const content = {
   },
   es: {
     hero: {
-      eyebrow: 'Producción · cultura · experiencia',
-      title: 'EXPERIENCIAS CON IDENTIDAD.',
-      body: 'GTRZ produce fiestas y experiencias culturales con lenguaje propio. Nacimos en Venezuela, fuimos creados por venezolanos y hoy, en Brasil, somos construidos por venezolanos y brasileños.',
-      originTitle: 'DOS CULTURAS. UNA MARCA.',
-      originBody: 'Nuestra historia cruza países, acentos y referencias. GTRZ lleva su origen venezolano y crece en Brasil con una construcción hecha también por brasileños.'
+      eyebrow: 'Eventos latinos · curaduría · producción',
+      title: 'FIESTAS LATINAS CON IDENTIDAD PROPIA.',
+      body: 'GTRZ produce eventos latinos con curaduría de pista, identidad visual propia y comunicación bilingüe. Nació en Venezuela y hoy se construye en Brasil entre venezolanos y brasileños, desde el concepto hasta la última canción de la noche.',
+      originTitle: 'VENEZUELA EN EL ORIGEN. BRASIL EN LA PISTA.',
+      originBody: 'GTRZ nació en Venezuela y tomó forma en Brasil. Esa mezcla aparece en la música, la comunicación, el equipo y en la manera de pensar cada evento.'
     },
     rhythms: ['Reggaeton','Dembow','Salsa','Merengue','Bachata','Latin Pop','Funk','Urban Mix'],
     differentials: [

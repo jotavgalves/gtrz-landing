@@ -1,1 +1,2 @@
--- placeholder
+-- Reserved no-op migration.
+-- Kept intentionally because this filename may already have been observed by a production deploy.

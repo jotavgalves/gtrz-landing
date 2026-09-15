@@ -13,18 +13,24 @@ const c: Record<string, any> = {
   routeTo: 'BRASIL',
   ...content
 };
-const titleParts = String(c.title || '').trim().split(/\s+/);
-const titleAccent = titleParts.pop() || '';
-const titleLead = titleParts.join(' ');
-const originParts = String(c.originTitle || '').trim().split(/\s+/);
-const originAccent = originParts.length >= 2 ? originParts.splice(-2).join(' ') : originParts.pop() || '';
-const originLead = originParts.join(' ');
+function splitDisplay(value: unknown, fallbackAccentWords = 1) {
+  const text = String(value || '').trim();
+  const sentences = text.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) || [];
+  if (sentences.length >= 2) {
+    return { lead: sentences.slice(0, -1).join(' '), accent: sentences.at(-1) || '' };
+  }
+  const words = text.split(/\s+/).filter(Boolean);
+  const accent = words.splice(Math.max(0, words.length - fallbackAccentWords)).join(' ');
+  return { lead: words.join(' '), accent };
+}
+const titleDisplay = splitDisplay(c.title, 1);
+const originDisplay = splitDisplay(c.originTitle, 2);
 ---
 <section id="top" class="hero" data-section="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy reveal">
       <div class="eyebrow">{c.eyebrow}</div>
-      <h1 class="display">{titleLead} <span class="red">{titleAccent}</span></h1>
+      <h1 class="display"><span class="hero-title-lead">{titleDisplay.lead}</span> <span class="red hero-title-accent">{titleDisplay.accent}</span></h1>
       <p>{c.body}</p>
       <div class="hero-actions">
         <a class="btn btn-red" href="#eventos" data-track="hero.events">{c.primaryCta}</a>
@@ -35,7 +41,7 @@ const originLead = originParts.join(' ');
       <img class="hero-side-logo" src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
       <div class="hero-origin">
         <small>{c.originEyebrow}</small>
-        <strong>{originLead}<br/><span class="red">{originAccent}</span></strong>
+        <strong><span>{originDisplay.lead}</span><br/><span class="red">{originDisplay.accent}</span></strong>
         <p>{c.originBody}</p>
       </div>
       <div class="hero-origin-route"><span>{c.routeFrom}</span><i></i><span>{c.routeTo}</span></div>
