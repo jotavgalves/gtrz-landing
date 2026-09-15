@@ -2,13 +2,54 @@
 import { defaultContent } from '@/lib/default-content';
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
-const defaults=defaultContent(locale).rhythms;
-const items=Array.isArray(content.items)?content.items:defaults;
-const c={eyebrow:es?'El sonido de GTRZ':'O som da GTRZ',title:es?'NUESTROS RITMOS.':'NOSSOS RITMOS.',body:es?'Nuestra pista nace del encuentro entre ritmos latinos, urbanos y brasileños.':'Nossa pista nasce do encontro entre ritmos latinos, urbanos e brasileiros.',...content};
+const defaults:any=defaultContent(locale).rhythms;
+const c={...defaults,...content};
+const legacyItems=Array.isArray(content.items)?content.items:[];
+const groups=[1,2,3,4].map((number)=>({
+  number,
+  title:c[`group${number}Title`]||'',
+  body:c[`group${number}Body`]||'',
+  items:Array.isArray(c[`group${number}Items`])?c[`group${number}Items`]:[]
+})).filter((group)=>group.title||group.body||group.items.length);
+if(!groups.length&&legacyItems.length){
+  groups.push({number:1,title:es?'Selección de pista':'Seleção de pista',body:'',items:legacyItems.map((item:any)=>typeof item==='string'?item:item?.name).filter(Boolean)});
+}
+const total=groups.reduce((sum,group)=>sum+group.items.length,0);
+const titleWords=String(c.title||'').trim().split(/\s+/);
+const accent=titleWords.pop()||'';
+const lead=titleWords.join(' ');
 ---
-<section id="ritmos" class="rhythms" data-section="rhythms">
+<section id="ritmos" class="rhythms rhythms-map" data-section="rhythms">
   <div class="wrap">
-    <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
-    <div class="rhythm-grid">{items.map((item:any,index:number)=><article class="rhythm-card reveal"><small>{String(index+1).padStart(2,'0')}</small><strong>{typeof item==='string'?item:item.name}</strong>{typeof item==='object'&&item.body&&<span>{item.body}</span>}</article>)}</div>
+    <div class="rhythms-intro reveal">
+      <div class="rhythms-title-block">
+        <div class="eyebrow">{c.eyebrow}</div>
+        <h2 class="display">{lead} <span class="red">{accent}</span></h2>
+      </div>
+      <div class="rhythms-copy">
+        <p>{c.body}</p>
+        <div class="rhythms-manifesto"><i></i><strong>{c.manifesto}</strong></div>
+      </div>
+    </div>
+
+    <div class="sound-map" aria-label={es?'Universo sonoro de GTRZ':'Universo sonoro da GTRZ'}>
+      {groups.map((group,index)=><article class={`sound-lane sound-lane-${index+1} reveal`}>
+        <div class="sound-lane-head">
+          <span>{String(group.number).padStart(2,'0')}</span>
+          <div>
+            <h3>{group.title}</h3>
+            {group.body&&<p>{group.body}</p>}
+          </div>
+        </div>
+        <div class="rhythm-tags">
+          {group.items.map((item:string,itemIndex:number)=><span class={itemIndex<2?'featured':''}>{item}</span>)}
+        </div>
+      </article>)}
+    </div>
+
+    <div class="rhythms-footer reveal">
+      <strong>{c.footerLabel}</strong>
+      <span>{total} {c.countLabel}</span>
+    </div>
   </div>
 </section>
