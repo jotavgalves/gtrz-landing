@@ -3,10 +3,17 @@ import type { CmsEvent,Locale } from '@/lib/cms';
 const {events,locale,content={}}=Astro.props as {events:CmsEvent[];locale:Locale;content?:Record<string,any>};
 const es=locale==='es';
 const c={
-  eyebrow:'Agenda GTRZ',title:'EVENTOS.',
-  body:es?'Cada proyecto tiene identidad propia. Entra al evento para ver detalles, line-up, lugar y entradas.':'Cada projeto tem identidade própria. Entre no evento para ver detalhes, line-up, local e ingressos.',
-  emptyTitle:es?'Nuevos eventos en preparación.':'Novos eventos em preparação.',
-  emptyBody:es?'Síguenos en Instagram para recibir las próximas fechas.':'Siga a GTRZ no Instagram para receber as próximas datas.',
+  eyebrow:'Agenda GTRZ',
+  title:'EVENTOS.',
+  body:es
+    ?'Fechas, ciudades, line-up y entradas aparecen aquí cuando cada edición está confirmada.'
+    :'Datas, cidades, line-up e ingressos entram aqui quando cada edição estiver confirmada.',
+  emptyTitle:es?'SIN FECHA PUBLICADA. POR AHORA.':'SEM DATA PUBLICADA. POR ENQUANTO.',
+  emptyBody:es
+    ?'La próxima edición solo entra en agenda cuando ciudad, fecha y operación están cerradas. Hasta entonces, acompaña los anuncios de GTRZ.'
+    :'A próxima edição só entra na agenda quando cidade, data e operação estiverem fechadas. Até lá, acompanhe os anúncios da GTRZ.',
+  cta:es?'Seguir en Instagram':'Acompanhar no Instagram',
+  secondaryCta:es?'Hablar con GTRZ':'Falar com a GTRZ',
   statusSalesOpen:es?'Entradas disponibles':'Ingressos disponíveis',
   statusSoldOut:es?'Agotado':'Esgotado',
   statusPast:es?'Realizado':'Realizado',
@@ -19,15 +26,57 @@ const c={
 const formatDate=(iso:string)=>{try{return new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(iso)).replace('.','').toUpperCase()}catch{return ''}};
 const statusLabel=(status:string)=>status==='sales_open'?c.statusSalesOpen:status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(status)?c.statusPast:c.statusActive;
 ---
-<section id="eventos" class="events" data-section="events">
+<section id="eventos" class="events events-premium" data-section="events">
   <div class="wrap">
-    <div class="section-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
-    {events.length ? <div class="event-grid">{events.map((event)=>{
-      const past=['finished','archived'].includes(event.status);
-      const titleParts=String(event.title||event.slug).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
-      return <article class:list={['event-card','reveal',past&&'past']}>
-        <div class="event-card-top"><span class="status"><span class="status-dot"></span>{statusLabel(event.status)}</span><div class="event-meta">{formatDate(event.starts_at)}<br/>{event.city}{event.state?` · ${event.state}`:''}</div></div>
-        <div><h3 class="display">{lead} <span class="red">{accent}</span></h3><p>{event.summary || c.genericSummary}</p><div class="event-actions"><a class:list={['btn',!past&&'btn-red']} href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>{past?c.pastCta:c.activeCta}</a></div></div>
-      </article>})}</div> : <div class="empty-state"><strong>{c.emptyTitle}</strong><p>{c.emptyBody}</p></div>}
+    <div class="section-head events-head reveal">
+      <div>
+        <div class="eyebrow">{c.eyebrow}</div>
+        <h2 class="display">{c.title}</h2>
+      </div>
+      <p>{c.body}</p>
+    </div>
+
+    {events.length ? (
+      <div class="event-grid event-grid-premium">
+        {events.map((event,index)=>{
+          const past=['finished','archived'].includes(event.status);
+          const titleParts=String(event.title||event.slug).trim().split(/\s+/);
+          const accent=titleParts.pop()||'';
+          const lead=titleParts.join(' ');
+          return <article class:list={['event-card','event-card-premium','reveal',index===0&&'event-card-featured',past&&'past']}>
+            <div class="event-card-top">
+              <span class="status"><span class="status-dot"></span>{statusLabel(event.status)}</span>
+              <div class="event-meta">{formatDate(event.starts_at)}<br/>{event.city}{event.state?` · ${event.state}`:''}</div>
+            </div>
+            <div class="event-card-copy">
+              <h3 class="display">{lead} <span class="red">{accent}</span></h3>
+              <p>{event.summary || c.genericSummary}</p>
+              <div class="event-actions">
+                <a class:list={['btn',!past&&'btn-red']} href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>{past?c.pastCta:c.activeCta}</a>
+              </div>
+            </div>
+          </article>
+        })}
+      </div>
+    ) : (
+      <div class="events-empty reveal">
+        <div class="events-empty-copy">
+          <div class="events-empty-kicker"><span></span>{c.eyebrow}</div>
+          <h3 class="display">{c.emptyTitle}</h3>
+          <p>{c.emptyBody}</p>
+          <div class="events-empty-actions">
+            <a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a>
+            <a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a>
+          </div>
+        </div>
+        <div class="events-empty-art" aria-hidden="true">
+          <div class="events-empty-orbit orbit-a"></div>
+          <div class="events-empty-orbit orbit-b"></div>
+          <div class="events-empty-orbit orbit-c"></div>
+          <img src="/brand/gtrz-symbol.svg" alt="" />
+          <span class="events-empty-pulse"></span>
+        </div>
+      </div>
+    )}
   </div>
 </section>
