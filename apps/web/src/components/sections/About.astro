@@ -2,15 +2,15 @@
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
 const c={
-  eyebrow:es?'De Venezuela a Brasil':'Da Venezuela para o Brasil',
-  title:es?'GTRZ NACE EN LA PISTA.':'A GTRZ NASCE DA PISTA.',
-  body1:es?'GTRZ nació en Venezuela y hoy se construye en Brasil por venezolanos y brasileños. Ese origen aparece sin disfraz: en el idioma, los ritmos, las referencias y la forma de recibir a quien llega.':'A GTRZ nasceu na Venezuela e hoje é construída no Brasil por venezuelanos e brasileiros. Essa origem aparece sem fantasia: no idioma, nos ritmos, nas referências e na forma de receber quem chega.',
-  body2:es?'Cada edición empieza con una pregunta simple: ¿qué noche vale la pena vivir? De ahí salen la curaduría musical, la dirección visual, la operación y los detalles que hacen que cada fiesta tenga nombre propio.':'Cada edição começa com uma pergunta simples: que noite vale a pena viver? A partir daí entram curadoria musical, direção visual, operação e os detalhes que fazem a festa ter nome próprio.',
-  note:es?'NO REPETIMOS FÓRMULAS. CADA EDICIÓN NECESITA UNA RAZÓN PARA EXISTIR.':'NÃO REPETIMOS FÓRMULAS. CADA EDIÇÃO PRECISA TER UM MOTIVO PARA EXISTIR.',
-  metric1Value:es?'ORIGEN LATINO REAL':'ORIGEM LATINA REAL',metric1Label:es?'Venezuela forma parte de la historia de GTRZ, no de una campaña.':'Venezuela faz parte da história da GTRZ, não de uma campanha.',
-  metric2Value:es?'PISTA CON CURADURÍA':'PISTA COM CURADORIA',metric2Label:es?'Reggaeton, dembow, salsa, funk y otros ritmos entran cuando tienen sentido para esa noche.':'Reggaeton, dembow, salsa, funk e outros ritmos entram quando fazem sentido para aquela noite.',
-  metric3Value:'PT + ES',metric3Label:es?'La comunicación bilingüe está en el evento, la atención y el contenido.':'A comunicação bilíngue está no evento, no atendimento e no conteúdo.',
-  metric4Value:es?'DEL CONCEPTO A LA OPERACIÓN':'DO CONCEITO À OPERAÇÃO',metric4Label:es?'Identidad visual, equipo, entrada, bar y ambientación se piensan como una sola experiencia.':'Identidade visual, equipe, entrada, bar e ambientação são pensados como uma experiência só.',
+  eyebrow:es?'Sobre la GTRZ':'Sobre a GTRZ',
+  title:es?'LA FIESTA TIENE IDENTIDAD.':'A FESTA TEM IDENTIDADE.',
+  body1:es?'GTRZ crea fiestas y experiencias con personalidad propia para una comunidad latina diversa. En la misma pista conviven referencias, ritmos y públicos de Colombia, Argentina, Venezuela, Cuba, Brasil y mucho más.':'A GTRZ cria festas e experiências com personalidade própria para uma comunidade latina diversa. Na mesma pista convivem referências, ritmos e públicos da Colômbia, Argentina, Venezuela, Cuba, Brasil e muito mais.',
+  body2:es?'Cada edición se piensa de punta a punta: concepto, música, dirección visual, comunicación y operación. La idea no es repetir una fórmula, sino darle a cada noche una razón real para existir.':'Cada edição é pensada de ponta a ponta: conceito, música, direção visual, comunicação e operação. A ideia não é repetir uma fórmula, mas dar a cada noite uma razão real para existir.',
+  note:es?'NO HACEMOS FIESTAS EN SERIE. CADA EDICIÓN NECESITA CONCEPTO, RITMO Y PRESENCIA.':'NÃO FAZEMOS FESTAS EM SÉRIE. CADA EDIÇÃO PRECISA DE CONCEITO, RITMO E PRESENÇA.',
+  metric1Value:es?'COMUNIDAD LATINA REAL':'COMUNIDADE LATINA REAL',metric1Label:es?'Públicos diversos, referencias compartidas y una pista hecha para conectar personas.':'Públicos diversos, referências compartilhadas e uma pista feita para conectar pessoas.',
+  metric2Value:es?'CURADURÍA MUSICAL':'CURADORIA MUSICAL',metric2Label:es?'Reggaeton, salsa, merengue, bachata, funk y mezclas urbanas entran según la energía de cada edición.':'Reggaeton, salsa, merengue, bachata, funk e misturas urbanas entram conforme a energia de cada edição.',
+  metric3Value:'PT + ES',metric3Label:es?'Portugués y español conviven de forma natural antes, durante y después del evento.':'Português e espanhol convivem de forma natural antes, durante e depois do evento.',
+  metric4Value:es?'DEL CONCEPTO A LA OPERACIÓN':'DO CONCEITO À OPERAÇÃO',metric4Label:es?'Visual, ingreso, line-up, ambientación y experiencia se piensan como un todo.':'Visual, entrada, line-up, ambientação e experiência são pensados como um todo.',
   ...content
 };
 const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
@@ -25,7 +25,7 @@ const proofs=[
   <div class="wrap">
     <div class="about-editorial-grid">
       <div class="about-title-block reveal">
-        <div class="eyebrow">{c.eyebrow}</div>
+        <div class="eyebrow about-eyebrow">{c.eyebrow}<span aria-hidden="true"></span></div>
         <h2 class="display">{lead} <span class="red">{accent}</span></h2>
       </div>
       <div class="about-copy about-copy-editorial reveal">
