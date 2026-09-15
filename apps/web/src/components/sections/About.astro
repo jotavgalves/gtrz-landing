@@ -2,30 +2,46 @@
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
 const c={
-  eyebrow:es?'Sobre GTRZ':'Sobre a GTRZ',
-  title:es?'NO ES SOLO UNA FIESTA.':'NÃO É SÓ UMA FESTA.',
-  body1:es?'GTRZ nació en Venezuela, creada por venezolanos con ganas de transformar encuentros en experiencias con identidad. En Brasil, el proyecto encontró nuevos caminos y hoy es construido en conjunto por venezolanos y brasileños.':'A GTRZ nasceu na Venezuela, criada por venezuelanos com vontade de transformar encontros em experiências com identidade. No Brasil, o projeto ganhou novos caminhos e hoje é construído em conjunto por venezuelanos e brasileiros.',
-  body2:es?'Desde la dirección creativa hasta la operación, cada evento necesita personalidad propia, música, cultura, cuidado y presencia.':'Da direção criativa à operação, cada evento precisa ter personalidade própria, música, cultura, cuidado e presença.',
-  note:es?'Producción de eventos · Dirección creativa · Experiencias de marca · Cultura nocturna':'Produção de eventos · Direção criativa · Experiências de marca · Cultura noturna',
-  metric1Value:'2',metric1Label:es?'Países de origen y construcción':'Países na nossa história',
-  metric2Value:'2',metric2Label:es?'Culturas construyendo juntas':'Culturas construindo juntas',
-  metric3Value:'PT + ES',metric3Label:es?'Comunicación bilingüe':'Comunicação bilíngue',
-  metric4Value:'1',metric4Label:es?'Marca, múltiples experiencias':'Marca, múltiplas experiências',
+  eyebrow:es?'De Venezuela a Brasil':'Da Venezuela para o Brasil',
+  title:es?'GTRZ NACE EN LA PISTA.':'A GTRZ NASCE DA PISTA.',
+  body1:es?'GTRZ nació en Venezuela y hoy se construye en Brasil por venezolanos y brasileños. Ese origen aparece sin disfraz: en el idioma, los ritmos, las referencias y la forma de recibir a quien llega.':'A GTRZ nasceu na Venezuela e hoje é construída no Brasil por venezuelanos e brasileiros. Essa origem aparece sem fantasia: no idioma, nos ritmos, nas referências e na forma de receber quem chega.',
+  body2:es?'Cada edición empieza con una pregunta simple: ¿qué noche vale la pena vivir? De ahí salen la curaduría musical, la dirección visual, la operación y los detalles que hacen que cada fiesta tenga nombre propio.':'Cada edição começa com uma pergunta simples: que noite vale a pena viver? A partir daí entram curadoria musical, direção visual, operação e os detalhes que fazem a festa ter nome próprio.',
+  note:es?'NO REPETIMOS FÓRMULAS. CADA EDICIÓN NECESITA UNA RAZÓN PARA EXISTIR.':'NÃO REPETIMOS FÓRMULAS. CADA EDIÇÃO PRECISA TER UM MOTIVO PARA EXISTIR.',
+  metric1Value:es?'ORIGEN LATINO REAL':'ORIGEM LATINA REAL',metric1Label:es?'Venezuela forma parte de la historia de GTRZ, no de una campaña.':'Venezuela faz parte da história da GTRZ, não de uma campanha.',
+  metric2Value:es?'PISTA CON CURADURÍA':'PISTA COM CURADORIA',metric2Label:es?'Reggaeton, dembow, salsa, funk y otros ritmos entran cuando tienen sentido para esa noche.':'Reggaeton, dembow, salsa, funk e outros ritmos entram quando fazem sentido para aquela noite.',
+  metric3Value:'PT + ES',metric3Label:es?'La comunicación bilingüe está en el evento, la atención y el contenido.':'A comunicação bilíngue está no evento, no atendimento e no conteúdo.',
+  metric4Value:es?'DEL CONCEPTO A LA OPERACIÓN':'DO CONCEITO À OPERAÇÃO',metric4Label:es?'Identidad visual, equipo, entrada, bar y ambientación se piensan como una sola experiencia.':'Identidade visual, equipe, entrada, bar e ambientação são pensados como uma experiência só.',
   ...content
 };
 const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
+const proofs=[
+  [c.metric1Value,c.metric1Label],
+  [c.metric2Value,c.metric2Label],
+  [c.metric3Value,c.metric3Label],
+  [c.metric4Value,c.metric4Label]
+];
 ---
-<section id="sobre" class="about" data-section="about">
-  <div class="wrap about-grid">
-    <div class="reveal"><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{lead} <span class="red">{accent}</span></h2></div>
-    <div class="about-copy reveal"><p>{c.body1}</p><p>{c.body2}</p><div class="about-note">{c.note}</div></div>
-  </div>
-</section>
-<section class="numbers" aria-label={es?'GTRZ en números':'GTRZ em números'}>
-  <div class="wrap numbers-grid">
-    <div class="number-card"><strong>{c.metric1Value}</strong><span>{c.metric1Label}</span></div>
-    <div class="number-card"><strong>{c.metric2Value}</strong><span>{c.metric2Label}</span></div>
-    <div class="number-card"><strong>{c.metric3Value}</strong><span>{c.metric3Label}</span></div>
-    <div class="number-card"><strong>{c.metric4Value}</strong><span>{c.metric4Label}</span></div>
+<section id="sobre" class="about about-editorial" data-section="about">
+  <div class="wrap">
+    <div class="about-editorial-grid">
+      <div class="about-title-block reveal">
+        <div class="eyebrow">{c.eyebrow}</div>
+        <h2 class="display">{lead} <span class="red">{accent}</span></h2>
+      </div>
+      <div class="about-copy about-copy-editorial reveal">
+        <p class="about-lead">{c.body1}</p>
+        <p>{c.body2}</p>
+      </div>
+    </div>
+
+    <div class="about-signature reveal"><span>{c.note}</span></div>
+
+    <div class="about-proof-grid" aria-label={es?'Lo que define a GTRZ':'O que define a GTRZ'}>
+      {proofs.map(([title,body],index)=><article class="about-proof reveal">
+        <small>{String(index+1).padStart(2,'0')}</small>
+        <h3>{title}</h3>
+        <p>{body}</p>
+      </article>)}
+    </div>
   </div>
 </section>
