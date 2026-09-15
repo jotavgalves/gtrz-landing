@@ -1,11 +1,14 @@
-import { useEffect,useMemo,useState } from 'react';
+import { useEffect,useState } from 'react';
 import { api } from '../../lib/api';
-import { Icon } from '../../components/Icons';
-import { Badge,Notice,Panel } from '../../components/StateViews';
+import { Icon,type IconName } from '../../components/Icons';
+import { Badge,Notice } from '../../components/StateViews';
 
 type Locale='pt-BR'|'es';
 type CopyTab='interface'|'freelancerPage'|'partnershipPage'|'eventPage'|'popup';
-type FieldDef={key:string;label:string;multiline?:boolean};
+type PairField={key:string;label:string;help?:string;multiline?:boolean};
+type PairGroup={title:string;description:string;fields:PairField[]};
+type InterfaceField={ptKey:string;esKey:string;label:string;help?:string;multiline?:boolean};
+type InterfaceGroup={title:string;description:string;fields:InterfaceField[]};
 
 const chromeDefaults:any={
   metaTitlePt:'GTRZ Eventos',metaTitleEs:'GTRZ Eventos',
@@ -32,41 +35,191 @@ const copyDefaults:Record<Locale,Record<string,Record<string,string>>>={
   }
 };
 
-const groupFields:Record<Exclude<CopyTab,'interface'>,FieldDef[]>={
-  freelancerPage:[
-    {key:'seoTitle',label:'Título SEO'},{key:'eyebrow',label:'Linha de apoio'},{key:'title',label:'Título'},{key:'intro',label:'Texto de abertura',multiline:true},{key:'nameLabel',label:'Campo · nome'},{key:'whatsappLabel',label:'Campo · WhatsApp'},{key:'emailLabel',label:'Campo · e-mail'},{key:'cityLabel',label:'Campo · cidade'},{key:'stateLabel',label:'Campo · estado'},{key:'instagramLabel',label:'Campo · Instagram'},{key:'rolesLabel',label:'Campo · áreas'},{key:'rolesPlaceholder',label:'Placeholder · áreas'},{key:'portfolioLabel',label:'Campo · portfólio'},{key:'portfolioPlaceholder',label:'Placeholder · portfólio'},{key:'availabilityLabel',label:'Campo · disponibilidade'},{key:'submitLabel',label:'Botão de envio'},{key:'successMessage',label:'Mensagem de sucesso',multiline:true},{key:'errorMessage',label:'Mensagem de erro',multiline:true}
-  ],
-  partnershipPage:[
-    {key:'seoTitle',label:'Título SEO'},{key:'eyebrow',label:'Linha de apoio'},{key:'title',label:'Título'},{key:'intro',label:'Texto de abertura',multiline:true},{key:'contactNameLabel',label:'Campo · nome'},{key:'companyNameLabel',label:'Campo · empresa/projeto'},{key:'typeLabel',label:'Campo · tipo'},{key:'typePlaceholder',label:'Opção vazia'},{key:'venueOption',label:'Opção · casa/espaço'},{key:'brandOption',label:'Opção · marca'},{key:'artistOption',label:'Opção · artista'},{key:'supplierOption',label:'Opção · fornecedor'},{key:'otherOption',label:'Opção · outro'},{key:'cityLabel',label:'Campo · cidade'},{key:'emailLabel',label:'Campo · e-mail'},{key:'whatsappLabel',label:'Campo · WhatsApp'},{key:'messageLabel',label:'Campo · mensagem'},{key:'submitLabel',label:'Botão de envio'},{key:'successMessage',label:'Mensagem de sucesso',multiline:true},{key:'errorMessage',label:'Mensagem de erro',multiline:true}
-  ],
-  eventPage:[
-    {key:'backLabel',label:'Voltar'},{key:'dateLabel',label:'Rótulo · data'},{key:'venueLabel',label:'Rótulo · local'},{key:'aboutLabel',label:'Título · sobre'},{key:'lineupEyebrow',label:'Linha de apoio · line-up'},{key:'lineupTitle',label:'Título · line-up'},{key:'ticketsEyebrow',label:'Linha de apoio · ingressos'},{key:'ticketsTitle',label:'Título · ingressos'},{key:'availableLabel',label:'Status · disponível'},{key:'draftLabel',label:'Status · rascunho'},{key:'soldOutLabel',label:'Status · esgotado'},{key:'closedLabel',label:'Status · encerrado'},{key:'buyLabel',label:'Botão comprar'},{key:'noTickets',label:'Sem ingressos',multiline:true},{key:'notFoundTitle',label:'Evento não encontrado'},{key:'notFoundCta',label:'Botão do 404'}
-  ],
-  popup:[
-    {key:'multiHeader',label:'Cabeçalho · vários eventos'},{key:'singleHeader',label:'Cabeçalho · um evento'},{key:'closeLabel',label:'Acessibilidade · fechar'},{key:'eyebrow',label:'Linha de apoio'},{key:'multiTitleLine1',label:'Título múltiplo · linha 1'},{key:'multiTitleLine2',label:'Título múltiplo · linha 2'},{key:'multiTitleAccent',label:'Título múltiplo · destaque'},{key:'singleTitleLine1',label:'Título único · linha 1'},{key:'singleTitleLine2',label:'Título único · linha 2'},{key:'singleTitleAccent',label:'Título único · destaque'},{key:'multiBody',label:'Texto · vários eventos',multiline:true},{key:'singleFallbackBody',label:'Texto padrão · um evento',multiline:true},{key:'soldOutLabel',label:'Status esgotado'},{key:'eventCta',label:'CTA do evento'},{key:'continueLabel',label:'Botão continuar'}
-  ]
+const tabMeta:Record<CopyTab,{label:string;title:string;description:string;icon:IconName}>={
+  interface:{label:'Interface global',title:'Interface global',description:'SEO, menu principal, seletor inicial de idioma e rodapé do institucional.',icon:'globe'},
+  freelancerPage:{label:'Trabalhe conosco',title:'Trabalhe conosco',description:'Textos da página e do formulário de cadastro de freelancers.',icon:'people'},
+  partnershipPage:{label:'Parcerias',title:'Parcerias',description:'Textos da página, formulário e opções de proposta comercial.',icon:'commercial'},
+  eventPage:{label:'Página de evento',title:'Página de evento',description:'Rótulos, estados, ingressos, line-up e mensagens das páginas de eventos.',icon:'events'},
+  popup:{label:'Popup de eventos',title:'Popup de eventos',description:'Cabeçalhos, chamadas e botões do popup automático de agenda.',icon:'marketing'}
 };
 
-const interfaceFields=(locale:Locale):FieldDef[]=>locale==='pt-BR'?[{key:'metaTitlePt',label:'Título SEO'},{key:'metaDescriptionPt',label:'Descrição SEO',multiline:true},{key:'eventsLabelPt',label:'Botão Eventos'},{key:'footerPt',label:'Rodapé'},{key:'langShortPt',label:'Abreviação PT'},{key:'gateEyebrowPt',label:'Porta de idioma · linha de apoio'},{key:'gateTitlePrefixPt',label:'Porta · título'},{key:'gateTitleHighlightPt',label:'Porta · destaque'},{key:'gateBodyPt',label:'Porta · texto'},{key:'gateHintPt',label:'Porta · dica'},{key:'gateOptionPt',label:'Opção Português'}]:[{key:'metaTitleEs',label:'Título SEO'},{key:'metaDescriptionEs',label:'Descrição SEO',multiline:true},{key:'eventsLabelEs',label:'Botón Eventos'},{key:'footerEs',label:'Pie de página'},{key:'langShortEs',label:'Abreviação ES'},{key:'gateEyebrowEs',label:'Puerta de idioma · línea de apoyo'},{key:'gateTitlePrefixEs',label:'Puerta · título'},{key:'gateTitleHighlightEs',label:'Puerta · destaque'},{key:'gateBodyEs',label:'Puerta · texto'},{key:'gateHintEs',label:'Puerta · dica'},{key:'gateOptionEs',label:'Opción Español'}];
+const interfaceGroups:InterfaceGroup[]=[
+  {title:'SEO e ações globais',description:'Metadados principais e CTA fixo do site.',fields:[
+    {ptKey:'metaTitlePt',esKey:'metaTitleEs',label:'Título SEO',help:'Título exibido na aba do navegador e mecanismos de busca.'},
+    {ptKey:'metaDescriptionPt',esKey:'metaDescriptionEs',label:'Descrição SEO',help:'Resumo institucional para busca e compartilhamento.',multiline:true},
+    {ptKey:'eventsLabelPt',esKey:'eventsLabelEs',label:'Botão Eventos',help:'Texto do botão de acesso à agenda.'}
+  ]},
+  {title:'Seletor inicial de idioma',description:'Toda a comunicação mostrada antes da entrada no site.',fields:[
+    {ptKey:'langShortPt',esKey:'langShortEs',label:'Abreviação do idioma',help:'Texto curto usado no seletor PT / ES.'},
+    {ptKey:'gateEyebrowPt',esKey:'gateEyebrowEs',label:'Linha de apoio'},
+    {ptKey:'gateTitlePrefixPt',esKey:'gateTitlePrefixEs',label:'Título principal'},
+    {ptKey:'gateTitleHighlightPt',esKey:'gateTitleHighlightEs',label:'Trecho em destaque'},
+    {ptKey:'gateBodyPt',esKey:'gateBodyEs',label:'Texto explicativo',multiline:true},
+    {ptKey:'gateHintPt',esKey:'gateHintEs',label:'Dica inferior',multiline:true},
+    {ptKey:'gateOptionPt',esKey:'gateOptionEs',label:'Nome da opção de idioma'}
+  ]},
+  {title:'Rodapé',description:'Assinatura textual no fim do institucional.',fields:[
+    {ptKey:'footerPt',esKey:'footerEs',label:'Texto do rodapé'}
+  ]}
+];
+
+const copyGroups:Record<Exclude<CopyTab,'interface'>,PairGroup[]>={
+  freelancerPage:[
+    {title:'Página e SEO',description:'Apresentação da página antes do formulário.',fields:[
+      {key:'seoTitle',label:'Título SEO'},{key:'eyebrow',label:'Linha de apoio'},{key:'title',label:'Título principal'},{key:'intro',label:'Texto de abertura',multiline:true}
+    ]},
+    {title:'Campos do formulário',description:'Rótulos e placeholders vistos pelo candidato.',fields:[
+      {key:'nameLabel',label:'Nome completo'},{key:'whatsappLabel',label:'WhatsApp'},{key:'emailLabel',label:'E-mail'},{key:'cityLabel',label:'Cidade'},{key:'stateLabel',label:'Estado'},{key:'instagramLabel',label:'Instagram'},{key:'rolesLabel',label:'Áreas de atuação'},{key:'rolesPlaceholder',label:'Placeholder · áreas'},{key:'portfolioLabel',label:'Portfólio'},{key:'portfolioPlaceholder',label:'Placeholder · portfólio'},{key:'availabilityLabel',label:'Disponibilidade / observações'}
+    ]},
+    {title:'Ação e feedback',description:'Botão de envio e mensagens apresentadas após a tentativa.',fields:[
+      {key:'submitLabel',label:'Botão de envio'},{key:'successMessage',label:'Mensagem de sucesso',multiline:true},{key:'errorMessage',label:'Mensagem de erro',multiline:true}
+    ]}
+  ],
+  partnershipPage:[
+    {title:'Página e SEO',description:'Apresentação da área comercial antes do formulário.',fields:[
+      {key:'seoTitle',label:'Título SEO'},{key:'eyebrow',label:'Linha de apoio'},{key:'title',label:'Título principal'},{key:'intro',label:'Texto de abertura',multiline:true}
+    ]},
+    {title:'Campos do formulário',description:'Rótulos preenchidos por marcas, casas, artistas e fornecedores.',fields:[
+      {key:'contactNameLabel',label:'Nome do contato'},{key:'companyNameLabel',label:'Empresa / projeto'},{key:'typeLabel',label:'Tipo de parceria'},{key:'cityLabel',label:'Cidade'},{key:'emailLabel',label:'E-mail'},{key:'whatsappLabel',label:'WhatsApp'},{key:'messageLabel',label:'Mensagem / ideia'}
+    ]},
+    {title:'Opções de parceria',description:'Itens disponíveis no seletor de tipo de proposta.',fields:[
+      {key:'typePlaceholder',label:'Opção vazia'},{key:'venueOption',label:'Casa / espaço'},{key:'brandOption',label:'Marca / patrocínio'},{key:'artistOption',label:'Artista / projeto cultural'},{key:'supplierOption',label:'Fornecedor'},{key:'otherOption',label:'Outro'}
+    ]},
+    {title:'Ação e feedback',description:'Botão de envio e mensagens de retorno.',fields:[
+      {key:'submitLabel',label:'Botão de envio'},{key:'successMessage',label:'Mensagem de sucesso',multiline:true},{key:'errorMessage',label:'Mensagem de erro',multiline:true}
+    ]}
+  ],
+  eventPage:[
+    {title:'Estrutura da página',description:'Rótulos gerais usados em qualquer edição publicada.',fields:[
+      {key:'backLabel',label:'Voltar'},{key:'dateLabel',label:'Data'},{key:'venueLabel',label:'Local'},{key:'aboutLabel',label:'Sobre o evento'}
+    ]},
+    {title:'Line-up e ingressos',description:'Títulos das áreas de artistas e venda.',fields:[
+      {key:'lineupEyebrow',label:'Linha de apoio · line-up'},{key:'lineupTitle',label:'Título · line-up'},{key:'ticketsEyebrow',label:'Linha de apoio · ingressos'},{key:'ticketsTitle',label:'Título · ingressos'},{key:'buyLabel',label:'Botão comprar'}
+    ]},
+    {title:'Estados de venda',description:'Textos associados ao status dos ingressos e do evento.',fields:[
+      {key:'availableLabel',label:'Disponível'},{key:'draftLabel',label:'Em breve / rascunho'},{key:'soldOutLabel',label:'Esgotado'},{key:'closedLabel',label:'Encerrado'}
+    ]},
+    {title:'Estados vazios e erro',description:'Mensagens usadas quando não há venda ou a rota não existe.',fields:[
+      {key:'noTickets',label:'Sem ingressos',multiline:true},{key:'notFoundTitle',label:'Evento não encontrado'},{key:'notFoundCta',label:'Botão do 404'}
+    ]}
+  ],
+  popup:[
+    {title:'Estrutura do popup',description:'Cabeçalhos e elementos comuns a qualquer configuração.',fields:[
+      {key:'multiHeader',label:'Cabeçalho · vários eventos'},{key:'singleHeader',label:'Cabeçalho · um evento'},{key:'closeLabel',label:'Acessibilidade · fechar'},{key:'eyebrow',label:'Linha de apoio'}
+    ]},
+    {title:'Quando há vários eventos',description:'Chamada usada quando mais de uma cidade está ativa.',fields:[
+      {key:'multiTitleLine1',label:'Título · linha 1'},{key:'multiTitleLine2',label:'Título · linha 2'},{key:'multiTitleAccent',label:'Título · destaque'},{key:'multiBody',label:'Texto explicativo',multiline:true}
+    ]},
+    {title:'Quando há um evento',description:'Chamada usada quando existe uma única edição ativa.',fields:[
+      {key:'singleTitleLine1',label:'Título · linha 1'},{key:'singleTitleLine2',label:'Título · linha 2'},{key:'singleTitleAccent',label:'Título · destaque'},{key:'singleFallbackBody',label:'Texto padrão',multiline:true}
+    ]},
+    {title:'Estados e ações',description:'Status e botões de navegação do popup.',fields:[
+      {key:'soldOutLabel',label:'Esgotado'},{key:'eventCta',label:'CTA do evento'},{key:'continueLabel',label:'Continuar no institucional'}
+    ]}
+  ]
+};
 
 function safeParse(raw:string|undefined,fallback:any){try{return raw?JSON.parse(raw):fallback}catch{return fallback}}
 function navText(value:any){return (Array.isArray(value)?value:[]).map((item:any)=>Array.isArray(item)?`${item[0]||''}|${item[1]||''}`:'').filter(Boolean).join('\n')}
 function parseNav(value:string){return value.split('\n').map(line=>line.trim()).filter(Boolean).map(line=>{const [label,...rest]=line.split('|');return [label?.trim()||'',rest.join('|').trim()||'#']}).filter(([label])=>label)}
 
+function CopyInput({value,onChange,multiline=false}:{value:string;onChange:(value:string)=>void;multiline?:boolean}){
+  if(multiline)return <textarea value={value} onChange={e=>onChange(e.target.value)}/>;
+  return <input value={value} onChange={e=>onChange(e.target.value)}/>;
+}
+
 export function PublicCopy(){
   const [tab,setTab]=useState<CopyTab>('interface');
-  const [chrome,setChrome]=useState<any>(chromeDefaults);const [copy,setCopy]=useState<any>(copyDefaults);
-  const [navPt,setNavPt]=useState(navText(chromeDefaults.navPt));const [navEs,setNavEs]=useState(navText(chromeDefaults.navEs));
-  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);
-  const load=async()=>{const r=await api<any>('/api/admin/settings');const rows=r.results||[];const ch=rows.find((x:any)=>x.key==='chrome');const cp=rows.find((x:any)=>x.key==='copy');const nextChrome={...chromeDefaults,...safeParse(ch?.value_json,{})};const stored=safeParse(cp?.value_json,{});const nextCopy:any={'pt-BR':{},es:{}};(['pt-BR','es'] as Locale[]).forEach(locale=>Object.keys(copyDefaults[locale]).forEach(group=>{nextCopy[locale][group]={...copyDefaults[locale][group],...(stored?.[locale]?.[group]||{})}}));setChrome(nextChrome);setCopy(nextCopy);setNavPt(navText(nextChrome.navPt));setNavEs(navText(nextChrome.navEs));};
+  const [chrome,setChromeState]=useState<any>(chromeDefaults);
+  const [copy,setCopyState]=useState<any>(copyDefaults);
+  const [navPt,setNavPtState]=useState(navText(chromeDefaults.navPt));
+  const [navEs,setNavEsState]=useState(navText(chromeDefaults.navEs));
+  const [message,setMessage]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [dirty,setDirty]=useState(false);
+
+  const load=async()=>{
+    const r=await api<any>('/api/admin/settings');
+    const rows=r.results||[];
+    const ch=rows.find((x:any)=>x.key==='chrome');
+    const cp=rows.find((x:any)=>x.key==='copy');
+    const nextChrome={...chromeDefaults,...safeParse(ch?.value_json,{})};
+    const stored=safeParse(cp?.value_json,{});
+    const nextCopy:any={'pt-BR':{},es:{}};
+    (['pt-BR','es'] as Locale[]).forEach(locale=>Object.keys(copyDefaults[locale]).forEach(group=>{
+      nextCopy[locale][group]={...copyDefaults[locale][group],...(stored?.[locale]?.[group]||{})};
+    }));
+    setChromeState(nextChrome);setCopyState(nextCopy);
+    setNavPtState(navText(nextChrome.navPt));setNavEsState(navText(nextChrome.navEs));
+    setDirty(false);
+  };
+
   useEffect(()=>{load().catch(e=>setMessage(e.message));},[]);
-  const save=async()=>{setBusy(true);setMessage('');try{if(tab==='interface')await api('/api/admin/settings/chrome',{method:'PUT',body:JSON.stringify({...chrome,navPt:parseNav(navPt),navEs:parseNav(navEs)})});else await api('/api/admin/settings/copy',{method:'PUT',body:JSON.stringify(copy)});setMessage('Textos publicados salvos.');await load();}catch(e:any){setMessage(e.message)}finally{setBusy(false)}};
-  const updateCopy=(locale:Locale,group:string,key:string,value:string)=>setCopy((prev:any)=>({...prev,[locale]:{...prev[locale],[group]:{...prev[locale][group],[key]:value}}}));
-  const tabTitle=useMemo(()=>({interface:'Interface global',freelancerPage:'Trabalhe conosco',partnershipPage:'Parcerias',eventPage:'Página de evento',popup:'Popup de eventos'}[tab]),[tab]);
-  return <div className="module-stack"><Panel title="Textos do site" eyebrow="Editorial" description="Controle central dos textos públicos. A Home é editada em Conteúdo; aqui ficam interface global, páginas auxiliares, página de evento e popup. PT e ES são independentes." action={<button className="primary" onClick={save} disabled={busy}><Icon name="save" size={16}/>{busy?'Salvando…':'Salvar textos'}</button>}>
-    <div className="segment-tabs"><button className={tab==='interface'?'active':''} onClick={()=>setTab('interface')}>Interface</button><button className={tab==='freelancerPage'?'active':''} onClick={()=>setTab('freelancerPage')}>Trabalhe conosco</button><button className={tab==='partnershipPage'?'active':''} onClick={()=>setTab('partnershipPage')}>Parcerias</button><button className={tab==='eventPage'?'active':''} onClick={()=>setTab('eventPage')}>Evento</button><button className={tab==='popup'?'active':''} onClick={()=>setTab('popup')}>Popup</button></div>
-    <div className="editor-section-head"><div><small>EDIÇÃO BILÍNGUE</small><h3>{tabTitle}</h3></div><Badge tone="green">PT + ES</Badge></div>
-    <div className="locale-grid">{(['pt-BR','es'] as Locale[]).map(locale=><section className="locale-editor" key={locale}><div className="locale-editor-head"><div><Badge tone="red">{locale==='pt-BR'?'PT':'ES'}</Badge><h4>{locale==='pt-BR'?'Português':'Español'}</h4></div><small>{tab==='interface'?interfaceFields(locale).length:groupFields[tab].length} textos</small></div>{(tab==='interface'?interfaceFields(locale):groupFields[tab]).map(field=><label className="field" key={field.key}><span>{field.label}</span>{field.multiline?<textarea value={tab==='interface'?(chrome[field.key]||''):(copy[locale]?.[tab]?.[field.key]||'')} onChange={e=>tab==='interface'?setChrome((v:any)=>({...v,[field.key]:e.target.value})):updateCopy(locale,tab,field.key,e.target.value)}/>:<input value={tab==='interface'?(chrome[field.key]||''):(copy[locale]?.[tab]?.[field.key]||'')} onChange={e=>tab==='interface'?setChrome((v:any)=>({...v,[field.key]:e.target.value})):updateCopy(locale,tab,field.key,e.target.value)}/>}</label>)}{tab==='interface'&&<label className="field"><span>{locale==='pt-BR'?'Menu PT':'Menú ES'}</span><textarea className="code-editor compact" value={locale==='pt-BR'?navPt:navEs} onChange={e=>locale==='pt-BR'?setNavPt(e.target.value):setNavEs(e.target.value)}/><small>Nome|#ancora · uma linha por item</small></label>}</section>)}</div>
-    {message&&<Notice tone={message.toLowerCase().includes('erro')||message.toLowerCase().includes('error')?'error':'success'}>{message}</Notice>}
-  </Panel></div>;
+
+  const setChrome=(key:string,value:string)=>{setChromeState((prev:any)=>({...prev,[key]:value}));setDirty(true)};
+  const setNavPt=(value:string)=>{setNavPtState(value);setDirty(true)};
+  const setNavEs=(value:string)=>{setNavEsState(value);setDirty(true)};
+  const updateCopy=(locale:Locale,group:string,key:string,value:string)=>{
+    setCopyState((prev:any)=>({...prev,[locale]:{...prev[locale],[group]:{...prev[locale][group],[key]:value}}}));
+    setDirty(true);
+  };
+
+  const save=async()=>{
+    setBusy(true);setMessage('');
+    try{
+      await Promise.all([
+        api('/api/admin/settings/chrome',{method:'PUT',body:JSON.stringify({...chrome,navPt:parseNav(navPt),navEs:parseNav(navEs)})}),
+        api('/api/admin/settings/copy',{method:'PUT',body:JSON.stringify(copy)})
+      ]);
+      setMessage('Alterações publicadas com sucesso.');
+      await load();
+    }catch(e:any){setMessage(e.message)}finally{setBusy(false)}
+  };
+
+  const discard=async()=>{
+    if(dirty&&!confirm('Descartar as alterações ainda não salvas?'))return;
+    setMessage('');
+    await load().catch(e=>setMessage(e.message));
+  };
+
+  const active=tabMeta[tab];
+  const activeGroups=tab==='interface'?[]:copyGroups[tab];
+  const totalFields=tab==='interface'?interfaceGroups.reduce((n,g)=>n+g.fields.length,0)+1:activeGroups.reduce((n,g)=>n+g.fields.length,0);
+
+  return <div className="copy-workspace-v2">
+    <div className="copy-controlbar-v2">
+      <nav className="copy-tabs-v2" aria-label="Áreas de texto">
+        {(Object.keys(tabMeta) as CopyTab[]).map(id=>{
+          const item=tabMeta[id];
+          return <button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><Icon name={item.icon} size={16}/><span>{item.label}</span></button>;
+        })}
+      </nav>
+      <div className="copy-control-actions-v2">
+        {dirty&&<span className="copy-unsaved-v2"><i/>Alterações não salvas</span>}
+        <button onClick={discard} disabled={busy||!dirty}>Descartar</button>
+        <button className="primary" onClick={save} disabled={busy||!dirty}><Icon name="save" size={16}/>{busy?'Salvando…':'Salvar alterações'}</button>
+      </div>
+    </div>
+
+    {message&&<Notice>{message}</Notice>}
+
+    <section className="copy-overview-v2">
+      <div><small>EDIÇÃO BILÍNGUE</small><h2>{active.title}</h2><p>{active.description}</p></div>
+      <div className="copy-overview-meta-v2"><span><strong>{totalFields}</strong> campos</span><Badge tone="green">PT + ES</Badge></div>
+    </section>
+
+    <div className="copy-home-note-v2"><Icon name="content" size={18}/><div><strong>Textos da Home</strong><span>Hero, Sobre, Ritmos, Diferenciais, agenda, equipe, freelancers, parcerias, manifesto, Instagram e contato são editados em <b>Conteúdo → Home</b>. Esta área controla interface global e páginas auxiliares.</span></div></div>
+
+    <div className="copy-language-header-v2" aria-hidden="true"><span>Campo</span><div><Badge tone="red">PT</Badge><strong>Português</strong></div><div><Badge tone="red">ES</Badge><strong>Español</strong></div></div>
+
+    {tab==='interface'&&<div className="copy-groups-v2">
+      {interfaceGroups.slice(0,1).map(group=><section className="copy-group-v2" key={group.title}><header><div><h3>{group.title}</h3><p>{group.description}</p></div><span>{group.fields.length} campos</span></header><div className="copy-rows-v2">{group.fields.map(field=><div className={`copy-row-v2 ${field.multiline?'multiline':''}`} key={field.ptKey}><div className="copy-field-meta-v2"><strong>{field.label}</strong>{field.help&&<small>{field.help}</small>}</div><div className="copy-locale-field-v2" data-locale="PT"><CopyInput value={String(chrome[field.ptKey]??'')} onChange={value=>setChrome(field.ptKey,value)} multiline={field.multiline}/></div><div className="copy-locale-field-v2" data-locale="ES"><CopyInput value={String(chrome[field.esKey]??'')} onChange={value=>setChrome(field.esKey,value)} multiline={field.multiline}/></div></div>)}</div></section>)}
+
+      <section className="copy-group-v2"><header><div><h3>Navegação principal</h3><p>Um item por linha no formato <code>Rótulo|#âncora</code>. A ordem das linhas define a ordem no menu.</p></div><span>menu</span></header><div className="copy-rows-v2"><div className="copy-row-v2 multiline"><div className="copy-field-meta-v2"><strong>Links do menu</strong><small>Edite nomes e destinos sem alterar o código.</small></div><div className="copy-locale-field-v2" data-locale="PT"><textarea className="copy-nav-textarea-v2" value={navPt} onChange={e=>setNavPt(e.target.value)}/></div><div className="copy-locale-field-v2" data-locale="ES"><textarea className="copy-nav-textarea-v2" value={navEs} onChange={e=>setNavEs(e.target.value)}/></div></div></div></section>
+
+      {interfaceGroups.slice(1).map(group=><section className="copy-group-v2" key={group.title}><header><div><h3>{group.title}</h3><p>{group.description}</p></div><span>{group.fields.length} campos</span></header><div className="copy-rows-v2">{group.fields.map(field=><div className={`copy-row-v2 ${field.multiline?'multiline':''}`} key={field.ptKey}><div className="copy-field-meta-v2"><strong>{field.label}</strong>{field.help&&<small>{field.help}</small>}</div><div className="copy-locale-field-v2" data-locale="PT"><CopyInput value={String(chrome[field.ptKey]??'')} onChange={value=>setChrome(field.ptKey,value)} multiline={field.multiline}/></div><div className="copy-locale-field-v2" data-locale="ES"><CopyInput value={String(chrome[field.esKey]??'')} onChange={value=>setChrome(field.esKey,value)} multiline={field.multiline}/></div></div>)}</div></section>)}
+    </div>}
+
+    {tab!=='interface'&&<div className="copy-groups-v2">{activeGroups.map(group=><section className="copy-group-v2" key={group.title}><header><div><h3>{group.title}</h3><p>{group.description}</p></div><span>{group.fields.length} campos</span></header><div className="copy-rows-v2">{group.fields.map(field=><div className={`copy-row-v2 ${field.multiline?'multiline':''}`} key={field.key}><div className="copy-field-meta-v2"><strong>{field.label}</strong>{field.help&&<small>{field.help}</small>}</div><div className="copy-locale-field-v2" data-locale="PT"><CopyInput value={String(copy?.['pt-BR']?.[tab]?.[field.key]??'')} onChange={value=>updateCopy('pt-BR',tab,field.key,value)} multiline={field.multiline}/></div><div className="copy-locale-field-v2" data-locale="ES"><CopyInput value={String(copy?.es?.[tab]?.[field.key]??'')} onChange={value=>updateCopy('es',tab,field.key,value)} multiline={field.multiline}/></div></div>)}</div></section>)}</div>}
+  </div>;
 }
