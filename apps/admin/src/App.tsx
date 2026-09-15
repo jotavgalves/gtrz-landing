@@ -115,7 +115,7 @@ export function App(){
   return <div className="control-app">
     {menuOpen&&<button className="mobile-backdrop" aria-label="Fechar menu" onClick={()=>setMenuOpen(false)}/>}
     <aside className={`sidebar ${menuOpen?'open':''}`}>
-      <div className="sidebar-head"><ControlBrand/><button className="icon-button sidebar-close" onClick={()=>setMenuOpen(false)} aria-label="Fechar menu"><Icon name="close"/></button></div>
+      <div className="sidebar-head"><ControlBrand/></div>
       <nav className="sidebar-nav">{groups.map(group=><div className="nav-group" key={group}><span className="nav-group-label">{group}</span>{items.filter(i=>i.group===group).map(item=><button className={`nav-item ${view===item.id?'active':''}`} onClick={()=>go(item.id)} key={item.id}><i><Icon name={item.icon} size={18}/></i><span><strong>{item.label}</strong><small>{item.desc}</small></span>{view===item.id&&<b/>}</button>)}</div>)}</nav>
       <div className="sidebar-foot"><a href="https://gtrz.com.br/" target="_blank" rel="noreferrer"><Icon name="external" size={16}/><span>Ver site publicado</span></a><div className="sidebar-runtime"><span className="runtime-dot"/><div><strong>{environment}</strong><small>Cloudflare</small></div></div></div>
     </aside>
