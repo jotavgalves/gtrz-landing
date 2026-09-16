@@ -141,6 +141,10 @@ export function Events(){
       const theme=parseTheme(detail?.event?.theme_json);
       const nextTheme={...theme,posterMediaId:posterMediaId||null};
       await api(`/api/admin/events/${active.id}`,{method:'PATCH',body:JSON.stringify({theme:nextTheme})});
+      const slug=active.slug;
+      reopenSlug.current=slug;
+      lastDetectedSlug.current='';
+      setInstance(value=>value+1);
       setNotice(posterMediaId?'Post oficial salvo. A arte já está vinculada à página pública do evento.':'Post oficial removido da página pública.');
     }catch(error:any){
       setNoticeError(true);
