@@ -4,6 +4,25 @@ import { audit } from '../../services/audit';
 
 export const peopleAdminRoutes = new Hono<{ Bindings: Env }>();
 const has=(value:unknown,key:string)=>Object.prototype.hasOwnProperty.call(value||{},key);
+const digits=(value:unknown)=>String(value??'').replace(/\D/g,'');
+const upper=(value:unknown,max=100)=>String(value??'').trim().replace(/\s+/g,' ').toLocaleUpperCase('pt-BR').slice(0,max);
+const defaultRoles=['DJ','FOTÓGRAFO(A)','VIDEOMAKER','SEGURANÇA','BOMBEIRO(A)','RECEPÇÃO','BARMAN','GARÇOM','LIMPEZA','OUTROS'];
+
+peopleAdminRoutes.get('/freelancer-config',async(c)=>{
+  const row=await c.env.DB.prepare("SELECT value_json FROM site_settings WHERE key='recruitment' LIMIT 1").first<{value_json:string}>();
+  try{return c.json(JSON.parse(row?.value_json||'{}'))}catch{return c.json({whatsapp:'',roles:defaultRoles})}
+});
+
+peopleAdminRoutes.patch('/freelancer-config',async(c)=>{
+  const b=await c.req.json<any>().catch(()=>({}));
+  const roles=[...new Set((Array.isArray(b.roles)?b.roles:[]).map((x:unknown)=>upper(x,80)).filter(Boolean))].slice(0,40);
+  if(!roles.length)return c.json({error:'roles_required'},400);
+  if(!roles.includes('OUTROS'))roles.push('OUTROS');
+  const config={whatsapp:digits(b.whatsapp).slice(0,15),roles};
+  await c.env.DB.prepare(`INSERT INTO site_settings(key,value_json,updated_at) VALUES('recruitment',?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value_json=excluded.value_json,updated_at=CURRENT_TIMESTAMP`).bind(JSON.stringify(config)).run();
+  await audit(c.env,'update','site_setting','recruitment');
+  return c.json(config);
+});
 
 peopleAdminRoutes.get('/freelancers',async(c)=>{
   return c.json(await c.env.DB.prepare('SELECT * FROM freelancer_applications ORDER BY created_at DESC LIMIT 500').all());
