@@ -2,7 +2,11 @@
 import type { ChromeSettings,Locale } from '@/lib/cms';
 const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
 const es=locale==='es';
-const eyebrow=es?(chrome.gateEyebrowEs||chrome.gateEyebrow||'Venezuela → Brasil'):(chrome.gateEyebrowPt||chrome.gateEyebrow||'Venezuela → Brasil');
+const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
+const configuredEyebrow=es?(chrome.gateEyebrowEs||chrome.gateEyebrow):(chrome.gateEyebrowPt||chrome.gateEyebrow);
+const eyebrow=configuredEyebrow&&!legacyCountryFocus.test(configuredEyebrow)
+  ?configuredEyebrow
+  :(es?'GTRZ · EXPERIENCIA LATINA':'GTRZ · EXPERIÊNCIA LATINA');
 const titlePrefix=es?(chrome.gateTitlePrefixEs||'¿CÓMO QUIERES'):(chrome.gateTitlePrefixPt||chrome.gateTitlePrefix||'COMO VOCÊ QUER');
 const titleHighlight=es?(chrome.gateTitleHighlightEs||'ENTRAR?'):(chrome.gateTitleHighlightPt||chrome.gateTitleHighlight||'ENTRAR?');
 const body=es?(chrome.gateBodyEs||'Elige el idioma de la experiencia.'):(chrome.gateBodyPt||'Escolha o idioma da experiência.');
@@ -23,16 +27,21 @@ const optionEs=chrome.gateOptionEs||'Español';
     <p class="language-hint">{hint}</p>
   </div>
 </div>
-<script define:vars={{ locale }}>
-  const gate = document.querySelector('[data-language-gate]');
-  const saved = localStorage.getItem('gtrz_locale');
-  if (!saved && gate) {
+<script>
+  const gate = document.querySelector<HTMLElement>('[data-language-gate]');
+  let saved: string | null = null;
+  try { saved = localStorage.getItem('gtrz_locale'); } catch {}
+  const explicitLanguage = new URLSearchParams(location.search).has('lang');
+
+  if (!saved && !explicitLanguage && gate) {
     gate.hidden = false;
+    gate.removeAttribute('hidden');
     gate.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
   }
-  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
-    localStorage.setItem('gtrz_locale',el.dataset.firstLanguage);
+
+  document.querySelectorAll<HTMLElement>('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
+    try { localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR'); } catch {}
     document.body.classList.remove('modal-open');
   }));
 </script>

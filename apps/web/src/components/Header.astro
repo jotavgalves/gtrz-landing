@@ -20,6 +20,7 @@ const langPt=chrome.langShortPt||'PT';
 const langEs=chrome.langShortEs||'ES';
 const brandHref=onHome?'#top':homeUrl;
 const eventsHref=onHome?'#eventos':`${homeUrl}#eventos`;
+const menuLabel=es?'Abrir navegación':'Abrir navegação';
 ---
 <header class="header">
   <div class="header-in">
@@ -35,10 +36,42 @@ const eventsHref=onHome?'#eventos':`${homeUrl}#eventos`;
         <a class:list={{active:es}} href="?lang=es" data-language="es">{langEs}</a>
       </div>
       <a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>
+      <button class="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
     </div>
   </div>
+
+  <div class="mobile-nav" id="mobileNav" data-mobile-nav data-open="false" aria-hidden="true">
+    <nav class="mobile-nav-links" aria-label={es ? 'Navegación móvil' : 'Navegação móvel'}>
+      {safeNav.map(([label,href]) => <a href={href} data-mobile-nav-link>{label}</a>)}
+    </nav>
+    <div class="mobile-nav-actions">
+      <div class="mobile-nav-language" aria-label="Idioma">
+        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-mobile-nav-link>{langPt}</a>
+        <a class:list={{active:es}} href="?lang=es" data-language="es" data-mobile-nav-link>{langEs}</a>
+      </div>
+      <a class="mobile-nav-events" href={eventsHref} data-track="nav.events.mobile" data-mobile-nav-link>{eventsLabel}</a>
+    </div>
+  </div>
+
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
 </header>
 <script>
-  document.querySelectorAll('[data-language]').forEach((el) => el.addEventListener('click', () => localStorage.setItem('gtrz_locale', el.getAttribute('data-language') || 'pt-BR')));
+  const storeLanguage = (value: string | null) => {
+    try { localStorage.setItem('gtrz_locale', value || 'pt-BR'); } catch {}
+  };
+  document.querySelectorAll<HTMLElement>('[data-language]').forEach((el) => el.addEventListener('click', () => storeLanguage(el.getAttribute('data-language'))));
+
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
+  const mobileNav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  const setMenu = (open: boolean) => {
+    if (!menuButton || !mobileNav) return;
+    menuButton.setAttribute('aria-expanded', String(open));
+    mobileNav.dataset.open = String(open);
+    mobileNav.setAttribute('aria-hidden', String(!open));
+    document.body.classList.toggle('mobile-nav-open', open);
+  };
+  menuButton?.addEventListener('click', () => setMenu(menuButton.getAttribute('aria-expanded') !== 'true'));
+  mobileNav?.querySelectorAll<HTMLElement>('[data-mobile-nav-link]').forEach((link) => link.addEventListener('click', () => setMenu(false)));
+  addEventListener('keydown', (event) => { if (event.key === 'Escape') setMenu(false); });
+  addEventListener('resize', () => { if (innerWidth > 700) setMenu(false); }, {passive:true});
 </script>
