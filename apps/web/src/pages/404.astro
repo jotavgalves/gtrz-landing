@@ -1,0 +1,25 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { getHomePage } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+import '@/styles/global-404.css';
+
+const requested = Astro.url.searchParams.get('lang');
+const locale: Locale = requested === 'es' ? 'es' : 'pt-BR';
+const isEs = locale === 'es';
+const site = await getHomePage();
+Astro.response.status = 404;
+
+const title = isEs ? 'Página no encontrada — GTRZ' : 'Página não encontrada — GTRZ';
+const cta = isEs ? 'VOLVER A GTRZ' : 'VOLTAR PARA A GTRZ';
+const homeHref = locale === 'es' ? '/?lang=es' : '/';
+---
+<SiteLayout locale={locale} title={title} settings={site.settings}>
+  <main class="event-not-found-premium global-not-found-premium" data-section="not_found">
+    <div class="event-shell">
+      <span class="event-eyebrow">404</span>
+      <h1>{isEs ? 'Esta página no está disponible.' : 'Esta página não está disponível.'}</h1>
+      <a href={homeHref}>{cta}</a>
+    </div>
+  </main>
+</SiteLayout>
