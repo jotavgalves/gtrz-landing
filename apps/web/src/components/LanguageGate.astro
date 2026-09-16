@@ -40,8 +40,12 @@ const optionEs=chrome.gateOptionEs||'Español';
     document.body.classList.add('modal-open');
   }
 
-  document.querySelectorAll<HTMLElement>('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
-    try { localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR'); } catch {}
+  document.querySelectorAll<HTMLAnchorElement>('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
+    try {
+      localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR');
+      sessionStorage.setItem('gtrz_language_handoff','1');
+    } catch {}
+    document.documentElement.classList.add('gtrz-popup-handoff');
     document.body.classList.remove('modal-open');
   }));
 </script>
