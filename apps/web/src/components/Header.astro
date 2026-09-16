@@ -56,14 +56,14 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
 </header>
 <script>
-  const storeLanguage = (value) => {
+  const storeLanguage = (value: string | null) => {
     try { localStorage.setItem('gtrz_locale', value || 'pt-BR'); } catch {}
   };
-  document.querySelectorAll('[data-language]').forEach((el) => el.addEventListener('click', () => storeLanguage(el.getAttribute('data-language'))));
+  document.querySelectorAll<HTMLElement>('[data-language]').forEach((el) => el.addEventListener('click', () => storeLanguage(el.getAttribute('data-language'))));
 
-  const menuButton = document.querySelector('[data-mobile-menu-button]');
-  const mobileNav = document.querySelector('[data-mobile-nav]');
-  const setMenu = (open) => {
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
+  const mobileNav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  const setMenu = (open: boolean) => {
     if (!menuButton || !mobileNav) return;
     menuButton.setAttribute('aria-expanded', String(open));
     mobileNav.dataset.open = String(open);
@@ -71,7 +71,7 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     document.body.classList.toggle('mobile-nav-open', open);
   };
   menuButton?.addEventListener('click', () => setMenu(menuButton.getAttribute('aria-expanded') !== 'true'));
-  mobileNav?.querySelectorAll('[data-mobile-nav-link]').forEach((link) => link.addEventListener('click', () => setMenu(false)));
+  mobileNav?.querySelectorAll<HTMLElement>('[data-mobile-nav-link]').forEach((link) => link.addEventListener('click', () => setMenu(false)));
   addEventListener('keydown', (event) => { if (event.key === 'Escape') setMenu(false); });
   addEventListener('resize', () => { if (innerWidth > 700) setMenu(false); }, {passive:true});
 </script>
