@@ -40,6 +40,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <meta name="theme-color" content="#080808" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <style is:inline>html.gtrz-popup-handoff{background:#080808}html.gtrz-popup-handoff body{visibility:hidden}html.gtrz-popup-handoff body .event-popup{visibility:visible}</style>
+    <script is:inline>
+      try { if (sessionStorage.getItem('gtrz_language_handoff') === '1') document.documentElement.classList.add('gtrz-popup-handoff'); } catch {}
+    </script>
   </head>
   <body>
     <Header locale={locale} chrome={chrome} />
