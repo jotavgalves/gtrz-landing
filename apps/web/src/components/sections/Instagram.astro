@@ -7,7 +7,6 @@ const c={
   body:es?'Nuevos eventos, backstage, line-ups, lotes, registros de las fiestas y todo lo que ocurre antes y después de la pista.':'Novos eventos, bastidores, line-ups, lotes, registros das festas e tudo que acontece antes e depois da pista.',
   handle:'@gtrzeventos',url:'https://instagram.com/gtrzeventos',
   cta:es?'Seguir en Instagram':'Seguir no Instagram',
-  liveLabel:es?'Perfil oficial · contenido en vivo':'Perfil oficial · conteúdo ao vivo',
   embedFallback:es?'Abrir @gtrzeventos en Instagram':'Abrir @gtrzeventos no Instagram',
   ...content
 };
@@ -22,11 +21,16 @@ const embedUrl=String(c.url||'https://instagram.com/gtrzeventos').replace('://in
         <h2 class="display">{lead} <span class="red">{accent}</span></h2>
         <p>{c.body}</p>
         <div class="insta-handle">{c.handle}</div>
-        <div class="hero-actions"><a class="btn btn-red" href={c.url} rel="noopener" target="_blank" data-track="instagram.follow">{c.cta}</a></div>
+        <div class="hero-actions">
+          <a class="btn btn-red insta-follow-btn" href={c.url} rel="noopener" target="_blank" data-track="instagram.follow">
+            <span class="insta-gradient-icon" aria-hidden="true"><i></i></span>
+            <span>{c.cta}</span>
+            <b aria-hidden="true">→</b>
+          </a>
+        </div>
       </div>
 
-      <div class="insta-native-frame" data-instagram-live>
-        <div class="insta-native-label"><span></span>{c.liveLabel}</div>
+      <div class="insta-native-frame">
         <div class="insta-native-embed">
           <blockquote
             class="instagram-media"
