@@ -3,26 +3,27 @@
   position:relative;
   display:flex;
   align-items:center;
-  min-height:720px;
+  min-height:calc(100svh - 72px);
+  padding-top:82px;
   overflow:hidden;
   isolation:isolate;
   color:#f7f4ef;
   background:
-    radial-gradient(circle at 78% 18%,rgba(255,36,24,.12),transparent 28%),
-    radial-gradient(circle at 22% 82%,rgba(255,255,255,.025),transparent 30%),
-    linear-gradient(135deg,#050505 0%,#080808 62%,#100504 100%);
-  border-bottom:1px solid rgba(255,255,255,.07);
+    radial-gradient(circle at 77% 34%,rgba(255,36,24,.11),transparent 28%),
+    linear-gradient(135deg,#050505 0%,#080808 64%,#0d0504 100%);
+  border:0;
 }
 
 .event-not-found-premium::before{
   content:"404";
   position:absolute;
   z-index:-2;
-  right:3vw;
-  bottom:48px;
+  right:2vw;
+  top:50%;
+  transform:translateY(-43%);
   color:rgba(255,255,255,.018);
   font-family:var(--font-display,Arial Black,sans-serif);
-  font-size:clamp(16rem,27vw,31rem);
+  font-size:clamp(17rem,28vw,33rem);
   font-weight:900;
   line-height:.72;
   letter-spacing:-.09em;
@@ -35,38 +36,37 @@
   position:absolute;
   inset:0;
   z-index:-1;
-  opacity:.24;
-  background-image:
-    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
-  background-size:72px 72px;
-  mask-image:linear-gradient(to bottom,transparent 0%,#000 24%,#000 100%);
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:80px 80px;
+  opacity:.22;
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 22%,#000 84%,transparent 100%);
   pointer-events:none;
 }
 
 .event-not-found-premium .event-shell{
   position:relative;
   z-index:2;
-  width:min(1320px,calc(100% - 72px));
+  width:min(1180px,calc(100% - 64px));
   margin:0 auto;
-  padding:104px 0 94px;
-  display:block;
+  padding:96px 0 112px;
 }
 
 .event-not-found-premium .event-eyebrow{
   display:inline-flex;
   align-items:center;
+  gap:9px;
   width:max-content;
-  gap:10px;
-  margin:0 0 28px;
-  padding:9px 13px;
-  border:1px solid rgba(255,36,24,.48);
+  margin:0 0 30px;
+  padding:8px 12px;
+  border:1px solid rgba(255,36,24,.42);
   border-radius:999px;
-  background:rgba(255,36,24,.075);
+  background:rgba(255,36,24,.06);
   color:#fff;
-  font-size:.64rem;
+  font-size:.61rem;
   font-weight:900;
-  letter-spacing:.14em;
+  letter-spacing:.13em;
   text-transform:uppercase;
 }
 
@@ -76,12 +76,12 @@
   height:6px;
   border-radius:50%;
   background:var(--error-accent);
-  box-shadow:0 0 18px rgba(255,36,24,.9);
+  box-shadow:0 0 16px rgba(255,36,24,.85);
 }
 
 .event-not-found-premium .event-eyebrow::after{
   content:"PÁGINA FORA DA PISTA";
-  color:rgba(255,255,255,.55);
+  color:rgba(255,255,255,.52);
 }
 
 html[lang="es"] .event-not-found-premium .event-eyebrow::after{
@@ -90,15 +90,13 @@ html[lang="es"] .event-not-found-premium .event-eyebrow::after{
 
 .event-not-found-premium h1{
   position:relative;
-  max-width:980px;
+  max-width:790px;
   margin:0;
-  color:#fffdf8;
-  font-family:var(--font-display,Arial Black,sans-serif);
-  font-size:0;
-  font-weight:900;
-  line-height:.86;
-  letter-spacing:-.055em;
-  text-transform:uppercase;
+  overflow:visible;
+  color:transparent!important;
+  font-size:0!important;
+  line-height:0!important;
+  text-shadow:none!important;
 }
 
 .event-not-found-premium h1::before{
@@ -106,9 +104,9 @@ html[lang="es"] .event-not-found-premium .event-eyebrow::after{
   display:block;
   color:#fffdf8;
   font-family:var(--font-display,Arial Black,sans-serif);
-  font-size:clamp(4.35rem,7.35vw,7.75rem);
+  font-size:clamp(4.15rem,6.35vw,7rem);
   font-weight:900;
-  line-height:.86;
+  line-height:.88;
   letter-spacing:-.055em;
   white-space:pre-line;
   text-transform:uppercase;
@@ -119,15 +117,15 @@ html[lang="es"] .event-not-found-premium h1::before{
 }
 
 .event-not-found-premium h1::after{
-  content:"O link pode ter mudado, o evento pode ainda não ter sido publicado ou esta edição não está disponível no momento.";
+  content:"O link pode ter mudado, o evento ainda pode não ter sido publicado ou esta edição não está disponível no momento.";
   display:block;
-  max-width:620px;
-  margin-top:30px;
-  color:rgba(255,255,255,.6);
+  max-width:560px;
+  margin-top:28px;
+  color:rgba(255,255,255,.58);
   font-family:var(--font-sans,Arial,sans-serif);
-  font-size:clamp(.98rem,1.08vw,1.08rem);
+  font-size:1rem;
   font-weight:450;
-  line-height:1.65;
+  line-height:1.7;
   letter-spacing:0;
   text-transform:none;
 }
@@ -140,122 +138,111 @@ html[lang="es"] .event-not-found-premium h1::after{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:max-content;
-  min-width:192px;
-  min-height:54px;
-  margin-top:34px;
-  padding:0 26px;
+  min-width:188px;
+  min-height:52px;
+  margin-top:32px;
+  padding:0 24px;
   border:1px solid var(--error-accent);
   border-radius:999px;
   background:var(--error-accent);
   color:#fff;
   text-decoration:none;
-  font-size:.69rem;
+  font-size:.67rem;
   font-weight:900;
   letter-spacing:.09em;
   text-transform:uppercase;
-  box-shadow:0 18px 46px rgba(255,36,24,.16);
+  box-shadow:0 16px 40px rgba(255,36,24,.15);
   transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
 }
 
 .event-not-found-premium .event-shell>a::after{
   content:"→";
-  margin-left:12px;
-  font-size:1rem;
+  margin-left:11px;
+  font-size:.96rem;
   line-height:1;
 }
 
 .event-not-found-premium .event-shell>a:hover{
   transform:translateY(-2px);
   background:#ff352b;
-  box-shadow:0 22px 56px rgba(255,36,24,.22);
+  box-shadow:0 20px 48px rgba(255,36,24,.21);
 }
 
 .event-not-found-premium .event-shell::after{
-  content:"LINK ALTERADO  ·  EVENTO AINDA NÃO PUBLICADO  ·  EDIÇÃO INDISPONÍVEL";
-  display:block;
-  width:min(920px,100%);
-  margin-top:72px;
-  padding-top:22px;
-  border-top:1px solid rgba(255,255,255,.1);
-  color:rgba(255,255,255,.31);
-  font-family:var(--font-sans,Arial,sans-serif);
-  font-size:.67rem;
-  font-weight:800;
-  line-height:1.6;
-  letter-spacing:.11em;
-  text-transform:uppercase;
-}
-
-html[lang="es"] .event-not-found-premium .event-shell::after{
-  content:"ENLACE MODIFICADO  ·  EVENTO AÚN NO PUBLICADO  ·  EDICIÓN NO DISPONIBLE";
+  content:none!important;
+  display:none!important;
 }
 
 body:has(.event-not-found-premium) .site-footer{
-  margin:0;
-  border-top:0;
-  background:#070707;
+  margin:0!important;
+  border:0!important;
+  background:#060606!important;
 }
 
 body:has(.event-not-found-premium) .site-footer .wrap{
-  border-top:1px solid rgba(255,255,255,.07);
+  border:0!important;
+  box-shadow:none!important;
 }
 
 body:has(.event-not-found-premium) .site-footer span{
-  color:rgba(255,255,255,.34);
+  color:rgba(255,255,255,.3);
 }
 
 @media(max-width:900px){
   .event-not-found-premium{
     min-height:auto;
+    padding-top:74px;
   }
 
   .event-not-found-premium::before{
-    right:-2vw;
-    bottom:48px;
-    font-size:42vw;
+    right:-6vw;
+    top:58%;
+    font-size:44vw;
   }
 
   .event-not-found-premium .event-shell{
     width:min(100% - 40px,760px);
-    padding:88px 0 76px;
+    padding:82px 0 90px;
+  }
+
+  .event-not-found-premium h1{
+    max-width:680px;
   }
 
   .event-not-found-premium h1::before{
-    font-size:clamp(3.8rem,13.5vw,6.15rem);
-  }
-
-  .event-not-found-premium .event-shell::after{
-    margin-top:56px;
+    font-size:clamp(3.75rem,12vw,6rem);
   }
 }
 
 @media(max-width:560px){
+  .event-not-found-premium{
+    padding-top:66px;
+  }
+
   .event-not-found-premium::before{
-    right:-10vw;
-    bottom:42px;
-    font-size:64vw;
-    opacity:.8;
+    right:-18vw;
+    top:67%;
+    font-size:72vw;
   }
 
   .event-not-found-premium .event-shell{
     width:calc(100% - 28px);
-    padding:70px 0 58px;
+    padding:68px 0 76px;
   }
 
   .event-not-found-premium .event-eyebrow{
     margin-bottom:24px;
-    font-size:.55rem;
+    font-size:.54rem;
   }
 
   .event-not-found-premium h1::before{
-    font-size:clamp(3.18rem,16vw,4.95rem);
-    line-height:.88;
+    font-size:clamp(3.05rem,15.5vw,4.7rem);
+    line-height:.9;
   }
 
   .event-not-found-premium h1::after{
-    margin-top:24px;
     max-width:100%;
+    margin-top:24px;
     font-size:.94rem;
     line-height:1.65;
   }
@@ -263,13 +250,6 @@ body:has(.event-not-found-premium) .site-footer span{
   .event-not-found-premium .event-shell>a{
     width:100%;
     margin-top:28px;
-  }
-
-  .event-not-found-premium .event-shell::after{
-    margin-top:44px;
-    padding-top:18px;
-    font-size:.61rem;
-    line-height:1.75;
   }
 }
 
