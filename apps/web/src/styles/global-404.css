@@ -1,0 +1,23 @@
+.global-not-found-premium h1::before{
+  content:"ESTA PÁGINA\ANÃO ESTÁ\ADISPONÍVEL.";
+}
+
+html[lang="es"] .global-not-found-premium h1::before{
+  content:"ESTA PÁGINA\ANO ESTÁ\ADISPONIBLE.";
+}
+
+.global-not-found-premium h1::after{
+  content:"O endereço pode ter mudado, o link pode estar incorreto ou esta página não existe mais.";
+}
+
+html[lang="es"] .global-not-found-premium h1::after{
+  content:"La dirección puede haber cambiado, el enlace puede ser incorrecto o esta página ya no existe.";
+}
+
+.global-not-found-premium .event-eyebrow::after{
+  content:"PÁGINA FORA DA PISTA";
+}
+
+html[lang="es"] .global-not-found-premium .event-eyebrow::after{
+  content:"PÁGINA FUERA DE PISTA";
+}
