@@ -1,24 +1,106 @@
 ---
 import SiteLayout from '@/layouts/SiteLayout.astro';
-import { publicApi } from '@/lib/api';
+import { API_BASE, publicApi } from '@/lib/api';
 import { getHomePage } from '@/lib/cms';
 import { getPublicCopy } from '@/lib/public-copy';
 import type { Locale } from '@/lib/cms';
+import '@/styles/event-page-premium.css';
+
 const {slug}=Astro.params;
 const locale:Locale=Astro.url.searchParams.get('lang')==='es'?'es':'pt-BR';
+const isEs=locale==='es';
 const site=await getHomePage();
 const c=getPublicCopy(site.settings,locale,'eventPage');
 let payload:any=null;
 try{payload=await publicApi<any>(`/api/public/events/${encodeURIComponent(slug||'')}`)}catch{Astro.response.status=404}
-const loc=payload?.localizations?.find((x:any)=>x.locale===locale)||payload?.localizations?.[0];
-const event=payload?.event;const tickets=payload?.tickets||[];const artists=payload?.artists||[];
-const ticketStatus=(status:string)=>status==='active'?c.availableLabel:status==='sold_out'?c.soldOutLabel:status==='closed'?c.closedLabel:status==='draft'?c.draftLabel:status;
+const loc=payload?.localizations?.find((x:any)=>x.locale===locale)||payload?.localizations?.find((x:any)=>x.locale==='pt-BR')||payload?.localizations?.[0];
+const event=payload?.event;
+const rawTickets=payload?.tickets||[];
+const artists=payload?.artists||[];
+const theme=event?(()=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}})():{};
+const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
+const parseJson=(value:any)=>{if(value&&typeof value==='object')return value;try{return JSON.parse(value||'{}')}catch{return {}}};
+const now=Date.now();
+const eventStart=event?new Date(event.starts_at).getTime():0;
+const eventEnded=!!event&&(event.status==='finished'||(event.ends_at&&new Date(event.ends_at).getTime()<now));
+const eventStatusLabel=(status:string)=>isEs?({scheduled:'PRÓXIMAMENTE',published:'PUBLICADO',sales_open:'VENTAS ABIERTAS',sold_out:'AGOTADO',finished:'EVENTO REALIZADO',archived:'ARCHIVADO'} as Record<string,string>)[status]||status:({scheduled:'EM BREVE',published:'PUBLICADO',sales_open:'VENDAS ABERTAS',sold_out:'ESGOTADO',finished:'EVENTO REALIZADO',archived:'ARQUIVADO'} as Record<string,string>)[status]||status;
+const availabilityLabels=isEs?{coming_soon:'PRÓXIMAMENTE',available:'DISPONIBLE',last_units:'ÚLTIMAS ENTRADAS',sold_out:'AGOTADO',closed:'VENTAS CERRADAS'}:{coming_soon:'EM BREVE',available:'DISPONÍVEL',last_units:'ÚLTIMOS INGRESSOS',sold_out:'ESGOTADO',closed:'VENDAS ENCERRADAS'};
+const effectiveAvailability=(ticket:any)=>{
+  if(eventEnded)return 'closed';
+  if(event?.status==='sold_out')return 'sold_out';
+  if(ticket.starts_at&&new Date(ticket.starts_at).getTime()>now)return 'coming_soon';
+  if(ticket.ends_at&&new Date(ticket.ends_at).getTime()<now)return 'closed';
+  return ticket.availability||({active:'available',sold_out:'sold_out',closed:'closed',draft:'coming_soon'} as Record<string,string>)[ticket.status]||'available';
+};
+const money=(cents:any,currency='BRL')=>cents==null?'':new Intl.NumberFormat(isEs?'es-VE':'pt-BR',{style:'currency',currency}).format(Number(cents)/100);
+const appendWhatsAppMessage=(raw:string,message:string)=>{
+  if(!raw)return '';
+  let base=raw.trim();
+  if(/^\+?[\d\s().-]{8,}$/.test(base))base=`https://wa.me/${base.replace(/\D/g,'')}`;
+  if(!message)return base;
+  try{const url=new URL(base);url.searchParams.set('text',message);return url.toString()}catch{return base}
+};
+const tickets=rawTickets.map((ticket:any)=>{
+  const copy={title:ticket.name,type:isEs?'ENTRADA':'INGRESSO',badge:'',description:'',meta:'',saving:'',note:'',buttonPrimary:isEs?'Comprar entrada':'Comprar ingresso',buttonSecondary:isEs?'Comprar en Sympla':'Comprar no Sympla',soldOutLabel:isEs?'AGOTADO':'ESGOTADO',lockedLabel:isEs?'PRÓXIMAMENTE':'EM BREVE',whatsappMessage:'',...parseJson(isEs?ticket.content_es_json:ticket.content_pt_json)};
+  const availability=effectiveAvailability(ticket);
+  const whatsapp=appendWhatsAppMessage(ticket.whatsapp_url||'',copy.whatsappMessage||'');
+  const sympla=ticket.sympla_url||ticket.sales_url||'';
+  return {...ticket,copy,availability,whatsapp,sympla,custom:ticket.custom_url||''};
+});
+const isPurchasable=(ticket:any)=>['available','last_units'].includes(ticket.availability)&&((['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp)||(['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla)||(ticket.purchase_mode==='custom'&&ticket.custom));
+const firstPurchasable=tickets.find(isPurchasable);
+const instagram=(site.settings as any)?.social?.instagramUrl||(site.settings as any)?.social?.instagram||(site.settings as any)?.social?.instagram_url||'https://www.instagram.com/gtrzeventos/';
+const mapQuery=event?.venue_address||[event?.venue_name,event?.city,event?.state].filter(Boolean).join(', ');
+const mapEmbed=mapQuery?`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`:'';
+const mapLink=mapQuery?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`:'';
+const countdownEnabled=!!event&&!eventEnded&&eventStart>now;
+const heroMedia=mediaUrl(event?.hero_media_id);
+const logoMedia=mediaUrl(event?.logo_media_id);
 ---
 <SiteLayout locale={locale} title={loc?.seo_title||loc?.title||site.settings?.chrome?.[locale==='es'?'metaTitleEs':'metaTitlePt']||'GTRZ Eventos'} settings={site.settings}>
-  {event ? <main class="event-detail" style={`--event-accent:${JSON.parse(event.theme_json||'{}').primary||'#ff1a12'}`}>
-    <section class="event-hero" data-section="event_hero"><div class="shell"><a class="back-link" href={`/?lang=${locale}`}>{c.backLabel}</a><span class="eyebrow">{event.city}{event.state?` · ${event.state}`:''}</span><h1>{loc?.title||event.slug}</h1><p>{loc?.summary||''}</p><div class="event-meta"><div><small>{c.dateLabel}</small><strong>{new Date(event.starts_at).toLocaleDateString(locale==='es'?'es-VE':'pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</strong></div><div><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div></div></div></section>
-    {loc?.description&&<section class="event-content paper-section" data-section="event_about"><div class="shell"><span class="eyebrow">{c.aboutLabel}</span><p>{loc.description}</p></div></section>}
-    {artists.length>0&&<section class="dark-section" data-section="event_lineup"><div class="shell"><div class="section-head"><div><span class="eyebrow">{c.lineupEyebrow}</span><h2>{c.lineupTitle}</h2></div></div><div class="artist-grid">{artists.map((artist:any)=><article><strong>{artist.name}</strong><span>{artist.role||''}</span></article>)}</div></div></section>}
-    <section class="tickets-section" data-section="event_tickets"><div class="shell"><div class="section-head"><div><span class="eyebrow">{c.ticketsEyebrow}</span><h2>{c.ticketsTitle}</h2></div></div>{tickets.length?<div class="ticket-grid">{tickets.map((ticket:any)=><article><div><small>{ticketStatus(ticket.status)}</small><h3>{ticket.name}</h3>{ticket.price_cents!=null&&<strong>{new Intl.NumberFormat(locale==='es'?'es-VE':'pt-BR',{style:'currency',currency:ticket.currency||'BRL'}).format(ticket.price_cents/100)}</strong>}</div>{ticket.sales_url&&ticket.status==='active'&&<a class="button primary" href={ticket.sales_url} target="_blank" rel="noopener" data-track={`ticket.${ticket.id}`}>{c.buyLabel}</a>}</article>)}</div>:<div class="empty-state">{c.noTickets}</div>}</div></section>
-  </main>:<main class="not-found"><div class="shell"><span class="eyebrow">404</span><h1>{c.notFoundTitle}</h1><a class="button primary" href={`/?lang=${locale}`}>{c.notFoundCta}</a></div></main>}
+  {event ? <main class={`event-premium ${eventEnded?'event-finished':''}`} style={`--event-accent:${theme.primary||'#ff1a12'};--event-bg:${theme.background||'#090909'};--event-fg:${theme.foreground||'#fffdf8'}`}>
+    <section class="event-premium-hero" data-section="event_hero">
+      <div class="event-premium-hero-bg">{heroMedia&&<img src={heroMedia} alt="" />}</div>
+      <div class="event-shell">
+        <a class="event-back" href={`/?lang=${locale}`}>← {c.backLabel}</a>
+        <div class="event-hero-grid-premium">
+          <div>
+            {logoMedia&&<img class="event-event-logo" src={logoMedia} alt={loc?.title||event.slug}/>} 
+            <span class="event-eyebrow">{event.city}{event.state?` · ${event.state}`:''}</span>
+            <h1 class="event-display">{loc?.title||event.slug}</h1>
+            {loc?.summary&&<p class="event-hero-summary">{loc.summary}</p>}
+            <span class="event-hero-status">{eventStatusLabel(event.status)}</span>
+            <div class="event-hero-cta-row">
+              {!eventEnded&&tickets.length>0&&<a class="primary" href="#ingressos">{isEs?'VER ENTRADAS':'VER INGRESSOS'}</a>}
+              {mapLink&&<a href={mapLink} target="_blank" rel="noopener">{isEs?'CÓMO LLEGAR':'COMO CHEGAR'}</a>}
+            </div>
+          </div>
+          <div class="event-facts">
+            <div class="event-fact"><small>{c.dateLabel}</small><strong>{new Date(event.starts_at).toLocaleDateString(isEs?'es-VE':'pt-BR',{weekday:'short',day:'2-digit',month:'long',year:'numeric'})}</strong></div>
+            <div class="event-fact"><small>{isEs?'HORARIO':'HORÁRIO'}</small><strong>{new Date(event.starts_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'})}{event.ends_at?` → ${new Date(event.ends_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'})}`:''}</strong></div>
+            <div class="event-fact"><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div>
+            <div class="event-fact"><small>{isEs?'CIUDAD':'CIDADE'}</small><strong>{event.city}{event.state?` · ${event.state}`:''}</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {countdownEnabled&&<section class="event-countdown" data-section="event_countdown" data-countdown-end={event.starts_at}>
+      <div class="event-shell event-countdown-inner"><div class="event-countdown-copy"><span class="event-eyebrow">{isEs?'CUENTA REGRESIVA':'CONTAGEM REGRESSIVA'}</span><strong>{isEs?'NOS VEMOS EN LA PISTA.':'NOS VEMOS NA PISTA.'}</strong></div><div class="event-clock"><div class="event-clock-item"><b data-clock="days">00</b><small>{isEs?'Días':'Dias'}</small></div><div class="event-clock-item"><b data-clock="hours">00</b><small>{isEs?'Horas':'Horas'}</small></div><div class="event-clock-item"><b data-clock="minutes">00</b><small>Min</small></div><div class="event-clock-item"><b data-clock="seconds">00</b><small>Seg</small></div></div></div>
+    </section>}
+
+    {loc?.description&&<section class="event-about-premium" data-section="event_about"><div class="event-shell event-about-grid"><div><span class="event-eyebrow">{c.aboutLabel}</span><h2 class="event-display">{isEs?'LA NOCHE.':'A NOITE.'}</h2></div><div class="event-about-copy">{loc.description}</div></div></section>}
+
+    {artists.length>0&&<section class="event-lineup-premium" data-section="event_lineup"><div class="event-shell"><div class="event-section-head-premium"><div><span class="event-eyebrow">{c.lineupEyebrow}</span><h2 class="event-display">{c.lineupTitle}</h2></div><p>{isEs?'Los nombres que van a conducir esta edición.':'Os nomes que vão conduzir esta edição.'}</p></div><div class="event-artist-grid">{artists.map((artist:any)=><article class="event-artist-card">{artist.media_id&&<img src={mediaUrl(artist.media_id)} alt={artist.name} loading="lazy"/>}<div class="event-artist-copy"><strong>{artist.name}</strong><span>{artist.role||''}</span>{artist.instagram_url&&<a class="event-back" href={artist.instagram_url} target="_blank" rel="noopener">Instagram ↗</a>}</div></article>)}</div></div></section>}
+
+    <section class="event-tickets-premium" id="ingressos" data-section="event_tickets"><div class="event-shell"><div class="event-section-head-premium"><div><span class="event-eyebrow">{c.ticketsEyebrow}</span><h2 class="event-display">{c.ticketsTitle}</h2></div><p>{eventEnded?(isEs?'Esta edición ya fue realizada.':'Esta edição já foi realizada.'):(isEs?'Elige la opción que mejor funciona para tu noche.':'Escolha a opção que faz mais sentido para sua noite.')}</p></div>{tickets.length?<div class="event-ticket-grid">{tickets.map((ticket:any)=><article class={`event-ticket-card ${ticket.featured?'featured':''}`} data-theme={ticket.theme||'light'}><div class="event-ticket-top"><span class="event-ticket-type">{ticket.copy.type||'INGRESSO'}</span>{ticket.copy.badge&&<span class="event-ticket-badge">{ticket.copy.badge}</span>}</div><span class="event-ticket-status">{availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability}</span><h3>{ticket.copy.title||ticket.name}</h3>{ticket.copy.description&&<p class="event-ticket-desc">{ticket.copy.description}</p>}<div class="event-ticket-price-wrap">{ticket.compare_price_cents!=null&&<span class="event-ticket-compare">{money(ticket.compare_price_cents,ticket.currency||'BRL')}</span>}{ticket.price_cents!=null?<strong class="event-ticket-price">{money(ticket.price_cents,ticket.currency||'BRL')}</strong>:<strong class="event-ticket-price">{isEs?'CONSULTAR':'CONSULTE'}</strong>}</div><span class="event-ticket-meta">{ticket.copy.meta||`${ticket.quantity||1} ${Number(ticket.quantity||1)>1?(isEs?'entradas':'ingressos'):(isEs?'entrada':'ingresso')}`}</span>{ticket.copy.saving&&<span class="event-ticket-saving">{ticket.copy.saving}</span>}{ticket.copy.note&&<p class="event-ticket-note">{ticket.copy.note}</p>}{isPurchasable(ticket)?<div class="event-ticket-actions">{['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp&&<a class="event-ticket-action primary" href={ticket.whatsapp} target="_blank" rel="noopener" data-track={`ticket.whatsapp.${ticket.id}`}>{ticket.copy.buttonPrimary||'WhatsApp'}</a>}{['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla&&<a class={`event-ticket-action ${ticket.purchase_mode==='sympla'?'primary':''}`} href={ticket.sympla} target="_blank" rel="noopener" data-track={`ticket.sympla.${ticket.id}`}>{ticket.purchase_mode==='both'?(ticket.copy.buttonSecondary||'Sympla'):(ticket.copy.buttonPrimary||'Sympla')}</a>}{ticket.purchase_mode==='custom'&&ticket.custom&&<a class="event-ticket-action primary" href={ticket.custom} target="_blank" rel="noopener" data-track={`ticket.custom.${ticket.id}`}>{ticket.copy.buttonPrimary||c.buyLabel}</a>}</div>:<div class="event-ticket-unavailable">{ticket.availability==='sold_out'?(ticket.copy.soldOutLabel||availabilityLabels.sold_out):ticket.availability==='coming_soon'?(ticket.copy.lockedLabel||availabilityLabels.coming_soon):(availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability)}</div>}</article>)}</div>:<div class="event-empty-tickets">{c.noTickets}</div>}</div></section>
+
+    {mapEmbed&&<section class="event-location-premium" data-section="event_location"><div class="event-shell event-location-grid"><div class="event-location-copy"><span class="event-eyebrow">{isEs?'DÓNDE ES':'ONDE É'}</span><h2 class="event-display">{event.venue_name||event.city}</h2><div class="event-location-address">{event.venue_address||`${event.city}${event.state?` · ${event.state}`:''}`}</div><a class="event-map-button" href={mapLink} target="_blank" rel="noopener">{isEs?'ABRIR EN GOOGLE MAPS':'ABRIR NO GOOGLE MAPS'} ↗</a></div><div class="event-map-frame"><iframe title={`${isEs?'Mapa de':'Mapa de'} ${event.venue_name||event.city}`} src={mapEmbed} loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>}
+
+    <section class="event-instagram-premium" data-section="event_instagram"><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos ↗</a></div></section>
+
+    {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy"><div><small>{isEs?'ENTRADAS':'INGRESSOS'}</small><strong>{firstPurchasable.copy.title||firstPurchasable.name} · {money(firstPurchasable.price_cents,firstPurchasable.currency||'BRL')}</strong></div><a href="#ingressos">{isEs?'COMPRAR':'COMPRAR'}</a></div>}
+
+    {countdownEnabled&&<script is:inline>{`(()=>{const root=document.querySelector('[data-countdown-end]');if(!root)return;const end=new Date(root.getAttribute('data-countdown-end')).getTime();const set=(k,v)=>{const n=root.querySelector('[data-clock="'+k+'"]');if(n)n.textContent=String(v).padStart(2,'0')};const tick=()=>{let d=Math.max(0,end-Date.now());const days=Math.floor(d/86400000);d%=86400000;const hours=Math.floor(d/3600000);d%=3600000;const minutes=Math.floor(d/60000);const seconds=Math.floor((d%60000)/1000);set('days',days);set('hours',hours);set('minutes',minutes);set('seconds',seconds)};tick();setInterval(tick,1000)})();`}</script>}
+  </main>:<main class="event-not-found-premium"><div class="event-shell"><span class="event-eyebrow">404</span><h1>{c.notFoundTitle}</h1><a href={`/?lang=${locale}`}>{c.notFoundCta}</a></div></main>}
 </SiteLayout>
