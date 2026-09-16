@@ -96,8 +96,8 @@ publicRoutes.get('/locations/neighborhoods',async(c)=>{
     const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded;charset=UTF-8'},body:`data=${encodeURIComponent(query)}`});
     if(!r.ok)throw new Error('overpass');
     const data=await r.json<any>();
-    const names=[...new Set((data.elements||[]).map((x:any)=>upper(x.tags?.name,120)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-    return c.json(names.map(name=>({name})),200,{'cache-control':'public,max-age=21600,s-maxage=86400'});
+    const names:string[]=[...new Set<string>((data.elements||[]).map((x:any)=>upper(x.tags?.name,120)).filter((x:string)=>Boolean(x)))].sort((a:string,b:string)=>a.localeCompare(b,'pt-BR'));
+    return c.json(names.map((name:string)=>({name})),200,{'cache-control':'public,max-age=21600,s-maxage=86400'});
   }catch{return c.json([],200,{'cache-control':'public,max-age=300'});}
 });
 
@@ -105,21 +105,27 @@ publicRoutes.post('/freelancers',async(c)=>{
   const contentType=c.req.header('content-type')||'';
   const isMultipart=contentType.includes('multipart/form-data');
   const form=isMultipart?await c.req.formData():null;
-  const body:any=isMultipart?Object.fromEntries([...form!.entries()].filter(([,v])=>!(v instanceof File))):await c.req.json<any>().catch(()=>null);
+  let body:any=null;
+  if(isMultipart&&form){
+    body={};
+    form.forEach((value,key)=>{if(!(value instanceof File))body[key]=value;});
+  }else{
+    body=await c.req.json<any>().catch(()=>null);
+  }
   if(!body)return c.json({error:'invalid_form'},400);
   const name=upper(body.name,160),cpf=digits(body.cpf),whatsapp=digits(body.whatsapp),birthDate=String(body.birthDate||''),state=upper(body.state,2),city=upper(body.city,120),neighborhood=upper(body.neighborhood,120);
-  const rolesRaw=isMultipart?form!.getAll('roles').map(String):Array.isArray(body.roles)?body.roles:[];
-  const roles=[...new Set(rolesRaw.map(x=>upper(x,80)).filter(Boolean))].slice(0,20);
+  const rolesRaw:string[]=isMultipart&&form?form.getAll('roles').map(value=>String(value)):Array.isArray(body.roles)?body.roles.map((value:unknown)=>String(value)):[];
+  const roles:string[]=[...new Set<string>(rolesRaw.map((x:string)=>upper(x,80)).filter((x:string)=>Boolean(x)))].slice(0,20);
   const otherRole=upper(body.otherRole,160);
   if(!validName(name)||!validCpf(cpf)||!isAdult(birthDate)||whatsapp.length<10||whatsapp.length>13||!state||!city||!neighborhood||!roles.length)return c.json({error:'invalid_form'},400);
   const config=await recruitmentConfig(c.env);
-  if(roles.some(role=>!config.roles.includes(role)))return c.json({error:'invalid_role'},400);
+  if(roles.some((role:string)=>!config.roles.includes(role)))return c.json({error:'invalid_role'},400);
   if(roles.includes('OUTROS')&&!otherRole)return c.json({error:'other_role_required'},400);
   if(!(await verifyTurnstile(c,body.turnstileToken)))return c.json({error:'challenge_failed'},400);
   if(!(await consumePublicFormQuota(c,'freelancer')))return c.json({error:'rate_limited'},429);
 
   let resumeMediaId:string|null=null,resumeFileName:string|null=null;
-  const file=isMultipart?form!.get('resume'):null;
+  const file=isMultipart&&form?form.get('resume'):null;
   if(file instanceof File&&file.size>0){
     if(file.size>5*1024*1024)return c.json({error:'resume_too_large'},400);
     if(file.type!=='application/pdf')return c.json({error:'resume_pdf_only'},415);
