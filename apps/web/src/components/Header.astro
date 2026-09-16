@@ -6,14 +6,24 @@ const defaultPt:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Dif
 const defaultEs:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Trabaja con nosotros','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']];
 const configured=es?chrome.navEs:chrome.navPt;
 const nav=Array.isArray(configured)&&configured.length?configured:(es?defaultEs:defaultPt);
-const safeNav=nav.filter(item=>Array.isArray(item)&&item.length>=2).map(([label,href])=>[String(label),String(href).startsWith('#')||String(href).startsWith('/')?String(href):'#'] as [string,string]);
+const onHome=Astro.url.pathname==='/'||Astro.url.pathname==='';
+const homeUrl=`/?lang=${locale}`;
+const normalizeHref=(value:unknown)=>{
+  const href=String(value||'');
+  if(href.startsWith('#'))return onHome?href:`${homeUrl}${href}`;
+  if(href.startsWith('/'))return href;
+  return onHome?'#':homeUrl;
+};
+const safeNav=nav.filter(item=>Array.isArray(item)&&item.length>=2).map(([label,href])=>[String(label),normalizeHref(href)] as [string,string]);
 const eventsLabel=es?(chrome.eventsLabelEs||'Eventos'):(chrome.eventsLabelPt||'Eventos');
 const langPt=chrome.langShortPt||'PT';
 const langEs=chrome.langShortEs||'ES';
+const brandHref=onHome?'#top':homeUrl;
+const eventsHref=onHome?'#eventos':`${homeUrl}#eventos`;
 ---
 <header class="header">
   <div class="header-in">
-    <a class="brand" href="#top" aria-label="GTRZ Eventos" data-track="nav.logo">
+    <a class="brand" href={brandHref} aria-label="GTRZ Eventos" data-track="nav.logo">
       <img class="brand-img" src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
     </a>
     <nav class="nav" aria-label={es ? 'Navegación principal' : 'Navegação principal'}>
@@ -24,7 +34,7 @@ const langEs=chrome.langShortEs||'ES';
         <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">{langPt}</a>
         <a class:list={{active:es}} href="?lang=es" data-language="es">{langEs}</a>
       </div>
-      <a class="events-btn" href="#eventos" data-track="nav.events">{eventsLabel}</a>
+      <a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>
     </div>
   </div>
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
