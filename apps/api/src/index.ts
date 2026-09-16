@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { Env } from './env';
 import { publicRoutes } from './routes/public';
+import { partnershipRoutes } from './routes/partnerships';
 import { adminRoutes } from './routes/admin';
 import { analyticsRoutes } from './routes/analytics';
 import { mediaRoutes } from './routes/media';
@@ -20,6 +21,7 @@ app.use('*', async (c, next) => {
 });
 
 app.get('/health', (c) => c.json({ ok: true, service: 'gtrz-api', env: c.env.APP_ENV }));
+app.route('/api/public/partnerships', partnershipRoutes);
 app.route('/api/public', publicRoutes);
 app.route('/api/admin/auth', authRoutes);
 app.route('/api/admin', adminRoutes);
