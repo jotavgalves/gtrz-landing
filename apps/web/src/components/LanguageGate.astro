@@ -31,8 +31,9 @@ const optionEs=chrome.gateOptionEs||'Español';
   const gate = document.querySelector('[data-language-gate]');
   let saved = null;
   try { saved = localStorage.getItem('gtrz_locale'); } catch {}
+  const explicitLanguage = new URLSearchParams(location.search).has('lang');
 
-  if (!saved && gate) {
+  if (!saved && !explicitLanguage && gate) {
     gate.hidden = false;
     gate.removeAttribute('hidden');
     gate.setAttribute('aria-hidden','false');
