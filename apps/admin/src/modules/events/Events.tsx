@@ -1,5 +1,6 @@
 import { useEffect,useRef,useState } from 'react';
 import { api } from '../../lib/api';
+import { MediaPicker } from '../../components/MediaPicker';
 import { EventsV2 } from './EventsV2';
 import './events-lifecycle.css';
 
@@ -7,6 +8,7 @@ type EventRow={id:string;slug:string;status:string;title?:string};
 
 const publicStatuses=new Set(['published','sales_open','sold_out','finished']);
 const statusLabel:Record<string,string>={draft:'Rascunho',scheduled:'Agendado',published:'Publicado',sales_open:'Vendas abertas',sold_out:'Esgotado',finished:'Realizado',archived:'Arquivado'};
+const parseTheme=(value:any)=>{if(value&&typeof value==='object')return value;try{return JSON.parse(value||'{}')}catch{return {}}};
 
 export function Events(){
   const rootRef=useRef<HTMLDivElement|null>(null);
@@ -15,15 +17,35 @@ export function Events(){
   const [notice,setNotice]=useState('');
   const [noticeError,setNoticeError]=useState(false);
   const [instance,setInstance]=useState(0);
+  const [posterMediaId,setPosterMediaId]=useState<string|null>(null);
+  const [posterSaving,setPosterSaving]=useState(false);
+  const [posterReady,setPosterReady]=useState(false);
   const reopenSlug=useRef<string|null>(null);
   const lastDetectedSlug=useRef('');
+
+  const loadPoster=async(id:string)=>{
+    setPosterReady(false);
+    try{
+      const data=await api<any>(`/api/admin/events/${id}`);
+      const theme=parseTheme(data?.event?.theme_json);
+      setPosterMediaId(theme.posterMediaId||theme.poster_media_id||null);
+    }catch{
+      setPosterMediaId(null);
+    }finally{
+      setPosterReady(true);
+    }
+  };
 
   const refreshActive=async(slug:string)=>{
     if(!slug)return;
     try{
       const result=await api<any>('/api/admin/events');
       const row=(result.results||[]).find((item:any)=>item.slug===slug);
-      if(row)setActive({id:row.id,slug:row.slug,status:row.status,title:row.title});
+      if(row){
+        const next={id:row.id,slug:row.slug,status:row.status,title:row.title};
+        setActive(next);
+        void loadPoster(row.id);
+      }
     }catch{}
   };
 
@@ -46,7 +68,12 @@ export function Events(){
       }
       const preview=root.querySelector<HTMLAnchorElement>('a[href*="gtrz.com.br/eventos/"]');
       if(!preview){
-        if(lastDetectedSlug.current){lastDetectedSlug.current='';setActive(null)}
+        if(lastDetectedSlug.current){
+          lastDetectedSlug.current='';
+          setActive(null);
+          setPosterMediaId(null);
+          setPosterReady(false);
+        }
         return;
       }
       try{
@@ -106,6 +133,21 @@ export function Events(){
     }finally{setBusy(false)}
   };
 
+  const savePoster=async()=>{
+    if(!active||posterSaving)return;
+    setPosterSaving(true);setNotice('');setNoticeError(false);
+    try{
+      const detail=await api<any>(`/api/admin/events/${active.id}`);
+      const theme=parseTheme(detail?.event?.theme_json);
+      const nextTheme={...theme,posterMediaId:posterMediaId||null};
+      await api(`/api/admin/events/${active.id}`,{method:'PATCH',body:JSON.stringify({theme:nextTheme})});
+      setNotice(posterMediaId?'Post oficial salvo. A arte já está vinculada à página pública do evento.':'Post oficial removido da página pública.');
+    }catch(error:any){
+      setNoticeError(true);
+      setNotice(error?.message||'Não foi possível salvar o post oficial.');
+    }finally{setPosterSaving(false)}
+  };
+
   const isPublic=!!active&&publicStatuses.has(active.status);
   const lifecycleTitle=active?.status==='draft'?'Este evento ainda não está no site':active?.status==='sales_open'?'Evento publicado · vendas abertas':active?.status==='published'?'Evento publicado no site':active?`Status: ${statusLabel[active.status]||active.status}`:'';
   const lifecycleDescription=active?.status==='draft'?'O rascunho só aparece no Control. Publique quando a página estiver pronta.':active?.status==='sales_open'?'A página está pública e os ingressos podem ser vendidos normalmente.':active?.status==='published'?'A página pública está disponível, mas o evento não está marcado como vendas abertas.':active?'Controle abaixo se este evento deve permanecer acessível ao público.':'';
@@ -121,6 +163,19 @@ export function Events(){
         {isPublic&&<button className="withdraw" disabled={busy} onClick={()=>transition('draft')}>Retirar do ar</button>}
       </div>
     </div>}
+
+    {active&&posterReady&&<section className="event-poster-editor">
+      <div className="event-poster-editor-copy">
+        <span>ARTE OFICIAL DA EDIÇÃO</span>
+        <strong>Post / flyer principal</strong>
+        <p>Selecione a arte vertical que representa esta edição. Ela aparece em destaque no topo da página pública. Recomendado: proporção 4:5, como 1080 × 1350 px.</p>
+      </div>
+      <div className="event-poster-editor-control">
+        <MediaPicker label="Post oficial / flyer" value={posterMediaId} onChange={setPosterMediaId}/>
+        <button className="event-poster-save" disabled={posterSaving} onClick={savePoster}>{posterSaving?'Salvando…':'Salvar post oficial'}</button>
+      </div>
+    </section>}
+
     {notice&&<div className={`event-lifecycle-notice ${noticeError?'error':''}`}>{notice}</div>}
     <EventsV2 key={instance}/>
   </div>;
