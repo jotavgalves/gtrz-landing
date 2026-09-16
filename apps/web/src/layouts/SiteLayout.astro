@@ -15,12 +15,20 @@ import '@/styles/events-premium.css';
 import '@/styles/team-premium.css';
 import '@/styles/instagram-native.css';
 import '@/styles/ticket-channel-public.css';
+import '@/styles/event-error.css';
 interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings; }
 const { locale, settings={} } = Astro.props;
 const chrome=settings.chrome||{};
 const title=Astro.props.title||(locale==='es'?(chrome.metaTitleEs||'GTRZ Eventos'):(chrome.metaTitlePt||'GTRZ Eventos'));
-const description=locale==='es'?(chrome.metaDescriptionEs||'GTRZ Eventos — experiencias culturales entre Venezuela y Brasil.'):(chrome.metaDescriptionPt||'GTRZ Eventos — experiências culturais entre Venezuela e Brasil.');
-const footer=locale==='es'?(chrome.footerEs||'GTRZ Eventos · Venezuela → Brasil'):(chrome.footerPt||'GTRZ Eventos · Venezuela → Brasil');
+const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
+const configuredDescription=locale==='es'?chrome.metaDescriptionEs:chrome.metaDescriptionPt;
+const configuredFooter=locale==='es'?chrome.footerEs:chrome.footerPt;
+const description=configuredDescription&&!legacyCountryFocus.test(configuredDescription)
+  ?configuredDescription
+  :(locale==='es'?'GTRZ Eventos — fiestas, música y experiencias para una comunidad latina multicultural.':'GTRZ Eventos — festas, música e experiências para uma comunidade latina multicultural.');
+const footer=configuredFooter&&!legacyCountryFocus.test(configuredFooter)
+  ?configuredFooter
+  :(locale==='es'?'GTRZ Eventos · Cultura latina en movimiento':'GTRZ Eventos · Cultura latina em movimento');
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 ---
 <!doctype html>
