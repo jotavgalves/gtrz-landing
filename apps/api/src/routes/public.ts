@@ -20,20 +20,38 @@ function validCpf(raw:unknown){
   return calc(9)===Number(cpf[9])&&calc(10)===Number(cpf[10]);
 }
 
-function isAdult(dateValue:unknown){
-  const value=String(dateValue??'');
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
+function normalizeBirthDate(value:unknown){
+  const raw=String(value??'').trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+  const m=raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m)return '';
+  const iso=`${m[3]}-${m[2]}-${m[1]}`;
+  const d=new Date(`${iso}T12:00:00Z`);
+  if(Number.isNaN(d.getTime())||d.getUTCFullYear()!==Number(m[3])||d.getUTCMonth()+1!==Number(m[2])||d.getUTCDate()!==Number(m[1]))return '';
+  return iso;
+}
+
+function ageFromBirth(dateValue:unknown){
+  const value=normalizeBirthDate(dateValue);
+  if(!value)return -1;
   const birth=new Date(`${value}T12:00:00Z`);
-  if(Number.isNaN(birth.getTime()))return false;
   const now=new Date();
   let age=now.getUTCFullYear()-birth.getUTCFullYear();
   const m=now.getUTCMonth()-birth.getUTCMonth();
   if(m<0||(m===0&&now.getUTCDate()<birth.getUTCDate()))age--;
-  return age>=18&&age<110;
+  return age;
 }
 
 function validName(name:string){
   return name.length>=5&&/^[A-ZÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇÜÑ' -]+$/u.test(name)&&/[A-ZÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇÜÑ]/u.test(name);
+}
+
+function validEmail(email:string){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)&&email.length<=200;
+}
+
+function parseFlags(value:unknown){
+  try{const parsed=JSON.parse(String(value||'[]'));return Array.isArray(parsed)?parsed.map(String):[]}catch{return []}
 }
 
 async function recruitmentConfig(env:Env){
@@ -42,6 +60,31 @@ async function recruitmentConfig(env:Env){
     const parsed=JSON.parse(row?.value_json||'{}');
     return {whatsapp:digits(parsed.whatsapp),roles:Array.isArray(parsed.roles)&&parsed.roles.length?parsed.roles.map((x:unknown)=>upper(x,80)):defaultRoles};
   }catch{return {whatsapp:'',roles:defaultRoles};}
+}
+
+async function markUnderage(env:Env,cpf:string,birthDate:string){
+  await env.DB.prepare(`
+    INSERT INTO recruitment_risk_state(cpf,first_birth_date,underage_attempts,first_underage_at,last_underage_at,updated_at)
+    VALUES(?,?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ON CONFLICT(cpf) DO UPDATE SET
+      first_birth_date=COALESCE(recruitment_risk_state.first_birth_date,excluded.first_birth_date),
+      underage_attempts=recruitment_risk_state.underage_attempts+1,
+      last_underage_at=CURRENT_TIMESTAMP,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(cpf,birthDate).run();
+}
+
+async function markDuplicate(env:Env,cpf:string,applicationId:string,currentFlags:unknown){
+  await env.DB.prepare(`
+    INSERT INTO recruitment_risk_state(cpf,duplicate_attempts,last_duplicate_at,updated_at)
+    VALUES(?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ON CONFLICT(cpf) DO UPDATE SET
+      duplicate_attempts=recruitment_risk_state.duplicate_attempts+1,
+      last_duplicate_at=CURRENT_TIMESTAMP,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(cpf).run();
+  const flags=[...new Set([...parseFlags(currentFlags),'DUPLICATE_CPF_ATTEMPT'])];
+  await env.DB.prepare('UPDATE freelancer_applications SET risk_flags_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(JSON.stringify(flags),applicationId).run();
 }
 
 publicRoutes.get('/site', async (c) => {
@@ -88,19 +131,6 @@ publicRoutes.get('/locations/cities/:uf',async(c)=>{
   return c.json(data.map(x=>({id:x.id,name:upper(x.nome,120)})),200,{'cache-control':'public,max-age=86400,s-maxage=604800'});
 });
 
-publicRoutes.get('/locations/neighborhoods',async(c)=>{
-  const city=upper(c.req.query('city'),120),state=upper(c.req.query('state'),2);
-  if(!city||!state)return c.json({error:'city_state_required'},400);
-  const query=`[out:json][timeout:18];area["ISO3166-2"="BR-${state}"][boundary=administrative]->.state;area(area.state)[name="${city.replace(/"/g,'')}"][boundary=administrative]->.city;(nwr(area.city)[place~"suburb|neighbourhood|quarter"];nwr(area.city)[boundary=administrative][admin_level~"9|10|11"];);out tags;`;
-  try{
-    const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded;charset=UTF-8'},body:`data=${encodeURIComponent(query)}`});
-    if(!r.ok)throw new Error('overpass');
-    const data=await r.json<any>();
-    const names:string[]=[...new Set<string>((data.elements||[]).map((x:any)=>upper(x.tags?.name,120)).filter((x:string)=>Boolean(x)))].sort((a:string,b:string)=>a.localeCompare(b,'pt-BR'));
-    return c.json(names.map((name:string)=>({name})),200,{'cache-control':'public,max-age=21600,s-maxage=86400'});
-  }catch{return c.json([],200,{'cache-control':'public,max-age=300'});}
-});
-
 publicRoutes.post('/freelancers',async(c)=>{
   const contentType=c.req.header('content-type')||'';
   const isMultipart=contentType.includes('multipart/form-data');
@@ -109,20 +139,40 @@ publicRoutes.post('/freelancers',async(c)=>{
   if(isMultipart&&form){
     body={};
     form.forEach((value,key)=>{if(!(value instanceof File))body[key]=value;});
-  }else{
-    body=await c.req.json<any>().catch(()=>null);
-  }
+  }else body=await c.req.json<any>().catch(()=>null);
   if(!body)return c.json({error:'invalid_form'},400);
-  const name=upper(body.name,160),cpf=digits(body.cpf),whatsapp=digits(body.whatsapp),birthDate=String(body.birthDate||''),state=upper(body.state,2),city=upper(body.city,120),neighborhood=upper(body.neighborhood,120);
+
+  const name=upper(body.name,160);
+  const cpf=digits(body.cpf);
+  const whatsapp=digits(body.whatsapp);
+  const birthDate=normalizeBirthDate(body.birthDate);
+  const age=ageFromBirth(birthDate);
+  const email=String(body.email||'').trim().toLowerCase();
+  const state=upper(body.state,2);
+  const city=upper(body.city,120);
+  const neighborhood=upper(body.neighborhood,120);
   const rolesRaw:string[]=isMultipart&&form?form.getAll('roles').map(value=>String(value)):Array.isArray(body.roles)?body.roles.map((value:unknown)=>String(value)):[];
   const roles:string[]=[...new Set<string>(rolesRaw.map((x:string)=>upper(x,80)).filter((x:string)=>Boolean(x)))].slice(0,20);
   const otherRole=upper(body.otherRole,160);
-  if(!validName(name)||!validCpf(cpf)||!isAdult(birthDate)||whatsapp.length<10||whatsapp.length>13||!state||!city||!neighborhood||!roles.length)return c.json({error:'invalid_form'},400);
+
+  if(validCpf(cpf)&&birthDate&&age>=0&&age<18){
+    if(await consumePublicFormQuota(c,'freelancer-underage'))await markUnderage(c.env,cpf,birthDate);
+    return c.json({error:'age_restricted'},422);
+  }
+
+  if(!validName(name)||!validCpf(cpf)||!birthDate||age<18||age>109||whatsapp.length!==11||!validEmail(email)||!state||!city||!neighborhood||!roles.length)return c.json({error:'invalid_form'},400);
   const config=await recruitmentConfig(c.env);
   if(roles.some((role:string)=>!config.roles.includes(role)))return c.json({error:'invalid_role'},400);
   if(roles.includes('OUTROS')&&!otherRole)return c.json({error:'other_role_required'},400);
   if(!(await verifyTurnstile(c,body.turnstileToken)))return c.json({error:'challenge_failed'},400);
   if(!(await consumePublicFormQuota(c,'freelancer')))return c.json({error:'rate_limited'},429);
+
+  const existing=await c.env.DB.prepare('SELECT id,risk_flags_json FROM freelancer_applications WHERE cpf=? LIMIT 1').bind(cpf).first<{id:string;risk_flags_json:string}>();
+  if(existing){await markDuplicate(c.env,cpf,existing.id,existing.risk_flags_json);return c.json({error:'cpf_already_registered'},409);}
+
+  const risk=await c.env.DB.prepare('SELECT underage_attempts FROM recruitment_risk_state WHERE cpf=? LIMIT 1').bind(cpf).first<{underage_attempts:number}>();
+  const riskFlags:string[]=[];
+  if((risk?.underage_attempts||0)>0)riskFlags.push('AGE_CHANGED_AFTER_UNDERAGE_ATTEMPT');
 
   let resumeMediaId:string|null=null,resumeFileName:string|null=null;
   const file=isMultipart&&form?form.get('resume'):null;
@@ -137,12 +187,10 @@ publicRoutes.post('/freelancers',async(c)=>{
     await c.env.DB.prepare('INSERT INTO media_assets(id,r2_key,mime_type,file_name,size_bytes) VALUES(?,?,?,?,?)').bind(resumeMediaId,key,'application/pdf',file.name,file.size).run();
   }
 
-  const existing=await c.env.DB.prepare('SELECT id FROM freelancer_applications WHERE cpf=? LIMIT 1').bind(cpf).first<{id:string}>();
-  if(existing)return c.json({error:'cpf_already_registered'},409);
   const appId=id();
-  await c.env.DB.prepare(`INSERT INTO freelancer_applications(id,name,cpf,birth_date,email,whatsapp,city,state,neighborhood,instagram,roles_json,other_role,portfolio_url,resume_media_id,resume_file_name,availability,source)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .bind(appId,name,cpf,birthDate,body.email?String(body.email).trim().slice(0,200):null,whatsapp,city,state,neighborhood,body.instagram?upper(body.instagram,160):null,JSON.stringify(roles),otherRole||null,body.portfolioUrl?String(body.portfolioUrl).trim().slice(0,1000):null,resumeMediaId,resumeFileName,body.availability?upper(body.availability,3000):null,body.source?String(body.source).slice(0,160):null).run();
+  await c.env.DB.prepare(`INSERT INTO freelancer_applications(id,name,cpf,birth_date,email,whatsapp,city,state,neighborhood,instagram,roles_json,other_role,portfolio_url,resume_media_id,resume_file_name,availability,source,risk_flags_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(appId,name,cpf,birthDate,email,whatsapp,city,state,neighborhood,body.instagram?upper(body.instagram,160):null,JSON.stringify(roles),otherRole||null,body.portfolioUrl?String(body.portfolioUrl).trim().slice(0,1000):null,resumeMediaId,resumeFileName,body.availability?upper(body.availability,3000):null,body.source?String(body.source).slice(0,160):null,JSON.stringify(riskFlags)).run();
   return c.json({ok:true,id:appId,whatsapp:config.whatsapp},201);
 });
 
