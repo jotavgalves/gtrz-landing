@@ -2,65 +2,138 @@
 import SiteLayout from '@/layouts/SiteLayout.astro';
 import Turnstile from '@/components/Turnstile.astro';
 import { getHomePage } from '@/lib/cms';
-import { getPublicCopy } from '@/lib/public-copy';
 import type { Locale } from '@/lib/cms';
 const locale: Locale = Astro.url.searchParams.get('lang') === 'es' ? 'es' : 'pt-BR';
+const es=locale==='es';
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 const site=await getHomePage();
-const c=getPublicCopy(site.settings,locale,'freelancerPage');
+const recruitment=(site.settings as any)?.recruitment||{};
+const defaultRoles=['DJ','FOTÓGRAFO(A)','VIDEOMAKER','SEGURANÇA','BOMBEIRO(A)','RECEPÇÃO','BARMAN','GARÇOM','LIMPEZA','OUTROS'];
+const roles=Array.isArray(recruitment.roles)&&recruitment.roles.length?recruitment.roles:defaultRoles;
+const copy=es?{
+  eyebrow:'TRABAJA CON NOSOTROS',title:'ENTRA EN LA RED GTRZ.',intro:'Registra tu perfil para futuras producciones. Puedes seleccionar todas las funciones en las que quieras participar.',identity:'DATOS PERSONALES',location:'DÓNDE ESTÁS',roles:'FUNCIONES',materials:'CURRÍCULO Y PORTAFOLIO',name:'NOMBRE COMPLETO',cpf:'CPF',birth:'FECHA DE NACIMIENTO',whatsapp:'WHATSAPP',email:'E-MAIL · OPCIONAL',state:'ESTADO',city:'CIUDAD',neighborhood:'BARRIO',other:'DESCRIBE LA OTRA FUNCIÓN',resume:'CURRÍCULO EN PDF · OPCIONAL',portfolio:'PORTAFOLIO · OPCIONAL',availability:'DISPONIBILIDAD / OBSERVACIONES · OPCIONAL',submit:'ENVIAR CANDIDATURA Y CONTINUAR EN WHATSAPP',required:'CAMPO OBLIGATORIO',loading:'CARGANDO…',choose:'SELECCIONA',custom:'OTRO / NO ENCONTRÉ MI BARRIO',success:'CANDIDATURA GUARDADA. ABRIENDO WHATSAPP…',error:'NO FUE POSIBLE ENVIAR. REVISA LOS CAMPOS E INTÉNTALO DE NUEVO.'
+}:{
+  eyebrow:'TRABALHE CONOSCO',title:'ENTRE PARA A REDE GTRZ.',intro:'Cadastre seu perfil para futuras produções. Você pode selecionar todas as funções em que está disposto a trabalhar.',identity:'DADOS PESSOAIS',location:'ONDE VOCÊ ESTÁ',roles:'FUNÇÕES',materials:'CURRÍCULO E PORTFÓLIO',name:'NOME COMPLETO',cpf:'CPF',birth:'DATA DE NASCIMENTO',whatsapp:'WHATSAPP',email:'E-MAIL · OPCIONAL',state:'ESTADO',city:'CIDADE',neighborhood:'BAIRRO',other:'DESCREVA A OUTRA FUNÇÃO',resume:'CURRÍCULO EM PDF · OPCIONAL',portfolio:'PORTFÓLIO · OPCIONAL',availability:'DISPONIBILIDADE / OBSERVAÇÕES · OPCIONAL',submit:'ENVIAR CANDIDATURA E CONTINUAR NO WHATSAPP',required:'CAMPO OBRIGATÓRIO',loading:'CARREGANDO…',choose:'SELECIONE',custom:'OUTRO / NÃO ENCONTREI MEU BAIRRO',success:'CANDIDATURA SALVA. ABRINDO O WHATSAPP…',error:'NÃO FOI POSSÍVEL ENVIAR. REVISE OS CAMPOS E TENTE NOVAMENTE.'
+};
 ---
-<SiteLayout locale={locale} title={c.seoTitle} settings={site.settings}>
-  <main class="form-page">
-    <section class="form-hero" data-section="freelancer_intro">
-      <div class="shell">
-        <span class="eyebrow">{c.eyebrow}</span>
-        <h1>{c.title}</h1>
-        <p>{c.intro}</p>
+<SiteLayout locale={locale} title={es?'Trabaja con nosotros · GTRZ':'Trabalhe conosco · GTRZ'} settings={site.settings}>
+  <main class="recruitment-page">
+    <section class="recruitment-hero" data-section="freelancer_intro">
+      <div class="shell recruitment-hero-grid">
+        <div><span class="eyebrow">{copy.eyebrow}</span><h1 class="display">{copy.title}</h1></div>
+        <p>{copy.intro}</p>
       </div>
     </section>
-    <section class="paper-section" data-section="freelancer_form">
-      <div class="shell form-shell">
-        <form data-public-form="freelancers">
-          <div class="form-grid-public">
-            <label><span>{c.nameLabel}</span><input name="name" required maxlength="160" /></label>
-            <label><span>{c.whatsappLabel}</span><input name="whatsapp" required maxlength="50" /></label>
-            <label><span>{c.emailLabel}</span><input name="email" type="email" /></label>
-            <label><span>{c.cityLabel}</span><input name="city" required /></label>
-            <label><span>{c.stateLabel}</span><input name="state" maxlength="40" /></label>
-            <label><span>{c.instagramLabel}</span><input name="instagram" /></label>
-            <label class="wide"><span>{c.rolesLabel}</span><input name="roles" placeholder={c.rolesPlaceholder} /></label>
-            <label class="wide"><span>{c.portfolioLabel}</span><input name="portfolioUrl" type="url" placeholder={c.portfolioPlaceholder} /></label>
-            <label class="wide"><span>{c.availabilityLabel}</span><textarea name="availability"></textarea></label>
-          </div>
+    <section class="recruitment-section" data-section="freelancer_form">
+      <div class="shell recruitment-shell">
+        <form data-public-form="freelancers" novalidate>
+          <fieldset class="recruitment-block">
+            <legend><span>01</span>{copy.identity}</legend>
+            <div class="recruitment-grid">
+              <label><span>{copy.name} *</span><input name="name" required maxlength="160" autocomplete="name" data-upper pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+" /></label>
+              <label><span>{copy.cpf} *</span><input name="cpf" required inputmode="numeric" maxlength="11" minlength="11" pattern="\d{11}" data-digits autocomplete="off" /></label>
+              <label><span>{copy.birth} *</span><input name="birthDate" type="date" required data-birth /></label>
+              <label><span>{copy.whatsapp} *</span><input name="whatsapp" required inputmode="tel" maxlength="13" data-digits autocomplete="tel" placeholder="5511999999999" /></label>
+              <label class="wide"><span>{copy.email}</span><input name="email" type="email" maxlength="200" autocomplete="email" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="recruitment-block">
+            <legend><span>02</span>{copy.location}</legend>
+            <div class="recruitment-grid three">
+              <label><span>{copy.state} *</span><select name="state" required data-state><option value="">{copy.loading}</option></select></label>
+              <label><span>{copy.city} *</span><select name="city" required data-city disabled><option value="">{copy.choose}</option></select></label>
+              <label><span>{copy.neighborhood} *</span><select name="neighborhood" required data-neighborhood disabled><option value="">{copy.choose}</option></select></label>
+              <label class="wide custom-neighborhood" hidden data-custom-neighborhood><span>{copy.neighborhood} *</span><input name="neighborhoodCustom" data-upper maxlength="120" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="recruitment-block">
+            <legend><span>03</span>{copy.roles}</legend>
+            <p class="block-help">{es?'SELECCIONA UNA O MÁS OPCIONES.':'MARQUE UMA OU MAIS OPÇÕES.'}</p>
+            <div class="role-picker" data-role-picker>
+              {roles.map((role:string)=><label class="role-choice"><input type="checkbox" name="roles" value={String(role).toLocaleUpperCase('pt-BR')} /><span>{String(role).toLocaleUpperCase('pt-BR')}</span></label>)}
+            </div>
+            <label class="other-role" hidden data-other-role><span>{copy.other} *</span><input name="otherRole" maxlength="160" data-upper /></label>
+          </fieldset>
+
+          <fieldset class="recruitment-block">
+            <legend><span>04</span>{copy.materials}</legend>
+            <div class="recruitment-grid">
+              <label class="file-field"><span>{copy.resume}</span><input name="resume" type="file" accept="application/pdf,.pdf" /><small>PDF · MÁX. 5 MB</small></label>
+              <label><span>{copy.portfolio}</span><input name="portfolioUrl" type="url" maxlength="1000" placeholder="HTTPS://" /></label>
+              <label class="wide"><span>{copy.availability}</span><textarea name="availability" maxlength="3000" data-upper rows="5"></textarea></label>
+            </div>
+          </fieldset>
+
           <Turnstile action="freelancer" />
-          <div class="form-submit"><p data-form-message></p><button class="button primary" type="submit">{c.submitLabel}</button></div>
+          <div class="recruitment-submit"><p data-form-message aria-live="polite"></p><button class="button primary" type="submit">{copy.submit}</button></div>
         </form>
       </div>
     </section>
   </main>
-  <script define:vars={{ apiBase, successMessage:c.successMessage, errorMessage:c.errorMessage }}>
-    const form = document.querySelector('[data-public-form="freelancers"]');
-    const msg = form?.querySelector('[data-form-message]');
-    let started = false;
-    form?.addEventListener('focusin', () => {
-      if (!started) { started = true; window.gtrzTrack?.('freelancer_form_start', { section:'freelancer_form' }); }
-    });
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const payload = Object.fromEntries(fd.entries());
-      payload.roles = String(payload.roles || '').split(',').map(x => x.trim()).filter(Boolean);
-      payload.turnstileToken = payload['cf-turnstile-response'] || undefined;
-      delete payload['cf-turnstile-response'];
-      try {
-        const r = await fetch(`${apiBase}/api/public/freelancers`, { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload) });
-        if (!r.ok) throw new Error();
-        window.gtrzTrack?.('freelancer_form_submit', { section:'freelancer_form' });
-        if (msg) msg.textContent = successMessage;
-        form.reset();
-      } catch {
-        if (msg) msg.textContent = errorMessage;
-      }
+  <script define:vars={{ apiBase, copy, es }}>
+    const form=document.querySelector('[data-public-form="freelancers"]');
+    const msg=form?.querySelector('[data-form-message]');
+    const stateSelect=form?.querySelector('[data-state]');
+    const citySelect=form?.querySelector('[data-city]');
+    const neighborhoodSelect=form?.querySelector('[data-neighborhood]');
+    const customWrap=form?.querySelector('[data-custom-neighborhood]');
+    const customInput=form?.querySelector('[name="neighborhoodCustom"]');
+    const otherWrap=form?.querySelector('[data-other-role]');
+    const otherInput=form?.querySelector('[name="otherRole"]');
+    let started=false;
+    const upper=v=>String(v||'').toLocaleUpperCase('pt-BR');
+    const digits=v=>String(v||'').replace(/\D/g,'');
+    const option=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;return o};
+    const setMessage=(text,error=false)=>{if(!msg)return;msg.textContent=text;msg.dataset.tone=error?'error':'success'};
+    const validCpf=raw=>{const cpf=digits(raw);if(cpf.length!==11||/^(\d)\1{10}$/.test(cpf))return false;const calc=len=>{let sum=0;for(let i=0;i<len;i++)sum+=Number(cpf[i])*(len+1-i);const r=(sum*10)%11;return r===10?0:r};return calc(9)===Number(cpf[9])&&calc(10)===Number(cpf[10])};
+    const eighteenMax=()=>{const d=new Date();d.setFullYear(d.getFullYear()-18);return d.toISOString().slice(0,10)};
+    const birth=form?.querySelector('[data-birth]');if(birth)birth.max=eighteenMax();
+    form?.querySelectorAll('[data-upper]').forEach(el=>el.addEventListener('input',()=>{const s=el.selectionStart;el.value=upper(el.value);try{el.setSelectionRange(s,s)}catch{}}));
+    form?.querySelectorAll('[data-digits]').forEach(el=>el.addEventListener('input',()=>{el.value=digits(el.value)}));
+    form?.addEventListener('focusin',()=>{if(!started){started=true;window.gtrzTrack?.('freelancer_form_start',{section:'freelancer_form'})}});
+
+    const loadStates=async()=>{try{const r=await fetch(`${apiBase}/api/public/locations/states`);const rows=await r.json();stateSelect.innerHTML='';stateSelect.append(option('',copy.choose));rows.forEach(x=>stateSelect.append(option(x.code,x.name)))}catch{stateSelect.innerHTML='';stateSelect.append(option('',copy.choose))}};
+    stateSelect?.addEventListener('change',async()=>{citySelect.disabled=true;neighborhoodSelect.disabled=true;citySelect.innerHTML='';citySelect.append(option('',copy.loading));neighborhoodSelect.innerHTML='';neighborhoodSelect.append(option('',copy.choose));customWrap.hidden=true;customInput.required=false;const uf=stateSelect.value;if(!uf)return;try{const r=await fetch(`${apiBase}/api/public/locations/cities/${encodeURIComponent(uf)}`);const rows=await r.json();citySelect.innerHTML='';citySelect.append(option('',copy.choose));rows.forEach(x=>citySelect.append(option(x.name,x.name)));citySelect.disabled=false}catch{citySelect.innerHTML='';citySelect.append(option('',copy.choose))}});
+    citySelect?.addEventListener('change',async()=>{neighborhoodSelect.disabled=true;neighborhoodSelect.innerHTML='';neighborhoodSelect.append(option('',copy.loading));customWrap.hidden=true;customInput.required=false;if(!citySelect.value)return;try{const r=await fetch(`${apiBase}/api/public/locations/neighborhoods?state=${encodeURIComponent(stateSelect.value)}&city=${encodeURIComponent(citySelect.value)}`);const rows=await r.json();neighborhoodSelect.innerHTML='';neighborhoodSelect.append(option('',copy.choose));rows.forEach(x=>neighborhoodSelect.append(option(x.name,x.name)));neighborhoodSelect.append(option('__CUSTOM__',copy.custom));neighborhoodSelect.disabled=false}catch{neighborhoodSelect.innerHTML='';neighborhoodSelect.append(option('__CUSTOM__',copy.custom));neighborhoodSelect.disabled=false}});
+    neighborhoodSelect?.addEventListener('change',()=>{const custom=neighborhoodSelect.value==='__CUSTOM__';customWrap.hidden=!custom;customInput.required=custom;if(!custom)customInput.value=''});
+    form?.querySelectorAll('input[name="roles"]').forEach(input=>input.addEventListener('change',()=>{const selected=[...form.querySelectorAll('input[name="roles"]:checked')].map(x=>upper(x.value));const custom=selected.includes('OUTROS');otherWrap.hidden=!custom;otherInput.required=custom;if(!custom)otherInput.value=''}));
+    loadStates();
+
+    form?.addEventListener('submit',async e=>{
+      e.preventDefault();setMessage('');
+      const name=form.elements.name.value.trim();const cpf=form.elements.cpf.value;const whatsapp=form.elements.whatsapp.value;const date=form.elements.birthDate.value;
+      const selectedRoles=[...form.querySelectorAll('input[name="roles"]:checked')];
+      if(/\d/.test(name)||name.length<5){setMessage(es?'EL NOMBRE NO PUEDE CONTENER NÚMEROS.':'O NOME NÃO PODE CONTER NÚMEROS.',true);form.elements.name.focus();return}
+      if(!validCpf(cpf)){setMessage(es?'CPF INVÁLIDO.':'CPF INVÁLIDO.',true);form.elements.cpf.focus();return}
+      if(!date||date>eighteenMax()){setMessage(es?'DEBES TENER AL MENOS 18 AÑOS.':'É NECESSÁRIO TER PELO MENOS 18 ANOS.',true);form.elements.birthDate.focus();return}
+      if(digits(whatsapp).length<10){setMessage(es?'WHATSAPP INVÁLIDO.':'WHATSAPP INVÁLIDO.',true);form.elements.whatsapp.focus();return}
+      if(!stateSelect.value||!citySelect.value||!neighborhoodSelect.value){setMessage(es?'SELECCIONA ESTADO, CIUDAD Y BARRIO.':'SELECIONE ESTADO, CIDADE E BAIRRO.',true);return}
+      if(neighborhoodSelect.value==='__CUSTOM__'&&!customInput.value.trim()){setMessage(es?'INFORMA TU BARRIO.':'INFORME O BAIRRO.',true);customInput.focus();return}
+      if(!selectedRoles.length){setMessage(es?'SELECCIONA AL MENOS UNA FUNCIÓN.':'SELECIONE PELO MENOS UMA FUNÇÃO.',true);return}
+      if(otherInput.required&&!otherInput.value.trim()){setMessage(es?'DESCRIBE LA FUNCIÓN "OTROS".':'DESCREVA A FUNÇÃO "OUTROS".',true);otherInput.focus();return}
+      if(!form.checkValidity()){form.reportValidity();return}
+      const fd=new FormData(form);fd.set('name',upper(name));fd.set('cpf',digits(cpf));fd.set('whatsapp',digits(whatsapp));fd.set('state',upper(stateSelect.value));fd.set('city',upper(citySelect.value));fd.set('neighborhood',upper(neighborhoodSelect.value==='__CUSTOM__'?customInput.value:neighborhoodSelect.value));fd.delete('neighborhoodCustom');
+      const token=fd.get('cf-turnstile-response');fd.set('turnstileToken',String(token||''));fd.delete('cf-turnstile-response');
+      const button=form.querySelector('button[type="submit"]');button.disabled=true;
+      try{
+        const r=await fetch(`${apiBase}/api/public/freelancers`,{method:'POST',body:fd});const result=await r.json().catch(()=>({}));
+        if(!r.ok){const map={cpf_already_registered:es?'ESTE CPF JÁ POSSUI CADASTRO.':'ESTE CPF JÁ POSSUI CADASTRO.',resume_pdf_only:es?'EL CURRÍCULO DEBE SER PDF.':'O CURRÍCULO DEVE SER PDF.',resume_too_large:es?'EL PDF DEBE TENER HASTA 5 MB.':'O PDF DEVE TER ATÉ 5 MB.'};throw new Error(map[result.error]||copy.error)}
+        window.gtrzTrack?.('freelancer_form_submit',{section:'freelancer_form'});setMessage(copy.success);
+        const roles=[...selectedRoles].map(x=>upper(x.value)).join(', ');const neighborhood=upper(neighborhoodSelect.value==='__CUSTOM__'?customInput.value:neighborhoodSelect.value);
+        const text=[
+          'CANDIDATURA GTRZ','',`NOME: ${upper(name)}`,`CPF: ${digits(cpf)}`,`DATA DE NASCIMENTO: ${date.split('-').reverse().join('/')}`,`WHATSAPP: ${digits(whatsapp)}`,`ESTADO: ${upper(stateSelect.value)}`,`CIDADE: ${upper(citySelect.value)}`,`BAIRRO: ${neighborhood}`,`FUNÇÕES: ${roles}`,
+          otherInput.value?`OUTRA FUNÇÃO: ${upper(otherInput.value)}`:'',form.elements.email.value?`E-MAIL: ${form.elements.email.value}`:'',form.elements.portfolioUrl.value?`PORTFÓLIO: ${form.elements.portfolioUrl.value}`:'',form.elements.availability.value?`OBSERVAÇÕES: ${upper(form.elements.availability.value)}`:'',fd.get('resume')?.size?`CURRÍCULO: ANEXADO NO CADASTRO GTRZ`:'',`PROTOCOLO: ${result.id}`
+        ].filter(Boolean).join('\n');
+        if(result.whatsapp){setTimeout(()=>{location.href=`https://wa.me/${digits(result.whatsapp)}?text=${encodeURIComponent(text)}`},450)}
+      }catch(err){setMessage(err?.message||copy.error,true);button.disabled=false}
     });
   </script>
 </SiteLayout>
+
+<style>
+.recruitment-page{background:#090909;color:#f6f2ee}.recruitment-hero{padding:150px 0 70px;background:radial-gradient(70% 90% at 100% 0%,rgba(255,32,24,.16),transparent 65%),#090909}.recruitment-hero-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:70px;align-items:end}.recruitment-hero h1{font-size:clamp(4.6rem,9vw,9rem);line-height:.82;max-width:900px;margin:18px 0 0}.recruitment-hero p{font-size:1.08rem;line-height:1.7;color:#aaa39e;max-width:520px}.recruitment-section{padding:30px 0 110px}.recruitment-shell{max-width:1120px}.recruitment-block{border:1px solid #262626;border-radius:24px;padding:28px;margin:0 0 18px;background:#101010}.recruitment-block legend{padding:0 12px;color:#fff;font-size:.8rem;font-weight:900;letter-spacing:.13em}.recruitment-block legend span{color:#ff2118;margin-right:10px}.block-help{font-size:.7rem;color:#777;letter-spacing:.1em;margin:0 0 18px}.recruitment-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.recruitment-grid.three{grid-template-columns:repeat(3,1fr)}.recruitment-grid .wide{grid-column:1/-1}.recruitment-block label{display:grid;gap:8px}.recruitment-block label>span{font-size:.64rem;letter-spacing:.1em;font-weight:900;color:#87817d}.recruitment-block input,.recruitment-block select,.recruitment-block textarea{width:100%;border:1px solid #302f2e;background:#090909;color:#fff;border-radius:12px;padding:15px 14px;font:inherit;outline:none}.recruitment-block input:focus,.recruitment-block select:focus,.recruitment-block textarea:focus{border-color:#ff2118;box-shadow:0 0 0 3px rgba(255,33,24,.08)}.recruitment-block input[data-upper],.recruitment-block textarea[data-upper],.recruitment-block select{text-transform:uppercase}.role-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.role-choice{position:relative}.role-choice input{position:absolute;opacity:0;pointer-events:none}.role-choice span{min-height:54px;display:flex;align-items:center;padding:0 16px!important;border:1px solid #302f2e;border-radius:12px;color:#b7b0ab!important;font-size:.72rem!important;cursor:pointer;transition:.18s}.role-choice input:checked+span{border-color:#ff2118;background:rgba(255,33,24,.1);color:#fff!important}.other-role{margin-top:16px}.file-field small{color:#69635f;font-size:.62rem;letter-spacing:.08em}.recruitment-submit{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:16px}.recruitment-submit p{font-size:.72rem;font-weight:800;letter-spacing:.07em;color:#8e8782}.recruitment-submit p[data-tone="error"]{color:#ff5d55}.recruitment-submit p[data-tone="success"]{color:#77d39a}.recruitment-submit .button{min-width:380px}.custom-neighborhood[hidden],.other-role[hidden]{display:none}
+@media(max-width:760px){.recruitment-hero{padding:104px 0 44px}.recruitment-hero-grid{grid-template-columns:1fr;gap:24px}.recruitment-hero h1{font-size:clamp(3.7rem,17vw,6rem)}.recruitment-block{padding:20px 16px;border-radius:18px}.recruitment-grid,.recruitment-grid.three{grid-template-columns:1fr}.role-picker{grid-template-columns:1fr 1fr}.recruitment-submit{align-items:stretch;flex-direction:column}.recruitment-submit .button{min-width:0;width:100%}}
+@media(max-width:390px){.role-picker{grid-template-columns:1fr}.recruitment-block input,.recruitment-block select,.recruitment-block textarea{font-size:16px}}
+</style>
