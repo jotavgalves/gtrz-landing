@@ -23,10 +23,12 @@ publicRoutes.get('/events/:slug',async(c)=>{
   const slug=c.req.param('slug');
   const event=await c.env.DB.prepare("SELECT * FROM events WHERE slug=? AND status!='draft' LIMIT 1").bind(slug).first();
   if(!event)return c.json({error:'not_found'},404);
-  const localizations=await c.env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=?').bind(event.id).all();
-  const tickets=await c.env.DB.prepare('SELECT * FROM event_tickets WHERE event_id=? ORDER BY position').bind(event.id).all();
-  const artists=await c.env.DB.prepare('SELECT * FROM event_artists WHERE event_id=? ORDER BY position').bind(event.id).all();
-  return c.json({event,localizations:localizations.results,tickets:tickets.results,artists:artists.results});
+  const [localizations,tickets,artists]=await Promise.all([
+    c.env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=?').bind(event.id).all(),
+    c.env.DB.prepare('SELECT * FROM event_tickets WHERE event_id=? AND visible=1 ORDER BY featured DESC,position,id').bind(event.id).all(),
+    c.env.DB.prepare('SELECT * FROM event_artists WHERE event_id=? ORDER BY position').bind(event.id).all()
+  ]);
+  return c.json({event,localizations:localizations.results,tickets:tickets.results,artists:artists.results},200,{'cache-control':'public,max-age=15,s-maxage=30'});
 });
 
 publicRoutes.post('/freelancers',async(c)=>{
