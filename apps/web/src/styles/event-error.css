@@ -1,0 +1,263 @@
+.event-not-found-premium{
+  --error-accent:#ff2418;
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:760px;
+  overflow:hidden;
+  isolation:isolate;
+  color:#f7f4ef;
+  background:
+    radial-gradient(circle at 78% 24%,rgba(255,36,24,.17),transparent 31%),
+    radial-gradient(circle at 18% 84%,rgba(255,255,255,.035),transparent 28%),
+    linear-gradient(135deg,#050505 0%,#090909 57%,#120604 100%);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.event-not-found-premium::before{
+  content:"404";
+  position:absolute;
+  z-index:-2;
+  right:-.035em;
+  bottom:-.24em;
+  color:rgba(255,255,255,.026);
+  font-family:var(--font-display,Arial Black,sans-serif);
+  font-size:clamp(18rem,35vw,42rem);
+  font-weight:900;
+  line-height:.72;
+  letter-spacing:-.09em;
+  pointer-events:none;
+  user-select:none;
+}
+
+.event-not-found-premium::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  opacity:.34;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 28%,#000 100%);
+  pointer-events:none;
+}
+
+.event-not-found-premium .event-shell{
+  position:relative;
+  z-index:2;
+  width:min(1240px,calc(100% - 56px));
+  margin:0 auto;
+  padding:112px 0 104px;
+  display:grid;
+  grid-template-columns:minmax(0,1.22fr) minmax(320px,.58fr);
+  grid-template-areas:
+    "eyebrow status"
+    "title status"
+    "cta status";
+  column-gap:clamp(48px,8vw,118px);
+  align-items:start;
+}
+
+.event-not-found-premium .event-eyebrow{
+  grid-area:eyebrow;
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  gap:10px;
+  margin:0 0 26px;
+  padding:8px 11px;
+  border:1px solid rgba(255,36,24,.46);
+  border-radius:999px;
+  background:rgba(255,36,24,.07);
+  color:#fff;
+  font-size:.61rem;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.event-not-found-premium .event-eyebrow::before{
+  content:"";
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--error-accent);
+  box-shadow:0 0 18px rgba(255,36,24,.9);
+}
+
+.event-not-found-premium .event-eyebrow::after{
+  content:"PÁGINA FORA DA PISTA";
+  color:rgba(255,255,255,.53);
+}
+
+html[lang="es"] .event-not-found-premium .event-eyebrow::after{
+  content:"PÁGINA FUERA DE PISTA";
+}
+
+.event-not-found-premium h1{
+  grid-area:title;
+  max-width:880px;
+  margin:0;
+  color:#fffdf8;
+  font-family:var(--font-display,Arial Black,sans-serif);
+  font-size:clamp(4.2rem,8.7vw,8.8rem);
+  font-weight:900;
+  line-height:.84;
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+
+.event-not-found-premium h1::after{
+  content:"O link pode ter mudado, o evento pode ainda não ter sido publicado ou esta edição não está disponível no momento.";
+  display:block;
+  max-width:690px;
+  margin-top:30px;
+  color:rgba(255,255,255,.61);
+  font-family:var(--font-sans,Arial,sans-serif);
+  font-size:clamp(.96rem,1.25vw,1.12rem);
+  font-weight:450;
+  line-height:1.7;
+  letter-spacing:0;
+  text-transform:none;
+}
+
+html[lang="es"] .event-not-found-premium h1::after{
+  content:"El enlace puede haber cambiado, el evento todavía puede no estar publicado o esta edición no está disponible en este momento.";
+}
+
+.event-not-found-premium .event-shell>a{
+  grid-area:cta;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  min-width:176px;
+  min-height:52px;
+  margin-top:34px;
+  padding:0 24px;
+  border:1px solid var(--error-accent);
+  border-radius:999px;
+  background:var(--error-accent);
+  color:#fff;
+  text-decoration:none;
+  font-size:.67rem;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  box-shadow:0 18px 46px rgba(255,36,24,.17);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+
+.event-not-found-premium .event-shell>a::after{
+  content:"→";
+  margin-left:11px;
+  font-size:1rem;
+  line-height:1;
+}
+
+.event-not-found-premium .event-shell>a:hover{
+  transform:translateY(-2px);
+  background:#ff352b;
+  box-shadow:0 22px 56px rgba(255,36,24,.24);
+}
+
+.event-not-found-premium .event-shell::after{
+  grid-area:status;
+  content:"O QUE PODE TER ACONTECIDO\A\A01  O LINK FOI ALTERADO\A02  O EVENTO AINDA NÃO FOI PUBLICADO\A03  ESTA EDIÇÃO SAIU DO AR\A\A────────────────\A\AUse o menu acima para voltar à agenda, conhecer a GTRZ ou acessar o Instagram.";
+  display:block;
+  min-height:336px;
+  padding:28px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow:0 30px 90px rgba(0,0,0,.28);
+  color:rgba(255,255,255,.58);
+  font-family:var(--font-sans,Arial,sans-serif);
+  font-size:.73rem;
+  font-weight:680;
+  line-height:1.9;
+  letter-spacing:.045em;
+  white-space:pre-line;
+  text-transform:uppercase;
+  backdrop-filter:blur(16px);
+}
+
+html[lang="es"] .event-not-found-premium .event-shell::after{
+  content:"QUÉ PUEDE HABER PASADO\A\A01  EL ENLACE CAMBIÓ\A02  EL EVENTO TODAVÍA NO FUE PUBLICADO\A03  ESTA EDICIÓN SALIÓ DEL AIRE\A\A────────────────\A\AUsa el menú superior para volver a la agenda, conocer GTRZ o abrir Instagram.";
+}
+
+body:has(.event-not-found-premium) .site-footer{
+  margin:0;
+  border-top:0;
+  background:#070707;
+}
+
+body:has(.event-not-found-premium) .site-footer .wrap{
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+body:has(.event-not-found-premium) .site-footer span{
+  color:rgba(255,255,255,.34);
+}
+
+@media(max-width:900px){
+  .event-not-found-premium{min-height:auto}
+  .event-not-found-premium .event-shell{
+    width:min(100% - 36px,720px);
+    padding:86px 0 76px;
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "eyebrow"
+      "title"
+      "cta"
+      "status";
+  }
+  .event-not-found-premium h1{font-size:clamp(3.7rem,15vw,6.5rem)}
+  .event-not-found-premium .event-shell::after{
+    margin-top:48px;
+    min-height:0;
+  }
+}
+
+@media(max-width:560px){
+  .event-not-found-premium::before{
+    right:-.02em;
+    bottom:-.11em;
+    font-size:68vw;
+  }
+  .event-not-found-premium .event-shell{
+    width:calc(100% - 28px);
+    padding:70px 0 58px;
+  }
+  .event-not-found-premium .event-eyebrow{
+    margin-bottom:22px;
+    font-size:.54rem;
+  }
+  .event-not-found-premium h1{
+    font-size:clamp(3.25rem,17vw,5.15rem);
+    line-height:.88;
+  }
+  .event-not-found-premium h1::after{
+    margin-top:24px;
+    font-size:.94rem;
+    line-height:1.65;
+  }
+  .event-not-found-premium .event-shell>a{
+    width:100%;
+    margin-top:28px;
+  }
+  .event-not-found-premium .event-shell::after{
+    margin-top:36px;
+    padding:22px;
+    border-radius:18px;
+    font-size:.66rem;
+    line-height:1.8;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .event-not-found-premium .event-shell>a{transition:none}
+}
