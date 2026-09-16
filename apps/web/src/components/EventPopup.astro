@@ -16,15 +16,20 @@ const activeEvents = eventPool.slice(0, Math.max(1, Math.min(6, Number(settings.
 const frequency = forcePreview ? 'always' : (settings.frequency || 'session');
 const delayMs = forcePreview ? 80 : Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
 const single=activeEvents.length===1;
+const cityCount=new Set(activeEvents.map(event=>`${event.city||''}|${event.state||''}`.toLowerCase())).size;
+const eventCount=activeEvents.length;
+const multiMeta=isEs
+  ? `${cityCount} ${cityCount===1?'CIUDAD':'CIUDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`
+  : `${cityCount} ${cityCount===1?'CIDADE':'CIDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`;
 
 const ui=isEs?{
   kicker:'AGENDA GTRZ',
   titleTop:'LA PRÓXIMA NOCHE GTRZ',
   titleBottom:'YA TIENE FECHA.',
-  multiTop:'ELIGE TU',
-  multiBottom:'PRÓXIMA NOCHE GTRZ.',
+  multiTop:'PRÓXIMAS NOCHES GTRZ.',
+  multiBottom:'ELIGE LA TUYA.',
   body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.',
-  multiBody:'Elige la próxima edición y entra directamente a la página del evento.',
+  multiBody:'Compara ciudad, fecha y entradas y elige la próxima edición.',
   from:'Desde',
   view:'VER EVENTO Y ENTRADAS',
   sold:'AGOTADO',
@@ -35,10 +40,10 @@ const ui=isEs?{
   kicker:'AGENDA GTRZ',
   titleTop:'A PRÓXIMA NOITE GTRZ',
   titleBottom:'JÁ TEM DATA.',
-  multiTop:'ESCOLHA SUA',
-  multiBottom:'PRÓXIMA NOITE GTRZ.',
+  multiTop:'PRÓXIMAS NOITES GTRZ.',
+  multiBottom:'ESCOLHA A SUA.',
   body:'Confira a próxima edição, veja data, local e ingressos disponíveis.',
-  multiBody:'Escolha a próxima edição e entre direto na página do evento.',
+  multiBody:'Compare cidade, data e ingressos e escolha a próxima edição.',
   from:'A partir de',
   view:'VER EVENTO E INGRESSOS',
   sold:'ESGOTADO',
@@ -57,6 +62,7 @@ const shortTime=(event:CmsEvent)=>{
 };
 const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:Number(event.min_price_cents)%100===0?0:2}).format(Number(event.min_price_cents)/100);
 const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
+const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
 ---
 {enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
   <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
@@ -67,7 +73,9 @@ const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filt
 
     <div class="popup-layout">
       <div class="popup-copy">
-        {single&&<div class="popup-city"><i></i>{activeEvents[0].city}{activeEvents[0].state?` · ${activeEvents[0].state}`:''}</div>}
+        {single
+          ? <div class="popup-city"><i></i>{cityLabel(activeEvents[0])}</div>
+          : <div class="popup-multi-meta"><i></i>{multiMeta}</div>}
         <h2 class="display" id="eventPopupTitle">
           {single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}
         </h2>
@@ -82,9 +90,9 @@ const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filt
             <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
               {artwork?<img src={artwork} alt="" loading="eager"/>:<><img class="popup-event-fallback-logo" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
               <div class="popup-event-media-shade"></div>
-              <span class="popup-event-city">{event.city}{event.state?` · ${event.state}`:''}</span>
             </div>
             <div class="popup-event-content">
+              {!single&&<span class="popup-event-city-inline">{cityLabel(event)}</span>}
               <div class="popup-event-date"><span>{shortDate(event)}</span><span>{shortTime(event)}</span></div>
               <strong>{event.title||event.slug}</strong>
               <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
