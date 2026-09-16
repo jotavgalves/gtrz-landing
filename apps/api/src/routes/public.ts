@@ -21,7 +21,7 @@ publicRoutes.get('/site', async (c) => {
 
 publicRoutes.get('/events/:slug',async(c)=>{
   const slug=c.req.param('slug');
-  const event=await c.env.DB.prepare("SELECT * FROM events WHERE slug=? AND status!='draft' LIMIT 1").bind(slug).first();
+  const event=await c.env.DB.prepare("SELECT * FROM events WHERE slug=? AND status IN ('published','sales_open','sold_out','finished') LIMIT 1").bind(slug).first();
   if(!event)return c.json({error:'not_found'},404);
   const [localizations,tickets,artists]=await Promise.all([
     c.env.DB.prepare('SELECT * FROM event_localizations WHERE event_id=?').bind(event.id).all(),
