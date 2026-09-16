@@ -1,27 +1,27 @@
-.instagram-native{padding:96px 0;background:linear-gradient(180deg,#fff 0%,#f7f4ef 100%);color:#111;overflow:hidden}
-.instagram-native:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(520px 340px at 82% 16%,rgba(255,26,18,.07),transparent 68%),linear-gradient(90deg,rgba(0,0,0,.018) 1px,transparent 1px);background-size:auto,120px 100%}
+.instagram-native{padding:96px 0;background:#fff;color:#111;overflow:hidden}
+.instagram-native:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(520px 340px at 84% 12%,rgba(255,26,18,.055),transparent 70%)}
 .instagram-native .wrap{position:relative;z-index:1}
-.instagram-native .insta-card{min-height:560px;align-items:center;padding:54px;border:1px solid rgba(0,0,0,.1);border-radius:34px;background:#fff;box-shadow:0 24px 70px rgba(30,20,16,.08);overflow:visible}
-.instagram-native .insta-card:after{content:"INSTAGRAM";position:absolute;left:42px;bottom:-.09em;font:900 clamp(5rem,10vw,10rem)/.8 "Arial Narrow",Impact,sans-serif;letter-spacing:-.06em;color:rgba(0,0,0,.025);pointer-events:none;z-index:0}
-.instagram-native .insta-copy{align-self:center;position:relative;z-index:2}
+.instagram-native .insta-card{min-height:0;align-items:center;padding:50px 52px;border:1px solid rgba(0,0,0,.085);border-radius:32px;background:#fff;box-shadow:0 16px 46px rgba(27,20,17,.07);overflow:hidden;grid-template-columns:minmax(0,.94fr) minmax(420px,1.06fr);gap:52px}
+.instagram-native .insta-card:after{content:none!important;display:none!important}
+.instagram-native .insta-copy{align-self:center;position:relative;z-index:2;max-width:590px}
 .instagram-native .insta-copy .eyebrow{color:var(--red)}
-.instagram-native .insta-copy h2{color:#111;line-height:.88;margin:16px 0 22px;overflow:visible;padding-top:.05em}
-.instagram-native .insta-copy p{color:#5b5552;max-width:560px;font-size:1rem;line-height:1.75}
+.instagram-native .insta-copy h2{color:#111;line-height:.9;margin:16px 0 22px;overflow:visible;padding-top:.05em}
+.instagram-native .insta-copy p{color:#5b5552;max-width:540px;font-size:1rem;line-height:1.72}
 .instagram-native .insta-handle{color:#111;font-size:1.18rem;margin-top:24px}
 .instagram-native .hero-actions{margin-top:28px}
-.instagram-native .insta-follow-btn{min-height:60px;padding:0 22px 0 10px;border:0!important;border-radius:999px;background:linear-gradient(135deg,#ff2a1a,#e71810)!important;color:#fff!important;box-shadow:0 16px 34px rgba(255,26,18,.2);gap:13px}
-.instagram-native .insta-follow-btn:hover{transform:translateY(-2px);box-shadow:0 19px 38px rgba(255,26,18,.27)}
-.instagram-native .insta-follow-btn b{font-size:1.12rem;font-weight:600;line-height:1;margin-left:2px}
-.insta-gradient-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:radial-gradient(circle at 30% 105%,#feda75 0 22%,#fa7e1e 28%,#d62976 52%,#962fbf 72%,#4f5bd5 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.instagram-native .insta-follow-btn{width:max-content;min-height:58px;padding:0 18px 0 10px;border:0!important;border-radius:999px;background:linear-gradient(135deg,#ff2a1a,#eb1811)!important;color:#fff!important;box-shadow:0 8px 22px rgba(255,26,18,.14);gap:12px;justify-content:flex-start}
+.instagram-native .insta-follow-btn:hover{transform:translateY(-2px);box-shadow:0 11px 26px rgba(255,26,18,.2)}
+.instagram-native .insta-follow-btn:after{content:"→";display:inline-block;margin-left:8px;font-size:1.2rem;font-weight:700;line-height:1;transform:translateY(-1px)}
+.instagram-native .insta-follow-label{display:inline-block;white-space:nowrap}
+.insta-gradient-icon{position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:radial-gradient(circle at 30% 105%,#feda75 0 22%,#fa7e1e 28%,#d62976 52%,#962fbf 72%,#4f5bd5 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
 .insta-gradient-icon:before{content:"";width:20px;height:20px;border:2px solid #fff;border-radius:6px;box-sizing:border-box}
 .insta-gradient-icon:after{content:"";position:absolute;width:7px;height:7px;border:2px solid #fff;border-radius:50%;box-sizing:border-box}
-.insta-gradient-icon{position:relative}
-.insta-gradient-icon i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;right:9px;top:9px}
-.insta-native-frame{position:relative;min-height:500px;border:1px solid rgba(0,0,0,.1);border-radius:28px;padding:18px;background:linear-gradient(180deg,#fff,#faf8f5);overflow:hidden;box-shadow:0 22px 52px rgba(20,14,10,.1)}
-.insta-native-frame:before{content:"";position:absolute;inset:-24% -14% auto auto;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(255,26,18,.08),transparent 68%);pointer-events:none}
-.insta-native-embed{position:relative;z-index:2;min-height:445px;display:grid;place-items:center;border-radius:18px;overflow:hidden;background:#fff}
+.insta-gradient-icon i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;right:8px;top:8px}
+.insta-native-frame{position:relative;min-height:0;border:1px solid rgba(0,0,0,.09);border-radius:26px;padding:14px;background:#fafafa;overflow:hidden;box-shadow:0 14px 34px rgba(20,14,10,.075)}
+.insta-native-frame:before{content:"";position:absolute;inset:-26% -16% auto auto;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(255,26,18,.055),transparent 70%);pointer-events:none}
+.insta-native-embed{position:relative;z-index:2;min-height:445px;display:grid;place-items:center;border-radius:16px;overflow:hidden;background:#fff}
 .insta-native-embed .instagram-media{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .insta-native-embed iframe{width:100%!important;min-width:0!important;max-width:100%!important}
 .insta-native-embed>a{display:flex;align-items:center;justify-content:center;min-height:445px;padding:32px;color:#111;font-weight:900;text-align:center}
-@media(max-width:1050px){.instagram-native{padding:82px 0}.instagram-native .insta-card{padding:38px;min-height:0}.insta-native-frame{min-height:460px}.insta-native-embed,.insta-native-embed>a{min-height:405px}}
-@media(max-width:700px){.instagram-native{padding:64px 0}.instagram-native .insta-card{padding:22px;border-radius:26px;gap:28px}.instagram-native .insta-card:after{left:18px;font-size:5rem}.instagram-native .insta-copy h2{line-height:.9}.instagram-native .insta-copy p{font-size:.94rem}.instagram-native .insta-follow-btn{width:100%;justify-content:center}.insta-native-frame{padding:10px;border-radius:20px;min-height:400px}.insta-native-embed{min-height:350px;border-radius:14px}.insta-native-embed>a{min-height:350px;padding:20px}}
+@media(max-width:1050px){.instagram-native{padding:82px 0}.instagram-native .insta-card{grid-template-columns:1fr;padding:38px;gap:36px}.instagram-native .insta-copy{max-width:680px}.insta-native-frame{min-height:0}.insta-native-embed,.insta-native-embed>a{min-height:405px}}
+@media(max-width:700px){.instagram-native{padding:64px 0}.instagram-native .insta-card{padding:22px;border-radius:26px;gap:28px}.instagram-native .insta-copy h2{line-height:.92}.instagram-native .insta-copy p{font-size:.94rem}.instagram-native .insta-follow-btn{width:100%;justify-content:flex-start;padding-right:16px}.instagram-native .insta-follow-btn:after{margin-left:auto}.insta-native-frame{padding:9px;border-radius:20px}.insta-native-embed{min-height:350px;border-radius:14px}.insta-native-embed>a{min-height:350px;padding:20px}}
