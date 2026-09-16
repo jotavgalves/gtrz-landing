@@ -126,8 +126,7 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
       const storage = kind === 'local' ? window.localStorage : window.sessionStorage;
       storage.setItem(storageKey,value);
     } catch {
-      // Storage pode estar bloqueado por modo privado/políticas do navegador.
-      // O popup continua funcionando; apenas não persiste a frequência.
+      // O popup continua funcionando mesmo quando o navegador bloqueia storage.
     }
   };
 
@@ -157,6 +156,8 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
 
   const openPopup = () => {
     if (!popup) return;
+    const languageGate = document.querySelector('[data-language-gate]');
+    if (languageGate && !languageGate.hidden) return;
     popup.hidden=false;
     popup.removeAttribute('hidden');
     popup.setAttribute('aria-hidden','false');
@@ -165,7 +166,14 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
     track('popup_view');
   };
 
-  if (popup && !seen) window.setTimeout(openPopup,delayMs);
+  const schedulePopup = () => {
+    if (!popup || seen) return;
+    const languageGate = document.querySelector('[data-language-gate]');
+    if (languageGate && !languageGate.hidden) return;
+    window.setTimeout(openPopup,delayMs);
+  };
+
+  schedulePopup();
   popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
   popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
   addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!popup?.hidden)closePopup()});
