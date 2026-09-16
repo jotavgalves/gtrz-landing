@@ -3,26 +3,26 @@
   position:relative;
   display:flex;
   align-items:center;
-  min-height:760px;
+  min-height:720px;
   overflow:hidden;
   isolation:isolate;
   color:#f7f4ef;
   background:
-    radial-gradient(circle at 78% 24%,rgba(255,36,24,.17),transparent 31%),
-    radial-gradient(circle at 18% 84%,rgba(255,255,255,.035),transparent 28%),
-    linear-gradient(135deg,#050505 0%,#090909 57%,#120604 100%);
-  border-bottom:1px solid rgba(255,255,255,.08);
+    radial-gradient(circle at 78% 18%,rgba(255,36,24,.12),transparent 28%),
+    radial-gradient(circle at 22% 82%,rgba(255,255,255,.025),transparent 30%),
+    linear-gradient(135deg,#050505 0%,#080808 62%,#100504 100%);
+  border-bottom:1px solid rgba(255,255,255,.07);
 }
 
 .event-not-found-premium::before{
   content:"404";
   position:absolute;
   z-index:-2;
-  right:-.035em;
-  bottom:-.24em;
-  color:rgba(255,255,255,.026);
+  right:3vw;
+  bottom:48px;
+  color:rgba(255,255,255,.018);
   font-family:var(--font-display,Arial Black,sans-serif);
-  font-size:clamp(18rem,35vw,42rem);
+  font-size:clamp(16rem,27vw,31rem);
   font-weight:900;
   line-height:.72;
   letter-spacing:-.09em;
@@ -35,46 +35,38 @@
   position:absolute;
   inset:0;
   z-index:-1;
-  opacity:.34;
+  opacity:.24;
   background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
-  background-size:64px 64px;
-  mask-image:linear-gradient(to bottom,transparent 0%,#000 28%,#000 100%);
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 24%,#000 100%);
   pointer-events:none;
 }
 
 .event-not-found-premium .event-shell{
   position:relative;
   z-index:2;
-  width:min(1240px,calc(100% - 56px));
+  width:min(1320px,calc(100% - 72px));
   margin:0 auto;
-  padding:112px 0 104px;
-  display:grid;
-  grid-template-columns:minmax(0,1.22fr) minmax(320px,.58fr);
-  grid-template-areas:
-    "eyebrow status"
-    "title status"
-    "cta status";
-  column-gap:clamp(48px,8vw,118px);
-  align-items:start;
+  padding:104px 0 94px;
+  display:block;
 }
 
 .event-not-found-premium .event-eyebrow{
-  grid-area:eyebrow;
   display:inline-flex;
   align-items:center;
   width:max-content;
   gap:10px;
-  margin:0 0 26px;
-  padding:8px 11px;
-  border:1px solid rgba(255,36,24,.46);
+  margin:0 0 28px;
+  padding:9px 13px;
+  border:1px solid rgba(255,36,24,.48);
   border-radius:999px;
-  background:rgba(255,36,24,.07);
+  background:rgba(255,36,24,.075);
   color:#fff;
-  font-size:.61rem;
+  font-size:.64rem;
   font-weight:900;
-  letter-spacing:.13em;
+  letter-spacing:.14em;
   text-transform:uppercase;
 }
 
@@ -89,7 +81,7 @@
 
 .event-not-found-premium .event-eyebrow::after{
   content:"PÁGINA FORA DA PISTA";
-  color:rgba(255,255,255,.53);
+  color:rgba(255,255,255,.55);
 }
 
 html[lang="es"] .event-not-found-premium .event-eyebrow::after{
@@ -97,29 +89,45 @@ html[lang="es"] .event-not-found-premium .event-eyebrow::after{
 }
 
 .event-not-found-premium h1{
-  grid-area:title;
-  max-width:880px;
+  position:relative;
+  max-width:980px;
   margin:0;
   color:#fffdf8;
   font-family:var(--font-display,Arial Black,sans-serif);
-  font-size:clamp(4.2rem,8.7vw,8.8rem);
+  font-size:0;
   font-weight:900;
-  line-height:.84;
+  line-height:.86;
   letter-spacing:-.055em;
   text-transform:uppercase;
-  text-wrap:balance;
+}
+
+.event-not-found-premium h1::before{
+  content:"ESTE EVENTO\ANÃO ESTÁ\ADISPONÍVEL.";
+  display:block;
+  color:#fffdf8;
+  font-family:var(--font-display,Arial Black,sans-serif);
+  font-size:clamp(4.35rem,7.35vw,7.75rem);
+  font-weight:900;
+  line-height:.86;
+  letter-spacing:-.055em;
+  white-space:pre-line;
+  text-transform:uppercase;
+}
+
+html[lang="es"] .event-not-found-premium h1::before{
+  content:"ESTE EVENTO\ANO ESTÁ\ADISPONIBLE.";
 }
 
 .event-not-found-premium h1::after{
   content:"O link pode ter mudado, o evento pode ainda não ter sido publicado ou esta edição não está disponível no momento.";
   display:block;
-  max-width:690px;
+  max-width:620px;
   margin-top:30px;
-  color:rgba(255,255,255,.61);
+  color:rgba(255,255,255,.6);
   font-family:var(--font-sans,Arial,sans-serif);
-  font-size:clamp(.96rem,1.25vw,1.12rem);
+  font-size:clamp(.98rem,1.08vw,1.08rem);
   font-weight:450;
-  line-height:1.7;
+  line-height:1.65;
   letter-spacing:0;
   text-transform:none;
 }
@@ -129,31 +137,30 @@ html[lang="es"] .event-not-found-premium h1::after{
 }
 
 .event-not-found-premium .event-shell>a{
-  grid-area:cta;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   width:max-content;
-  min-width:176px;
-  min-height:52px;
+  min-width:192px;
+  min-height:54px;
   margin-top:34px;
-  padding:0 24px;
+  padding:0 26px;
   border:1px solid var(--error-accent);
   border-radius:999px;
   background:var(--error-accent);
   color:#fff;
   text-decoration:none;
-  font-size:.67rem;
+  font-size:.69rem;
   font-weight:900;
   letter-spacing:.09em;
   text-transform:uppercase;
-  box-shadow:0 18px 46px rgba(255,36,24,.17);
+  box-shadow:0 18px 46px rgba(255,36,24,.16);
   transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
 }
 
 .event-not-found-premium .event-shell>a::after{
   content:"→";
-  margin-left:11px;
+  margin-left:12px;
   font-size:1rem;
   line-height:1;
 }
@@ -161,32 +168,27 @@ html[lang="es"] .event-not-found-premium h1::after{
 .event-not-found-premium .event-shell>a:hover{
   transform:translateY(-2px);
   background:#ff352b;
-  box-shadow:0 22px 56px rgba(255,36,24,.24);
+  box-shadow:0 22px 56px rgba(255,36,24,.22);
 }
 
 .event-not-found-premium .event-shell::after{
-  grid-area:status;
-  content:"O QUE PODE TER ACONTECIDO\A\A01  O LINK FOI ALTERADO\A02  O EVENTO AINDA NÃO FOI PUBLICADO\A03  ESTA EDIÇÃO SAIU DO AR\A\A────────────────\A\AUse o menu acima para voltar à agenda, conhecer a GTRZ ou acessar o Instagram.";
+  content:"LINK ALTERADO  ·  EVENTO AINDA NÃO PUBLICADO  ·  EDIÇÃO INDISPONÍVEL";
   display:block;
-  min-height:336px;
-  padding:28px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:24px;
-  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-  box-shadow:0 30px 90px rgba(0,0,0,.28);
-  color:rgba(255,255,255,.58);
+  width:min(920px,100%);
+  margin-top:72px;
+  padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.31);
   font-family:var(--font-sans,Arial,sans-serif);
-  font-size:.73rem;
-  font-weight:680;
-  line-height:1.9;
-  letter-spacing:.045em;
-  white-space:pre-line;
+  font-size:.67rem;
+  font-weight:800;
+  line-height:1.6;
+  letter-spacing:.11em;
   text-transform:uppercase;
-  backdrop-filter:blur(16px);
 }
 
 html[lang="es"] .event-not-found-premium .event-shell::after{
-  content:"QUÉ PUEDE HABER PASADO\A\A01  EL ENLACE CAMBIÓ\A02  EL EVENTO TODAVÍA NO FUE PUBLICADO\A03  ESTA EDICIÓN SALIÓ DEL AIRE\A\A────────────────\A\AUsa el menú superior para volver a la agenda, conocer GTRZ o abrir Instagram.";
+  content:"ENLACE MODIFICADO  ·  EVENTO AÚN NO PUBLICADO  ·  EDICIÓN NO DISPONIBLE";
 }
 
 body:has(.event-not-found-premium) .site-footer{
@@ -196,7 +198,7 @@ body:has(.event-not-found-premium) .site-footer{
 }
 
 body:has(.event-not-found-premium) .site-footer .wrap{
-  border-top:1px solid rgba(255,255,255,.08);
+  border-top:1px solid rgba(255,255,255,.07);
 }
 
 body:has(.event-not-found-premium) .site-footer span{
@@ -204,57 +206,70 @@ body:has(.event-not-found-premium) .site-footer span{
 }
 
 @media(max-width:900px){
-  .event-not-found-premium{min-height:auto}
-  .event-not-found-premium .event-shell{
-    width:min(100% - 36px,720px);
-    padding:86px 0 76px;
-    grid-template-columns:1fr;
-    grid-template-areas:
-      "eyebrow"
-      "title"
-      "cta"
-      "status";
+  .event-not-found-premium{
+    min-height:auto;
   }
-  .event-not-found-premium h1{font-size:clamp(3.7rem,15vw,6.5rem)}
+
+  .event-not-found-premium::before{
+    right:-2vw;
+    bottom:48px;
+    font-size:42vw;
+  }
+
+  .event-not-found-premium .event-shell{
+    width:min(100% - 40px,760px);
+    padding:88px 0 76px;
+  }
+
+  .event-not-found-premium h1::before{
+    font-size:clamp(3.8rem,13.5vw,6.15rem);
+  }
+
   .event-not-found-premium .event-shell::after{
-    margin-top:48px;
-    min-height:0;
+    margin-top:56px;
   }
 }
 
 @media(max-width:560px){
   .event-not-found-premium::before{
-    right:-.02em;
-    bottom:-.11em;
-    font-size:68vw;
+    right:-10vw;
+    bottom:42px;
+    font-size:64vw;
+    opacity:.8;
   }
+
   .event-not-found-premium .event-shell{
     width:calc(100% - 28px);
     padding:70px 0 58px;
   }
+
   .event-not-found-premium .event-eyebrow{
-    margin-bottom:22px;
-    font-size:.54rem;
+    margin-bottom:24px;
+    font-size:.55rem;
   }
-  .event-not-found-premium h1{
-    font-size:clamp(3.25rem,17vw,5.15rem);
+
+  .event-not-found-premium h1::before{
+    font-size:clamp(3.18rem,16vw,4.95rem);
     line-height:.88;
   }
+
   .event-not-found-premium h1::after{
     margin-top:24px;
+    max-width:100%;
     font-size:.94rem;
     line-height:1.65;
   }
+
   .event-not-found-premium .event-shell>a{
     width:100%;
     margin-top:28px;
   }
+
   .event-not-found-premium .event-shell::after{
-    margin-top:36px;
-    padding:22px;
-    border-radius:18px;
-    font-size:.66rem;
-    line-height:1.8;
+    margin-top:44px;
+    padding-top:18px;
+    font-size:.61rem;
+    line-height:1.75;
   }
 }
 
