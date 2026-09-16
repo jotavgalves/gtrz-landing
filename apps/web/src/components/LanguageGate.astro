@@ -28,8 +28,8 @@ const optionEs=chrome.gateOptionEs||'Español';
   </div>
 </div>
 <script>
-  const gate = document.querySelector('[data-language-gate]');
-  let saved = null;
+  const gate = document.querySelector<HTMLElement>('[data-language-gate]');
+  let saved: string | null = null;
   try { saved = localStorage.getItem('gtrz_locale'); } catch {}
   const explicitLanguage = new URLSearchParams(location.search).has('lang');
 
@@ -40,7 +40,7 @@ const optionEs=chrome.gateOptionEs||'Español';
     document.body.classList.add('modal-open');
   }
 
-  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
+  document.querySelectorAll<HTMLElement>('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
     try { localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR'); } catch {}
     document.body.classList.remove('modal-open');
   }));
