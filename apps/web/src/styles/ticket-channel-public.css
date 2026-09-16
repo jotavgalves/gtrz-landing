@@ -1,0 +1,36 @@
+/* Purchase channels keep their own visual language inside event ticket cards. */
+.event-ticket-action[data-track^="ticket.sympla"]{
+  border-color:rgba(27,132,255,.75)!important;
+  background:linear-gradient(135deg,#16a8ff 0%,#0072ff 52%,#2847ff 100%)!important;
+  color:#fff!important;
+  box-shadow:0 9px 26px rgba(0,100,255,.18);
+  font-size:0;
+}
+.event-ticket-action[data-track^="ticket.sympla"]::after{
+  content:"COMPRAR VIA SYMPLA";
+  font-size:.65rem;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+html[lang="es"] .event-ticket-action[data-track^="ticket.sympla"]::after{content:"COMPRAR EN SYMPLA"}
+
+.event-ticket-action[data-track^="ticket.whatsapp"]{
+  border-color:#25d366!important;
+  background:linear-gradient(135deg,#1fb956 0%,#25d366 60%,#3fdf7a 100%)!important;
+  color:#fff!important;
+  box-shadow:0 9px 26px rgba(37,211,102,.15);
+  font-size:0;
+}
+.event-ticket-action[data-track^="ticket.whatsapp"]::after{
+  content:"COMPRAR PELO WHATSAPP · SEM TAXA";
+  font-size:.65rem;
+  font-weight:900;
+  letter-spacing:.065em;
+}
+html[lang="es"] .event-ticket-action[data-track^="ticket.whatsapp"]::after{content:"COMPRAR POR WHATSAPP · SIN TASA"}
+
+.event-ticket-action[data-track^="ticket.sympla"]:hover,
+.event-ticket-action[data-track^="ticket.whatsapp"]:hover{
+  filter:brightness(1.06);
+  transform:translateY(-2px);
+}
