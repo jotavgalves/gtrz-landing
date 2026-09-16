@@ -1,25 +1,98 @@
 ---
 import type { CmsEvent, Locale, SiteSettings } from '@/lib/cms';
+import { API_BASE } from '@/lib/api';
 import { getPublicCopy } from '@/lib/public-copy';
+
 const { events, locale, siteSettings = {} } = Astro.props as { events: CmsEvent[]; locale: Locale; siteSettings?: SiteSettings };
 const settings=siteSettings.event_popup||{};
 const c=getPublicCopy(siteSettings,locale,'popup');
+const isEs=locale==='es';
 const enabled = settings.enabled !== false;
 const selected = settings.selectedEventId ? events.filter(event => event.id === settings.selectedEventId) : events;
 const activeEvents = selected.filter(event => ['published','sales_open','sold_out'].includes(event.status)).slice(0, Math.max(1, Math.min(6, settings.maxEvents || 4)));
 const frequency = settings.frequency || 'session';
 const delayMs = Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
+const single=activeEvents.length===1;
+
+const ui=isEs?{
+  kicker:'AGENDA GTRZ',
+  titleTop:'HAY GTRZ',
+  titleBottom:'EN TU CIUDAD.',
+  multiTop:'GTRZ ESTÁ',
+  multiBottom:'EN MÁS DE UNA CIUDAD.',
+  body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.',
+  multiBody:'Elige la próxima edición y entra directamente a la página del evento.',
+  from:'Desde',
+  view:'VER EVENTO Y ENTRADAS',
+  sold:'AGOTADO',
+  continue:'Continuar en el sitio',
+  date:'FECHA',
+  venue:'LUGAR'
+}:{
+  kicker:'AGENDA GTRZ',
+  titleTop:'TEM GTRZ',
+  titleBottom:'NA SUA CIDADE.',
+  multiTop:'A GTRZ ESTÁ',
+  multiBottom:'EM MAIS DE UMA CIDADE.',
+  body:'Confira a próxima edição, veja data, local e ingressos disponíveis.',
+  multiBody:'Escolha a próxima edição e entre direto na página do evento.',
+  from:'A partir de',
+  view:'VER EVENTO E INGRESSOS',
+  sold:'ESGOTADO',
+  continue:'Continuar no site',
+  date:'DATA',
+  venue:'LOCAL'
+};
+
+const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
+const mediaId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
+const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
+const shortDate=(event:CmsEvent)=>new Intl.DateTimeFormat(isEs?'es-ES':'pt-BR',{day:'2-digit',month:'short'}).format(new Date(event.starts_at)).replace('.','').toUpperCase();
+const shortTime=(event:CmsEvent)=>{
+  const value=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(event.starts_at));
+  return value.endsWith(':00')?`${value.slice(0,2)}H`:value;
+};
+const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:Number(event.min_price_cents)%100===0?0:2}).format(Number(event.min_price_cents)/100);
+const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
 ---
 {enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
-  <div class="event-popup-card" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
-    <div class="popup-head"><div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{activeEvents.length > 1 ? c.multiHeader : c.singleHeader}</small></div><button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>×</button></div>
-    <div class="popup-body">
-      <div class="eyebrow">{c.eyebrow}</div>
-      {activeEvents.length === 1 && <div class="city-pill">{activeEvents[0].city}{activeEvents[0].state ? ` · ${activeEvents[0].state}` : ''}</div>}
-      <h2 class="display" id="eventPopupTitle">{activeEvents.length > 1 ? <>{c.multiTitleLine1}<br/>{c.multiTitleLine2} <span class="red">{c.multiTitleAccent}</span></> : <>{c.singleTitleLine1}<br/>{c.singleTitleLine2} <span class="red">{c.singleTitleAccent}</span></>}</h2>
-      <p>{activeEvents.length > 1 ? c.multiBody : (activeEvents[0]?.summary || c.singleFallbackBody)}</p>
-      <div class="popup-events">{activeEvents.map(event => <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click"><span class="city-pill">{event.city}{event.state ? ` · ${event.state}` : ''}</span><strong>{event.title || event.slug}</strong><small>{event.status === 'sold_out' ? c.soldOutLabel : c.eventCta}</small></a>)}</div>
-      <button class="popup-continue" type="button" data-popup-close>{c.continueLabel}</button>
+  <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
+    <div class="popup-head">
+      <div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{ui.kicker}</small></div>
+      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>×</button>
+    </div>
+
+    <div class="popup-layout">
+      <div class="popup-copy">
+        {single&&<div class="popup-city"><i></i>{activeEvents[0].city}{activeEvents[0].state?` · ${activeEvents[0].state}`:''}</div>}
+        <h2 class="display" id="eventPopupTitle">
+          {single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}
+        </h2>
+        <p>{single?ui.body:ui.multiBody}</p>
+        <button class="popup-continue" type="button" data-popup-close>{ui.continue} <span>↘</span></button>
+      </div>
+
+      <div class:list={["popup-events",single?'single-event':'multiple-events']}>
+        {activeEvents.map(event => {
+          const artwork=mediaUrl(mediaId(event));
+          return <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
+            <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
+              {artwork?<img src={artwork} alt="" loading="eager"/>:<><img class="popup-event-fallback-logo" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
+              <div class="popup-event-media-shade"></div>
+              <span class="popup-event-city">{event.city}{event.state?` · ${event.state}`:''}</span>
+            </div>
+            <div class="popup-event-content">
+              <div class="popup-event-date"><span>{shortDate(event)}</span><span>{shortTime(event)}</span></div>
+              <strong>{event.title||event.slug}</strong>
+              <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
+              <div class="popup-event-footer">
+                <div>{event.status==='sold_out'?<span class="popup-sold-out">{ui.sold}</span>:price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
+                <span class="popup-event-cta">{ui.view} <b>→</b></span>
+              </div>
+            </div>
+          </a>;
+        })}
+      </div>
     </div>
   </div>
 </div>}
@@ -33,4 +106,5 @@ const delayMs = Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
   if (popup && !seen) setTimeout(()=>{ popup.hidden=false; popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); markSeen(); window.gtrzTrack?.('popup_view',{section:'event_popup'}); },delayMs);
   popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
   popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
+  addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!popup?.hidden)closePopup()});
 </script>
