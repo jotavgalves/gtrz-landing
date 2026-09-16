@@ -10,7 +10,23 @@ export interface CmsSectionRow {
   content_json?: string;
 }
 export interface CmsSection { id:string; type:string; position:number; enabled:boolean; config:Record<string,unknown>; content:Record<string,any>; }
-export interface CmsEvent { id:string; slug:string; status:string; city:string; state?:string; starts_at:string; ends_at?:string; locale?:string; title?:string; summary?:string; }
+export interface CmsEvent {
+  id:string;
+  slug:string;
+  status:string;
+  city:string;
+  state?:string;
+  starts_at:string;
+  ends_at?:string;
+  venue_name?:string|null;
+  hero_media_id?:string|null;
+  logo_media_id?:string|null;
+  theme_json?:string|null;
+  min_price_cents?:number|null;
+  locale?:string;
+  title?:string;
+  summary?:string;
+}
 export interface CmsTeamMember { id:string; name:string; media_id?:string|null; instagram_url?:string|null; position:number; locale?:string; role_label?:string|null; bio?:string|null; }
 export interface EventPopupSettings {
   enabled?: boolean;
