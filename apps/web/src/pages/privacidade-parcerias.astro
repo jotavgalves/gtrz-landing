@@ -1,0 +1,37 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { getHomePage } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+const locale: Locale = Astro.url.searchParams.get('lang') === 'es' ? 'es' : 'pt-BR';
+const es = locale === 'es';
+const site = await getHomePage();
+const c = es ? {
+  eyebrow:'GTRZ · PRIVACIDAD', title:'PRIVACIDAD EN ALIANZAS', intro:'Cómo GTRZ trata los datos enviados en propuestas comerciales y de colaboración.',
+  items:[
+    ['FINALIDAD','Los datos se utilizan para analizar la propuesta, identificar y contactar a la persona responsable, conducir negociaciones, mantener el historial de la relación comercial y, cuando corresponda, formalizar la alianza.'],
+    ['DATOS RECOPILADOS','Podemos tratar datos de identificación y contacto, información de la organización, ubicación, propuesta comercial, archivos y demás información que la persona decida enviar en el formulario.'],
+    ['CONSERVACIÓN','Los datos podrán conservarse mientras sean pertinentes y necesarios para las finalidades comerciales y administrativas informadas, respetando la legislación aplicable y los derechos del titular.'],
+    ['COMPARTIR','GTRZ no comercializa los datos enviados ni los utiliza para publicidad de terceros. El acceso se limita a personas y prestadores que necesiten la información para analizar, negociar, formalizar o gestionar la relación comercial.'],
+    ['SEGURIDAD','GTRZ adopta medidas razonables para reducir riesgos de acceso no autorizado, pérdida, alteración o divulgación indebida de la información.'],
+    ['DERECHOS','La persona titular podrá solicitar, cuando corresponda, confirmación del tratamiento, acceso, corrección y demás derechos previstos por la legislación aplicable.'],
+    ['REGISTRO DEL CONSENTIMIENTO','Al enviar una propuesta, GTRZ registra la fecha y hora del consentimiento, la versión del aviso y el idioma presentado, manteniendo evidencia de la información aceptada en ese momento.']
+  ], back:'VOLVER A ALIANZAS'
+} : {
+  eyebrow:'GTRZ · PRIVACIDADE', title:'PRIVACIDADE EM PARCERIAS', intro:'Como a GTRZ trata os dados enviados em propostas comerciais e de colaboração.',
+  items:[
+    ['FINALIDADE','Os dados são utilizados para analisar a proposta, identificar e contatar a pessoa responsável, conduzir negociações, manter o histórico do relacionamento comercial e, quando aplicável, formalizar a parceria.'],
+    ['DADOS COLETADOS','Podemos tratar dados de identificação e contato, informações da organização, localização, proposta comercial, arquivos e demais informações que a pessoa optar por enviar no formulário.'],
+    ['CONSERVAÇÃO','Os dados poderão ser mantidos enquanto forem pertinentes e necessários às finalidades comerciais e administrativas informadas, respeitando a legislação aplicável e os direitos do titular.'],
+    ['COMPARTILHAMENTO','A GTRZ não comercializa os dados enviados nem os utiliza para publicidade de terceiros. O acesso é limitado às pessoas e prestadores que necessitem das informações para analisar, negociar, formalizar ou administrar a relação comercial.'],
+    ['SEGURANÇA','A GTRZ adota medidas razoáveis para reduzir riscos de acesso não autorizado, perda, alteração ou divulgação indevida das informações.'],
+    ['DIREITOS','O titular poderá solicitar, quando aplicável, confirmação do tratamento, acesso, correção e os demais direitos previstos pela legislação aplicável.'],
+    ['REGISTRO DO ACEITE','Ao enviar uma proposta, a GTRZ registra a data e hora do aceite, a versão do aviso e o idioma apresentado, mantendo evidência do conteúdo aceito naquele momento.']
+  ], back:'VOLTAR PARA PARCERIAS'
+};
+---
+<SiteLayout locale={locale} title={c.title} settings={site.settings}>
+<main class="privacy-page"><section class="privacy-hero"><div class="shell"><span class="eyebrow">{c.eyebrow}</span><h1>{c.title}</h1><p>{c.intro}</p></div></section><section class="privacy-body"><div class="shell privacy-shell">{c.items.map(([title,text])=><article><h2>{title}</h2><p>{text}</p></article>)}<a class="button primary" href={`/parcerias?lang=${es?'es':'pt-BR'}`}>{c.back}</a></div></section></main>
+</SiteLayout>
+<style>
+.privacy-page{background:#090909;color:#f5f1ed;min-height:100vh}.privacy-hero{padding:150px 0 70px;background:radial-gradient(60% 100% at 100% 0%,rgba(255,32,24,.15),transparent 70%),#090909}.privacy-hero h1{font-size:clamp(4rem,8vw,8rem);line-height:.86;max-width:980px;margin:18px 0 24px}.privacy-hero p{max-width:660px;color:#a69f9a;line-height:1.65;font-size:1.05rem}.privacy-body{padding:0 0 120px}.privacy-shell{max-width:920px}.privacy-shell article{padding:28px 0;border-top:1px solid #282828}.privacy-shell h2{margin:0 0 10px;font-size:.82rem;letter-spacing:.13em;color:#ff2a21}.privacy-shell p{margin:0;color:#c0b9b5;line-height:1.8}.privacy-shell .button{margin-top:32px}@media(max-width:760px){.privacy-hero{padding:104px 0 48px}.privacy-hero h1{font-size:clamp(3.4rem,15vw,5rem)}.privacy-shell article{padding:22px 0}}
+</style>
