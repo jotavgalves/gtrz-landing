@@ -23,43 +23,20 @@ const multiMeta=isEs
   : `${cityCount} ${cityCount===1?'CIDADE':'CIDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`;
 
 const ui=isEs?{
-  kicker:'AGENDA GTRZ',
-  titleTop:'LA PRÓXIMA NOCHE GTRZ',
-  titleBottom:'YA TIENE FECHA.',
-  multiTop:'PRÓXIMAS NOCHES GTRZ.',
-  multiBottom:'ELIGE LA TUYA.',
-  body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.',
-  multiBody:'Compara ciudad, fecha y entradas y elige la próxima edición.',
-  from:'Desde',
-  view:'VER EVENTO Y ENTRADAS',
-  sold:'AGOTADO',
-  continue:'Continuar en el sitio',
-  date:'FECHA',
-  venue:'LUGAR'
+  kicker:'AGENDA GTRZ', titleTop:'LA PRÓXIMA NOCHE GTRZ', titleBottom:'YA TIENE FECHA.', multiTop:'PRÓXIMAS NOCHES GTRZ.', multiBottom:'ELIGE LA TUYA.',
+  body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.', multiBody:'Compara ciudad, fecha y entradas y elige la próxima edición.',
+  from:'Desde', view:'VER EVENTO Y ENTRADAS', sold:'AGOTADO', continue:'Continuar en el sitio', venue:'LUGAR'
 }:{
-  kicker:'AGENDA GTRZ',
-  titleTop:'A PRÓXIMA NOITE GTRZ',
-  titleBottom:'JÁ TEM DATA.',
-  multiTop:'PRÓXIMAS NOITES GTRZ.',
-  multiBottom:'ESCOLHA A SUA.',
-  body:'Confira a próxima edição, veja data, local e ingressos disponíveis.',
-  multiBody:'Compare cidade, data e ingressos e escolha a próxima edição.',
-  from:'A partir de',
-  view:'VER EVENTO E INGRESSOS',
-  sold:'ESGOTADO',
-  continue:'Continuar no site',
-  date:'DATA',
-  venue:'LOCAL'
+  kicker:'AGENDA GTRZ', titleTop:'A PRÓXIMA NOITE GTRZ', titleBottom:'JÁ TEM DATA.', multiTop:'PRÓXIMAS NOITES GTRZ.', multiBottom:'ESCOLHA A SUA.',
+  body:'Confira a próxima edição, veja data, local e ingressos disponíveis.', multiBody:'Compare cidade, data e ingressos e escolha a próxima edição.',
+  from:'A partir de', view:'VER EVENTO E INGRESSOS', sold:'ESGOTADO', continue:'Continuar no site', venue:'LOCAL'
 };
 
 const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
 const mediaId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
 const shortDate=(event:CmsEvent)=>new Intl.DateTimeFormat(isEs?'es-ES':'pt-BR',{day:'2-digit',month:'short'}).format(new Date(event.starts_at)).replace('.','').toUpperCase();
-const shortTime=(event:CmsEvent)=>{
-  const value=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(event.starts_at));
-  return value.endsWith(':00')?`${value.slice(0,2)}H`:value;
-};
+const shortTime=(event:CmsEvent)=>{const value=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(event.starts_at));return value.endsWith(':00')?`${value.slice(0,2)}H`:value};
 const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:Number(event.min_price_cents)%100===0?0:2}).format(Number(event.min_price_cents)/100);
 const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
 const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
@@ -68,21 +45,17 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
   <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
     <div class="popup-head">
       <div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{ui.kicker}</small></div>
-      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>×</button>
+      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
+      </button>
     </div>
-
     <div class="popup-layout">
       <div class="popup-copy">
-        {single
-          ? <div class="popup-city"><i></i>{cityLabel(activeEvents[0])}</div>
-          : <div class="popup-multi-meta"><i></i>{multiMeta}</div>}
-        <h2 class="display" id="eventPopupTitle">
-          {single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}
-        </h2>
+        {single?<div class="popup-city"><i></i>{cityLabel(activeEvents[0])}</div>:<div class="popup-multi-meta"><i></i>{multiMeta}</div>}
+        <h2 class="display" id="eventPopupTitle">{single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}</h2>
         <p>{single?ui.body:ui.multiBody}</p>
-        <button class="popup-continue" type="button" data-popup-close>{ui.continue} <span>↘</span></button>
+        <button class="popup-continue" type="button" data-popup-close>{ui.continue}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></button>
       </div>
-
       <div class:list={["popup-events",single?'single-event':'multiple-events']}>
         {activeEvents.map(event => {
           const artwork=mediaUrl(mediaId(event));
@@ -98,7 +71,7 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
               <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
               <div class="popup-event-footer">
                 <div>{event.status==='sold_out'?<span class="popup-sold-out">{ui.sold}</span>:price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
-                <span class="popup-event-cta">{ui.view} <b>→</b></span>
+                <span class="popup-event-cta">{ui.view}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></span>
               </div>
             </div>
           </a>;
@@ -111,70 +84,30 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
   const popup = document.querySelector('[data-event-popup]');
   const key = 'gtrz_event_popup_seen';
   const today = new Date().toISOString().slice(0,10);
-
-  const storageRead = (kind, storageKey) => {
-    try {
-      const storage = kind === 'local' ? window.localStorage : window.sessionStorage;
-      return storage.getItem(storageKey);
-    } catch {
-      return null;
-    }
-  };
-
-  const storageWrite = (kind, storageKey, value) => {
-    try {
-      const storage = kind === 'local' ? window.localStorage : window.sessionStorage;
-      storage.setItem(storageKey,value);
-    } catch {
-      // O popup continua funcionando mesmo quando o navegador bloqueia storage.
-    }
-  };
-
-  const seen = frequency === 'always'
-    ? false
-    : frequency === 'day'
-      ? storageRead('local',key) === today
-      : storageRead('session',key) === '1';
-
-  const markSeen = () => {
-    if (frequency === 'day') storageWrite('local',key,today);
-    else if (frequency !== 'always') storageWrite('session',key,'1');
-  };
-
-  const track = (name) => {
-    try { window.gtrzTrack?.(name,{section:'event_popup'}); } catch {}
-  };
-
-  const closePopup = () => {
-    if (!popup) return;
-    popup.hidden=true;
-    popup.setAttribute('hidden','');
-    popup.setAttribute('aria-hidden','true');
-    document.body.classList.remove('modal-open');
-    track('popup_close');
-  };
-
+  const storageRead = (kind, storageKey) => { try { const storage = kind === 'local' ? window.localStorage : window.sessionStorage; return storage.getItem(storageKey); } catch { return null; } };
+  const storageWrite = (kind, storageKey, value) => { try { const storage = kind === 'local' ? window.localStorage : window.sessionStorage; storage.setItem(storageKey,value); } catch {} };
+  const handoff = storageRead('session','gtrz_language_handoff') === '1';
+  if (handoff) { try { sessionStorage.removeItem('gtrz_language_handoff'); } catch {} }
+  const seen = handoff ? false : frequency === 'always' ? false : frequency === 'day' ? storageRead('local',key) === today : storageRead('session',key) === '1';
+  const markSeen = () => { if (frequency === 'day') storageWrite('local',key,today); else if (frequency !== 'always') storageWrite('session',key,'1'); };
+  const track = (name) => { try { window.gtrzTrack?.(name,{section:'event_popup'}); } catch {} };
+  const clearHandoff = () => document.documentElement.classList.remove('gtrz-popup-handoff');
+  const closePopup = () => { if (!popup) return; popup.hidden=true; popup.setAttribute('hidden',''); popup.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); clearHandoff(); track('popup_close'); };
   const openPopup = () => {
-    if (!popup) return;
+    if (!popup) { clearHandoff(); return; }
     const languageGate = document.querySelector('[data-language-gate]');
     if (languageGate && !languageGate.hidden) return;
-    popup.hidden=false;
-    popup.removeAttribute('hidden');
-    popup.setAttribute('aria-hidden','false');
-    document.body.classList.add('modal-open');
-    markSeen();
-    track('popup_view');
+    popup.hidden=false; popup.removeAttribute('hidden'); popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); clearHandoff(); markSeen(); track('popup_view');
   };
-
   const schedulePopup = () => {
-    if (!popup || seen) return;
+    if (!popup || seen) { clearHandoff(); return; }
     const languageGate = document.querySelector('[data-language-gate]');
     if (languageGate && !languageGate.hidden) return;
-    window.setTimeout(openPopup,delayMs);
+    window.setTimeout(openPopup,handoff?0:delayMs);
   };
-
   schedulePopup();
   popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
   popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
   addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!popup?.hidden)closePopup()});
+  window.setTimeout(clearHandoff,1800);
 </script>

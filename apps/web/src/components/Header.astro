@@ -39,22 +39,18 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
       <button class="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
     </div>
   </div>
-
-  <div class="mobile-nav" id="mobileNav" data-mobile-nav data-open="false" aria-hidden="true">
-    <nav class="mobile-nav-links" aria-label={es ? 'Navegación móvil' : 'Navegação móvel'}>
-      {safeNav.map(([label,href]) => <a href={href} data-mobile-nav-link>{label}</a>)}
-    </nav>
-    <div class="mobile-nav-actions">
-      <div class="mobile-nav-language" aria-label="Idioma">
-        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-mobile-nav-link>{langPt}</a>
-        <a class:list={{active:es}} href="?lang=es" data-language="es" data-mobile-nav-link>{langEs}</a>
-      </div>
-      <a class="mobile-nav-events" href={eventsHref} data-track="nav.events.mobile" data-mobile-nav-link>{eventsLabel}</a>
-    </div>
-  </div>
-
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
 </header>
+
+<div class="mobile-nav" id="mobileNav" data-mobile-nav data-open="false" aria-hidden="true">
+  <nav class="mobile-nav-links" aria-label={es ? 'Navegación móvil' : 'Navegação móvel'}>
+    {safeNav.map(([label,href]) => <a href={href} data-mobile-nav-link><span>{label}</span><svg class="mobile-nav-link-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></a>)}
+  </nav>
+  <div class="mobile-nav-actions">
+    <a class="mobile-nav-events" href={eventsHref} data-track="nav.events.mobile" data-mobile-nav-link>{eventsLabel}</a>
+  </div>
+</div>
+
 <script>
   const storeLanguage = (value: string | null) => {
     try { localStorage.setItem('gtrz_locale', value || 'pt-BR'); } catch {}

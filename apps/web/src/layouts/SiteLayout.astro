@@ -17,6 +17,7 @@ import '@/styles/instagram-native.css';
 import '@/styles/ticket-channel-public.css';
 import '@/styles/event-error.css';
 import '@/styles/mobile-hardening.css';
+import '@/styles/mobile-polish.css';
 interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings; }
 const { locale, settings={} } = Astro.props;
 const chrome=settings.chrome||{};
@@ -40,12 +41,29 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <meta name="theme-color" content="#080808" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <style is:inline>html.gtrz-popup-handoff{background:#080808}html.gtrz-popup-handoff body{visibility:hidden}html.gtrz-popup-handoff body .event-popup{visibility:visible}</style>
+    <script is:inline>
+      try { if (sessionStorage.getItem('gtrz_language_handoff') === '1') document.documentElement.classList.add('gtrz-popup-handoff'); } catch {}
+    </script>
   </head>
   <body>
     <Header locale={locale} chrome={chrome} />
     <LanguageGate locale={locale} chrome={chrome} />
     <slot />
     <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>{footer}</span></div></footer>
+    <script is:inline>
+      (()=>{
+        const forbidden=/[\p{Extended_Pictographic}\uFE0F\u2190-\u21FF]/gu;
+        const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+        let node;
+        while((node=walker.nextNode())){
+          const parent=node.parentElement;
+          if(!parent||['SCRIPT','STYLE','NOSCRIPT'].includes(parent.tagName)) continue;
+          if(forbidden.test(node.nodeValue||'')) node.nodeValue=(node.nodeValue||'').replace(forbidden,'');
+          forbidden.lastIndex=0;
+        }
+      })();
+    </script>
     <script define:vars={{ apiBase, locale }}>
       const sessionKey = 'gtrz_session_id';
       const attributionKey = 'gtrz_attribution';
