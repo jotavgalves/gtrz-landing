@@ -3,37 +3,19 @@ import type { CmsEvent,Locale } from '@/lib/cms';
 import { API_BASE } from '@/lib/api';
 const {events,locale,content={}}=Astro.props as {events:CmsEvent[];locale:Locale;content?:Record<string,any>};
 const es=locale==='es';
-const c={
-  eyebrow:'Agenda GTRZ',
-  title:'EVENTOS.',
-  body:es?'Elige tu próxima noche GTRZ.':'Escolha sua próxima noite GTRZ.',
-  emptyTitle:es?'PRÓXIMAMENTE.':'EM BREVE.',
-  emptyBody:es?'Nuevas ediciones entran aquí cuando estén listas para ser anunciadas.':'Novas edições entram aqui assim que estiverem prontas para ser anunciadas.',
-  cta:es?'Seguir en Instagram':'Acompanhar no Instagram',
-  secondaryCta:es?'Hablar con GTRZ':'Falar com a GTRZ',
-  statusComingSoon:es?'Próximamente':'Em breve',
-  statusSalesOpen:es?'Entradas disponibles':'Ingressos disponíveis',
-  statusSoldOut:es?'Agotado':'Esgotado',
-  statusPast:es?'Realizado':'Realizado',
-  statusActive:es?'Evento activo':'Evento ativo',
-  activeCta:es?'Ver evento':'Ver evento',
-  pastCta:es?'Revivir la edición':'Rever a edição',
-  ...content
-};
+const c={eyebrow:'Agenda GTRZ',title:'EVENTOS.',body:es?'Elige tu próxima noche GTRZ.':'Escolha sua próxima noite GTRZ.',emptyTitle:es?'PRÓXIMAMENTE.':'EM BREVE.',emptyBody:es?'Nuevas ediciones entran aquí cuando estén listas para ser anunciadas.':'Novas edições entram aqui assim que estiverem prontas para ser anunciadas.',cta:es?'Seguir en Instagram':'Acompanhar no Instagram',secondaryCta:es?'Hablar con GTRZ':'Falar com a GTRZ',statusComingSoon:es?'Próximamente':'Em breve',statusSalesOpen:es?'Entradas disponibles':'Ingressos disponíveis',statusSoldOut:es?'Agotado':'Esgotado',statusPast:es?'Realizado':'Realizado',statusActive:es?'Evento activo':'Evento ativo',activeCta:es?'Ver evento':'Ver evento',pastCta:es?'Revivir la edición':'Rever a edição',...content};
 const formatDate=(iso:string)=>{try{return new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(iso)).replace('.','').toUpperCase()}catch{return ''}};
 const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
 const posterId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
 const statusLabel=(event:CmsEvent)=>event.status==='published'?c.statusComingSoon:event.status==='sales_open'?c.statusSalesOpen:event.status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(event.status)?c.statusPast:c.statusActive;
 const locationLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
+const safeColor=(v:any,fallback:string)=>/^#[0-9a-f]{6}$/i.test(String(v||''))?String(v):fallback;
+const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback};
 ---
 <section id="eventos" class="events events-premium" data-section="events">
   <div class="wrap">
-    <div class="section-head events-head reveal">
-      <div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div>
-      <p>{c.body}</p>
-    </div>
-
+    <div class="section-head events-head reveal"><div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div><p>{c.body}</p></div>
     {events.length ? (
       <div class:list={['event-showcase',`event-count-${Math.min(events.length,4)}`]}>
         {events.map((event,index)=>{
@@ -41,18 +23,30 @@ const locationLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).j
           const comingSoon=event.status==='published';
           const artwork=mediaUrl(posterId(event));
           const location=locationLabel(event);
+          const theme=parseTheme(event);
+          const titleDesign=theme.posterTitle||{};
+          const titleMode=titleDesign.mode==='artwork'?'artwork':'text';
+          const titleText=String(titleDesign.text||event.title||event.slug);
+          const titleColor=safeColor(titleDesign.color,'#fffdf8');
+          const glowEnabled=titleDesign.glowEnabled===true;
+          const glowColor=safeColor(titleDesign.glowColor,titleColor);
+          const glowBlur=clamp(titleDesign.glowBlur,0,48,18);
+          const glowOpacity=clamp(titleDesign.glowOpacity,0,1,.7);
+          const scale=clamp(titleDesign.scale,50,180,100);
+          const fontId=titleDesign.fontMediaId||null;
+          const titleArtwork=mediaUrl(titleDesign.artworkMediaId||null);
+          const fontName=`GTRZEventTitle_${String(event.id).replace(/[^a-zA-Z0-9_]/g,'')}`;
+          const textShadow=glowEnabled?`0 0 ${glowBlur}px color-mix(in srgb, ${glowColor} ${Math.round(glowOpacity*100)}%, transparent)`:undefined;
           return <article class:list={['event-showcase-card','reveal',index===0&&'is-lead',past&&'is-past',comingSoon&&'is-coming-soon',artwork?'has-poster':'missing-poster']}>
+            {fontId&&<style is:inline>{`@font-face{font-family:"${fontName}";src:url("${mediaUrl(fontId)}");font-display:swap}`}</style>}
             <a class="event-showcase-link" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>
               <div class:list={['event-showcase-media',artwork?'has-art':'no-art']}>
-                {artwork
-                  ? <img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />
-                  : <div class="event-showcase-fallback-art" aria-hidden="true"><span class="fallback-kicker">GTRZ · {location||'EVENTO'}</span><strong>{event.title||event.slug}</strong><i></i></div>}
-                <div class="event-showcase-shade"></div>
-                <div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
+                {artwork?<img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />:<div class="event-showcase-fallback-art" aria-hidden="true"><span class="fallback-kicker">GTRZ · {location||'EVENTO'}</span><strong>{event.title||event.slug}</strong><i></i></div>}
+                <div class="event-showcase-shade"></div><div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
               </div>
               <div class="event-showcase-copy">
                 <div class="event-showcase-meta"><span>{formatDate(event.starts_at)}</span>{location&&<span>{location}</span>}</div>
-                <h3 class="display">{event.title||event.slug}</h3>
+                {titleMode==='artwork'&&titleArtwork?<img class="event-showcase-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />:<h3 class="display event-custom-title" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--title-scale:${scale/100}`}>{titleText}</h3>}
                 {event.summary&&<p>{event.summary}</p>}
                 <span class="event-showcase-cta"><span>{past?c.pastCta:c.activeCta}</span><b aria-hidden="true">→</b></span>
               </div>
@@ -60,16 +54,6 @@ const locationLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).j
           </article>
         })}
       </div>
-    ) : (
-      <div class="events-empty reveal">
-        <div class="events-empty-copy">
-          <div class="events-empty-kicker"><span></span>{c.eyebrow}</div>
-          <h3 class="display">{c.emptyTitle}</h3>
-          <p>{c.emptyBody}</p>
-          <div class="events-empty-actions"><a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a><a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a></div>
-        </div>
-        <div class="events-empty-art" aria-hidden="true"><img src="/brand/gtrz-symbol.svg" alt="" /></div>
-      </div>
-    )}
+    ) : <div class="events-empty reveal"><div class="events-empty-copy"><div class="events-empty-kicker"><span></span>{c.eyebrow}</div><h3 class="display">{c.emptyTitle}</h3><p>{c.emptyBody}</p><div class="events-empty-actions"><a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a><a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a></div></div><div class="events-empty-art" aria-hidden="true"><img src="/brand/gtrz-symbol.svg" alt="" /></div></div>}
   </div>
 </section>
