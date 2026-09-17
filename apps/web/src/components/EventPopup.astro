@@ -24,12 +24,12 @@ const multiMeta=isEs
 
 const ui=isEs?{
   kicker:'AGENDA GTRZ', titleTop:'LA PRÓXIMA NOCHE GTRZ', titleBottom:'YA TIENE FECHA.', multiTop:'PRÓXIMAS NOCHES GTRZ.', multiBottom:'ELIGE LA TUYA.',
-  body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.', multiBody:'Compara ciudad, fecha y entradas y elige la próxima edición.',
-  from:'Desde', view:'VER EVENTO Y ENTRADAS', sold:'AGOTADO', continue:'Continuar en el sitio', venue:'LUGAR'
+  body:'Conoce la próxima edición.', multiBody:'Elige ciudad y descubre la próxima edición.',
+  from:'Desde', view:'VER EVENTO', sold:'AGOTADO', continue:'Continuar en el sitio', venue:'LUGAR', coming:'PRÓXIMAMENTE', available:'ENTRADAS DISPONIBLES'
 }:{
   kicker:'AGENDA GTRZ', titleTop:'A PRÓXIMA NOITE GTRZ', titleBottom:'JÁ TEM DATA.', multiTop:'PRÓXIMAS NOITES GTRZ.', multiBottom:'ESCOLHA A SUA.',
-  body:'Confira a próxima edição, veja data, local e ingressos disponíveis.', multiBody:'Compare cidade, data e ingressos e escolha a próxima edição.',
-  from:'A partir de', view:'VER EVENTO E INGRESSOS', sold:'ESGOTADO', continue:'Continuar no site', venue:'LOCAL'
+  body:'Confira a próxima edição.', multiBody:'Escolha a cidade e descubra a próxima edição.',
+  from:'A partir de', view:'VER EVENTO', sold:'ESGOTADO', continue:'Continuar no site', venue:'LOCAL', coming:'EM BREVE', available:'INGRESSOS DISPONÍVEIS'
 };
 
 const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
@@ -40,14 +40,13 @@ const shortTime=(event:CmsEvent)=>{const value=new Intl.DateTimeFormat('pt-BR',{
 const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:Number(event.min_price_cents)%100===0?0:2}).format(Number(event.min_price_cents)/100);
 const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
 const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
+const statusText=(event:CmsEvent)=>event.status==='sales_open'?ui.available:event.status==='sold_out'?ui.sold:ui.coming;
 ---
-{enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
+{enabled && activeEvents.length > 0 && <div class="event-popup popup-v2" data-event-popup hidden aria-hidden="true">
   <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
     <div class="popup-head">
       <div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{ui.kicker}</small></div>
-      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
-      </button>
+      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg></button>
     </div>
     <div class="popup-layout">
       <div class="popup-copy">
@@ -61,16 +60,17 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
           const artwork=mediaUrl(mediaId(event));
           return <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
             <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
-              {artwork?<img src={artwork} alt="" loading="eager"/>:<><img class="popup-event-fallback-logo" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
+              {artwork?<img src={artwork} alt={event.title||event.slug} loading="eager"/>:<div class="popup-fallback-name">{event.title||event.slug}</div>}
               <div class="popup-event-media-shade"></div>
+              <span class:list={["popup-ticket-status",event.status==='sales_open'?'open':event.status==='sold_out'?'sold':'coming']}>{statusText(event)}</span>
             </div>
             <div class="popup-event-content">
-              {!single&&<span class="popup-event-city-inline">{cityLabel(event)}</span>}
+              <span class="popup-event-city-inline">{cityLabel(event)}</span>
               <div class="popup-event-date"><span>{shortDate(event)}</span><span>{shortTime(event)}</span></div>
               <strong>{event.title||event.slug}</strong>
               <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
               <div class="popup-event-footer">
-                <div>{event.status==='sold_out'?<span class="popup-sold-out">{ui.sold}</span>:price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
+                <div>{event.status==='sales_open'&&price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
                 <span class="popup-event-cta">{ui.view}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></span>
               </div>
             </div>
@@ -80,6 +80,30 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
     </div>
   </div>
 </div>}
+<style>
+.popup-v2 .is-multiple{width:min(1080px,calc(100vw - 40px))}
+.popup-v2 .is-multiple .popup-layout{grid-template-columns:minmax(240px,.48fr) minmax(0,1.52fr);gap:24px;padding:22px 26px 26px}
+.popup-v2 .is-multiple .popup-copy h2{font-size:clamp(2.45rem,3.55vw,3.55rem);line-height:.88;max-width:330px}
+.popup-v2 .is-multiple .popup-copy>p{font-size:.82rem;max-width:300px;margin-top:13px}
+.popup-v2 .multiple-events{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.popup-v2 .popup-event-option{border-radius:18px!important;background:#0d0d0d!important}
+.popup-v2 .is-multiple .popup-event-media{aspect-ratio:4/5;min-height:0!important}
+.popup-v2 .popup-event-media.has-art img{object-fit:cover}
+.popup-v2 .popup-event-media.no-art{aspect-ratio:4/5;min-height:0!important;background:linear-gradient(155deg,#17100f,#090909 65%,#050505)}
+.popup-v2 .popup-fallback-name{position:absolute;inset:auto 16px 18px;z-index:1;font-family:var(--font-display,"Arial Narrow",Impact,sans-serif);font-size:clamp(2rem,3vw,3rem);font-weight:900;line-height:.85;text-transform:uppercase;color:#f5f1ee}
+.popup-v2 .popup-ticket-status{position:absolute;z-index:4;top:12px;left:12px;padding:6px 8px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(7,7,7,.74);backdrop-filter:blur(8px);font-size:.46rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.popup-v2 .popup-ticket-status:before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:#ffb02e;box-shadow:0 0 10px rgba(255,176,46,.55)}
+.popup-v2 .popup-ticket-status.open:before{background:#4bdd86;box-shadow:0 0 10px rgba(75,221,134,.55)}
+.popup-v2 .popup-ticket-status.sold:before{background:#8a8a8a;box-shadow:none}
+.popup-v2 .is-multiple .popup-event-content{padding:14px 15px 15px}
+.popup-v2 .is-multiple .popup-event-city-inline{display:inline-flex;margin-bottom:8px;background:transparent;border:0;padding:0;color:#ff6a63}
+.popup-v2 .is-multiple .popup-event-content>strong{font-size:1.65rem;margin-top:7px}
+.popup-v2 .popup-event-cta{background:transparent;border:1px solid rgba(255,255,255,.2);padding:7px 10px;color:#fff}
+.popup-v2 .popup-event-option:hover .popup-event-cta{border-color:#ff332a;background:#ff2118}
+.popup-v2 .popup-event-footer{align-items:center}
+@media(max-width:900px){.popup-v2 .is-multiple .popup-layout{grid-template-columns:1fr;gap:14px}.popup-v2 .is-multiple .popup-copy h2{max-width:none;font-size:clamp(2.3rem,8vw,3.4rem)}.popup-v2 .is-multiple .popup-copy>p{max-width:none}.popup-v2 .multiple-events{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.popup-v2 .is-multiple .popup-layout{padding:13px}.popup-v2 .popup-copy>p{display:none}.popup-v2 .popup-continue{margin-top:8px}.popup-v2 .multiple-events{grid-template-columns:1fr}.popup-v2 .popup-event-option{display:grid!important;grid-template-columns:112px 1fr}.popup-v2 .is-multiple .popup-event-media{aspect-ratio:auto;height:100%;min-height:160px!important}.popup-v2 .popup-event-content{min-height:160px}.popup-v2 .popup-event-place{display:grid!important}.popup-v2 .popup-event-footer{margin-top:auto}.popup-v2 .popup-ticket-status{top:8px;left:8px;font-size:.42rem;padding:5px 6px}}
+</style>
 <script define:vars={{ frequency, delayMs }}>
   const popup = document.querySelector('[data-event-popup]');
   const key = 'gtrz_event_popup_seen';
@@ -93,18 +117,8 @@ const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(
   const track = (name) => { try { window.gtrzTrack?.(name,{section:'event_popup'}); } catch {} };
   const clearHandoff = () => document.documentElement.classList.remove('gtrz-popup-handoff');
   const closePopup = () => { if (!popup) return; popup.hidden=true; popup.setAttribute('hidden',''); popup.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); clearHandoff(); track('popup_close'); };
-  const openPopup = () => {
-    if (!popup) { clearHandoff(); return; }
-    const languageGate = document.querySelector('[data-language-gate]');
-    if (languageGate && !languageGate.hidden) return;
-    popup.hidden=false; popup.removeAttribute('hidden'); popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); clearHandoff(); markSeen(); track('popup_view');
-  };
-  const schedulePopup = () => {
-    if (!popup || seen) { clearHandoff(); return; }
-    const languageGate = document.querySelector('[data-language-gate]');
-    if (languageGate && !languageGate.hidden) return;
-    window.setTimeout(openPopup,handoff?0:delayMs);
-  };
+  const openPopup = () => { if (!popup) { clearHandoff(); return; } const languageGate = document.querySelector('[data-language-gate]'); if (languageGate && !languageGate.hidden) return; popup.hidden=false; popup.removeAttribute('hidden'); popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); clearHandoff(); markSeen(); track('popup_view'); };
+  const schedulePopup = () => { if (!popup || seen) { clearHandoff(); return; } const languageGate = document.querySelector('[data-language-gate]'); if (languageGate && !languageGate.hidden) return; window.setTimeout(openPopup,handoff?0:delayMs); };
   schedulePopup();
   popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
   popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
