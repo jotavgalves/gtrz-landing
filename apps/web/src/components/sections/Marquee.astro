@@ -2,8 +2,8 @@
 const { locale='pt-BR', content={} } = Astro.props as { locale?:'pt-BR'|'es'; content?:Record<string,any> };
 const defaults=locale==='es'?['GTRZ EVENTOS','RECIFE','JOÃO PESSOA','CULTURA LATINA','EXPERIENCIAS','PRODUCCIÓN']:['GTRZ EVENTOS','RECIFE','JOÃO PESSOA','CULTURA LATINA','EXPERIÊNCIAS','PRODUÇÃO'];
 const source=Array.isArray(content.marqueeItems)&&content.marqueeItems.length?content.marqueeItems:defaults;
-const items=source.map((item:any)=>String(typeof item==='string'?item:item?.name||'').trim()).filter(Boolean);
-const duration=Math.max(22,Math.min(48,items.length*4.4));
+const items=source.map((item:any)=>String(typeof item==='string'?item:item?.name||'').replace(/[•·]+\s*$/g,'').trim()).filter(Boolean);
+const duration=Math.max(24,Math.min(50,items.length*4.6));
 ---
 <div class="runner" aria-label={locale==='es'?'Temas de GTRZ':'Temas da GTRZ'} style={`--runner-duration:${duration}s`}>
   <div class="runner-track">
@@ -13,13 +13,14 @@ const duration=Math.max(22,Math.min(48,items.length*4.4));
   </div>
 </div>
 <style>
-.runner{width:100%;overflow:hidden;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.08);background:#0a0a0a;white-space:nowrap;contain:paint}
-.runner-track{display:flex;width:max-content;will-change:transform;animation:runner-loop var(--runner-duration,28s) linear infinite}
-.runner-group{display:flex;flex:0 0 auto;align-items:center}
-.runner-group span{display:flex;align-items:center;flex:0 0 auto;gap:28px;padding:16px 28px 16px 0;color:#716a67;font-size:.68rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.runner-group span b{font:inherit;white-space:nowrap}
-.runner-group span i{display:block;width:4px;height:4px;border-radius:50%;background:var(--red,#ff1a12);box-shadow:0 0 9px rgba(255,26,18,.35)}
+.runner{width:100%;height:42px;overflow:hidden;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.07);background:#0a0a0a;white-space:nowrap;contain:paint;display:flex;align-items:center}
+.runner-track{display:flex;width:max-content;align-items:center;will-change:transform;animation:runner-loop var(--runner-duration,30s) linear infinite}
+.runner-group{display:flex;flex:0 0 auto;align-items:center;height:42px}
+.runner-group span{display:inline-flex;align-items:center;flex:0 0 auto;gap:16px;padding:0 18px 0 0;color:#716a67;font-size:.61rem;font-weight:900;line-height:1;letter-spacing:.095em;text-transform:uppercase}
+.runner-group span::before,.runner-group span::after{content:none!important;display:none!important}
+.runner-group span b{font:inherit;line-height:1;white-space:nowrap}
+.runner-group span i{display:block;flex:0 0 auto;width:3px;height:3px;border-radius:50%;background:var(--red,#ff1a12);box-shadow:none}
 @keyframes runner-loop{to{transform:translate3d(-25%,0,0)}}
-@media(max-width:700px){.runner-group span{gap:20px;padding:13px 20px 13px 0;font-size:.61rem;letter-spacing:.09em}}
+@media(max-width:700px){.runner,.runner-group{height:38px}.runner-group span{gap:13px;padding-right:15px;font-size:.56rem;letter-spacing:.085em}.runner-group span i{width:3px;height:3px}}
 @media(prefers-reduced-motion:reduce){.runner-track{animation-duration:70s}}
 </style>
