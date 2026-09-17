@@ -41,12 +41,18 @@ const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);re
             {fontId&&<style is:inline>{`@font-face{font-family:"${fontName}";src:url("${mediaUrl(fontId)}");font-display:swap}`}</style>}
             <a class="event-showcase-link" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>
               <div class:list={['event-showcase-media',artwork?'has-art':'no-art']}>
-                {artwork?<img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />:<div class="event-showcase-fallback-art" aria-hidden="true"><span class="fallback-kicker">GTRZ · {location||'EVENTO'}</span><strong>{event.title||event.slug}</strong><i></i></div>}
+                {artwork?<img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />:<div class="event-showcase-fallback-art" aria-hidden="true">
+                  <span class="fallback-kicker">GTRZ · {location||'EVENTO'}</span>
+                  {titleMode==='artwork'&&titleArtwork
+                    ? <img class="event-showcase-fallback-title-art" src={titleArtwork} alt="" style={`--title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />
+                    : <strong class="event-showcase-fallback-title-text" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--title-scale:${scale/100}`}>{titleText}</strong>}
+                  <i></i>
+                </div>}
                 <div class="event-showcase-shade"></div><div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
               </div>
               <div class="event-showcase-copy">
                 <div class="event-showcase-meta"><span>{formatDate(event.starts_at)}</span>{location&&<span>{location}</span>}</div>
-                {titleMode==='artwork'&&titleArtwork?<img class="event-showcase-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />:<h3 class="display event-custom-title" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--title-scale:${scale/100}`}>{titleText}</h3>}
+                {artwork && (titleMode==='artwork'&&titleArtwork?<img class="event-showcase-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />:<h3 class="display event-custom-title" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--title-scale:${scale/100}`}>{titleText}</h3>)}
                 {event.summary&&<p>{event.summary}</p>}
                 <span class="event-showcase-cta"><span>{past?c.pastCta:c.activeCta}</span><b aria-hidden="true">→</b></span>
               </div>
