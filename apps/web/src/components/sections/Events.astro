@@ -57,3 +57,17 @@ const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);re
     ) : <div class="events-empty reveal"><div class="events-empty-copy"><div class="events-empty-kicker"><span></span>{c.eyebrow}</div><h3 class="display">{c.emptyTitle}</h3><p>{c.emptyBody}</p><div class="events-empty-actions"><a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a><a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a></div></div><div class="events-empty-art" aria-hidden="true"><img src="/brand/gtrz-symbol.svg" alt="" /></div></div>}
   </div>
 </section>
+<style>
+.events-premium .event-showcase.event-count-2 .event-showcase-card{min-height:0}
+.events-premium .event-showcase.event-count-2 .event-showcase-media.has-art{aspect-ratio:16/11;max-height:360px}
+.events-premium .event-showcase .event-showcase-media.no-art{aspect-ratio:auto!important;min-height:180px!important;max-height:180px!important}
+.events-premium .event-showcase .event-showcase-media.no-art .event-showcase-fallback-art{padding:20px 22px;justify-content:flex-end}
+.events-premium .event-showcase .event-showcase-media.no-art .fallback-kicker{margin-bottom:8px}
+.events-premium .event-showcase .event-showcase-media.no-art .event-showcase-fallback-art i{margin-top:8px}
+.events-premium .event-showcase.event-count-2 .event-showcase-copy{min-height:190px;padding:22px 24px 22px}
+.events-premium .event-showcase.event-count-2 .event-showcase-meta{margin-bottom:13px}
+.events-premium .event-showcase.event-count-2 .event-showcase-title-art{max-height:92px;max-width:88%}
+.events-premium .event-showcase.event-count-2 .event-showcase-copy h3{font-size:clamp(2.25rem,3.2vw,3.35rem)}
+.events-premium .event-showcase.event-count-2 .event-showcase-cta{padding-top:18px}
+@media(max-width:700px){.events-premium .event-showcase .event-showcase-media.no-art{min-height:150px!important;max-height:none!important}.events-premium .event-showcase.event-count-2 .event-showcase-copy{min-height:150px;padding:16px 14px}.events-premium .event-showcase.event-count-2 .event-showcase-title-art{max-height:60px}}
+</style>
