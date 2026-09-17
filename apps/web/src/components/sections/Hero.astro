@@ -4,19 +4,50 @@ import type { Locale } from '@/lib/cms';
 const { locale, content = {} } = Astro.props as { locale: Locale; content?: Record<string, unknown> };
 const defaults = defaultContent(locale).hero;
 const es = locale === 'es';
-const c: Record<string, any> = {
-  ...defaults,
-  eyebrow: es ? 'GTRZ · EVENTOS' : 'GTRZ · EVENTOS',
+
+const fresh = {
+  eyebrow: 'GTRZ · EVENTOS',
   title: es ? 'NO ES UNA FIESTA MÁS. TIENE QUE VALER SALIR DE CASA.' : 'NÃO É SÓ MAIS UMA FESTA. TEM QUE VALER A SAÍDA DE CASA.',
   body: es ? 'GTRZ crea eventos propios y desarrolla proyectos con marcas, espacios, artistas y aliados. Cada edición nace con una propuesta clara y se construye para tener personalidad antes, durante y después de la pista.' : 'A GTRZ cria eventos próprios e desenvolve projetos com marcas, espaços, artistas e parceiros. Cada edição nasce com uma proposta clara e é construída para ter personalidade antes, durante e depois da pista.',
-  primaryCta: es ? 'Ver eventos' : 'Ver eventos',
-  secondaryCta: es ? 'Conocer GTRZ' : 'Conhecer a GTRZ',
   originEyebrow: es ? 'LO QUE HACE FUNCIONAR UNA NOCHE' : 'O QUE FAZ UMA NOITE FUNCIONAR',
   originTitle: es ? 'NO ES UNA SOLA COSA. ES EL CONJUNTO.' : 'NÃO É UMA COISA SÓ. É O CONJUNTO.',
   originBody: es ? 'Buena música no salva una mala producción. Un visual bonito no corrige una comunicación débil. Una casa llena, por sí sola, tampoco construye marca. En GTRZ, cada parte tiene que sostener a la otra.' : 'Música boa não salva produção ruim. Visual bonito não resolve comunicação fraca. Casa cheia, sozinha, também não constrói marca. Na GTRZ, cada parte precisa sustentar a outra.',
   routeFrom: es ? 'CONCEPTO' : 'CONCEITO',
-  routeTo: es ? 'EXPERIENCIA' : 'EXPERIÊNCIA',
-  ...content
+  routeTo: es ? 'EXPERIENCIA' : 'EXPERIÊNCIA'
+};
+
+const legacy = es ? {
+  eyebrow: ['Eventos latinos · curaduría · producción'],
+  title: ['FIESTAS LATINAS CON IDENTIDAD PROPIA.'],
+  body: ['GTRZ produce eventos latinos con curaduría de pista, identidad visual propia y comunicación bilingüe. Nació en Venezuela y hoy se construye en Brasil entre venezolanos y brasileños, desde el concepto hasta la última canción de la noche.'],
+  originEyebrow: ['DE VENEZUELA A BRASIL'],
+  originTitle: ['VENEZUELA EN EL ORIGEN. BRASIL EN LA PISTA.'],
+  originBody: ['GTRZ nació en Venezuela y tomó forma en Brasil. Esa mezcla aparece en la música, la comunicación, el equipo y en la manera de pensar cada evento.'],
+  routeFrom: ['VENEZUELA'],
+  routeTo: ['BRASIL']
+} : {
+  eyebrow: ['Eventos latinos · curadoria · produção'],
+  title: ['FESTAS LATINAS COM IDENTIDADE PRÓPRIA.'],
+  body: ['A GTRZ produz eventos latinos com curadoria de pista, identidade visual própria e comunicação bilíngue. Nascida na Venezuela, hoje é construída no Brasil por venezuelanos e brasileiros — do conceito à última música da noite.'],
+  originEyebrow: ['DA VENEZUELA PARA O BRASIL'],
+  originTitle: ['VENEZUELA NA ORIGEM. BRASIL NA PISTA.'],
+  originBody: ['A GTRZ nasceu na Venezuela e ganhou corpo no Brasil. Essa mistura aparece na música, na comunicação, na equipe e na forma como cada evento é pensado.'],
+  routeFrom: ['VENEZUELA'],
+  routeTo: ['BRASIL']
+};
+
+const normalizedContent = { ...content } as Record<string, any>;
+for (const key of Object.keys(fresh)) {
+  const current = String(normalizedContent[key] ?? '').trim();
+  if (!current || (legacy as Record<string,string[]>)[key]?.includes(current)) normalizedContent[key] = (fresh as Record<string,string>)[key];
+}
+
+const c: Record<string, any> = {
+  ...defaults,
+  ...fresh,
+  primaryCta: es ? 'Ver eventos' : 'Ver eventos',
+  secondaryCta: es ? 'Conocer GTRZ' : 'Conhecer a GTRZ',
+  ...normalizedContent
 };
 function splitDisplay(value: unknown, fallbackAccentWords = 1) {
   const text = String(value || '').trim();
