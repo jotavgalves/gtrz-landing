@@ -9,10 +9,11 @@ const fresh = {
   eyebrow: 'GTRZ · EVENTOS',
   title: es ? 'NO ES UNA FIESTA MÁS. TIENE QUE VALER SALIR DE CASA.' : 'NÃO É SÓ MAIS UMA FESTA. TEM QUE VALER A SAÍDA DE CASA.',
   body: es ? 'GTRZ crea eventos propios y desarrolla proyectos con marcas, espacios, artistas y aliados. Cada edición nace con una propuesta clara y se construye para tener personalidad antes, durante y después de la pista.' : 'A GTRZ cria eventos próprios e desenvolve projetos com marcas, espaços, artistas e parceiros. Cada edição nasce com uma proposta clara e é construída para ter personalidade antes, durante e depois da pista.',
-  originEyebrow: es ? 'LO QUE HACE FUNCIONAR UNA NOCHE' : 'O QUE FAZ UMA NOITE FUNCIONAR',
-  originTitle: es ? 'NO ES UNA SOLA COSA. ES EL CONJUNTO.' : 'NÃO É UMA COISA SÓ. É O CONJUNTO.',
-  originBody: es ? 'Buena música no salva una mala producción. Un visual bonito no corrige una comunicación débil. Una casa llena, por sí sola, tampoco construye marca. En GTRZ, cada parte tiene que sostener a la otra.' : 'Música boa não salva produção ruim. Visual bonito não resolve comunicação fraca. Casa cheia, sozinha, também não constrói marca. Na GTRZ, cada parte precisa sustentar a outra.',
+  originEyebrow: es ? 'LO QUE SOSTIENE UNA NOCHE' : 'O QUE SUSTENTA UMA NOITE',
+  originTitle: es ? 'NO ES SOLO EL LINE-UP. ES EL CONJUNTO.' : 'NÃO É SÓ O LINE-UP. É O CONJUNTO.',
+  originBody: es ? 'Un visual bonito no corrige una comunicación débil. Una casa llena, por sí sola, no construye marca. En GTRZ, cada parte tiene que sostener a la otra para que la noche tenga sentido de principio a fin.' : 'Visual bonito não resolve comunicação fraca. Casa cheia, sozinha, não constrói marca. Na GTRZ, cada parte precisa sustentar a outra para a noite fazer sentido do começo ao fim.',
   routeFrom: es ? 'CONCEPTO' : 'CONCEITO',
+  routeMid: es ? 'PRODUCCIÓN' : 'PRODUÇÃO',
   routeTo: es ? 'EXPERIENCIA' : 'EXPERIÊNCIA'
 };
 
@@ -20,20 +21,22 @@ const legacy = es ? {
   eyebrow: ['Eventos latinos · curaduría · producción'],
   title: ['FIESTAS LATINAS CON IDENTIDAD PROPIA.'],
   body: ['GTRZ produce eventos latinos con curaduría de pista, identidad visual propia y comunicación bilingüe. Nació en Venezuela y hoy se construye en Brasil entre venezolanos y brasileños, desde el concepto hasta la última canción de la noche.'],
-  originEyebrow: ['DE VENEZUELA A BRASIL'],
-  originTitle: ['VENEZUELA EN EL ORIGEN. BRASIL EN LA PISTA.'],
-  originBody: ['GTRZ nació en Venezuela y tomó forma en Brasil. Esa mezcla aparece en la música, la comunicación, el equipo y en la manera de pensar cada evento.'],
-  routeFrom: ['VENEZUELA'],
-  routeTo: ['BRASIL']
+  originEyebrow: ['DE VENEZUELA A BRASIL','LO QUE HACE FUNCIONAR UNA NOCHE'],
+  originTitle: ['VENEZUELA EN EL ORIGEN. BRASIL EN LA PISTA.','NO ES UNA SOLA COSA. ES EL CONJUNTO.'],
+  originBody: ['GTRZ nació en Venezuela y tomó forma en Brasil. Esa mezcla aparece en la música, la comunicación, el equipo y en la manera de pensar cada evento.','Buena música no salva una mala producción. Un visual bonito no corrige una comunicación débil. Una casa llena, por sí sola, tampoco construye marca. En GTRZ, cada parte tiene que sostener a la otra.'],
+  routeFrom: ['VENEZUELA','CONCEPTO'],
+  routeMid: [],
+  routeTo: ['BRASIL','EXPERIENCIA']
 } : {
   eyebrow: ['Eventos latinos · curadoria · produção'],
   title: ['FESTAS LATINAS COM IDENTIDADE PRÓPRIA.'],
   body: ['A GTRZ produz eventos latinos com curadoria de pista, identidade visual própria e comunicação bilíngue. Nascida na Venezuela, hoje é construída no Brasil por venezuelanos e brasileiros — do conceito à última música da noite.'],
-  originEyebrow: ['DA VENEZUELA PARA O BRASIL'],
-  originTitle: ['VENEZUELA NA ORIGEM. BRASIL NA PISTA.'],
-  originBody: ['A GTRZ nasceu na Venezuela e ganhou corpo no Brasil. Essa mistura aparece na música, na comunicação, na equipe e na forma como cada evento é pensado.'],
-  routeFrom: ['VENEZUELA'],
-  routeTo: ['BRASIL']
+  originEyebrow: ['DA VENEZUELA PARA O BRASIL','O QUE FAZ UMA NOITE FUNCIONAR'],
+  originTitle: ['VENEZUELA NA ORIGEM. BRASIL NA PISTA.','NÃO É UMA COISA SÓ. É O CONJUNTO.'],
+  originBody: ['A GTRZ nasceu na Venezuela e ganhou corpo no Brasil. Essa mistura aparece na música, na comunicação, na equipe e na forma como cada evento é pensado.','Música boa não salva produção ruim. Visual bonito não resolve comunicação fraca. Casa cheia, sozinha, também não constrói marca. Na GTRZ, cada parte precisa sustentar a outra.'],
+  routeFrom: ['VENEZUELA','CONCEITO'],
+  routeMid: [],
+  routeTo: ['BRASIL','EXPERIÊNCIA']
 };
 
 const normalizedContent = { ...content } as Record<string, any>;
@@ -72,13 +75,17 @@ const originDisplay = splitDisplay(c.originTitle, 2);
       </div>
     </div>
     <aside class="hero-side reveal">
-      <img class="hero-side-logo" src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
-      <div class="hero-origin">
+      <div class="hero-side-brand">
+        <img class="hero-side-logo" src="/brand/gtrz-full.svg" alt="GTRZ Eventos" />
         <small>{c.originEyebrow}</small>
+      </div>
+      <div class="hero-origin">
         <strong><span>{originDisplay.lead}</span><br/><span class="red">{originDisplay.accent}</span></strong>
         <p>{c.originBody}</p>
       </div>
-      <div class="hero-origin-route"><span>{c.routeFrom}</span><i></i><span>{c.routeTo}</span></div>
+      <div class="hero-origin-route" aria-label={`${c.routeFrom}, ${c.routeMid}, ${c.routeTo}`}>
+        <span>{c.routeFrom}</span><i></i><span>{c.routeMid}</span><i></i><span>{c.routeTo}</span>
+      </div>
     </aside>
   </div>
 </section>
