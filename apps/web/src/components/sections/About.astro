@@ -1,7 +1,7 @@
 ---
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
-const fresh={
+const fresh:Record<string,string>={
   eyebrow:es?'ANTES DE ABRIR LA PUERTA':'ANTES DE ABRIR A PORTA',
   title:es?'UN EVENTO PUEDE SALIR BIEN O MAL. MUCHO ANTES DE LA PRIMERA CANCIÓN.':'UM EVENTO JÁ PODE DAR CERTO OU ERRADO. MUITO ANTES DA PRIMEIRA MÚSICA.',
   body1:es?'GTRZ trata el espacio, el line-up, la comunicación y la operación como partes de una misma noche. Cada decisión cambia quién va, cómo responde la pista y qué se lleva el público de ahí.':'A GTRZ trata espaço, line-up, comunicação e operação como partes da mesma noite. Cada escolha muda quem vai, como a pista responde e o que o público leva dali.',
@@ -16,7 +16,7 @@ const fresh={
   metric4Value:es?'CUANDO LA OPERACIÓN FALLA, TODOS LO NOTAN':'QUANDO A OPERAÇÃO FALHA, TODO MUNDO PERCEBE',
   metric4Label:es?'Fila, bar, equipo, seguridad y cronograma casi no reciben elogios cuando funcionan. Basta que uno falle para convertirse en el tema de la noche.':'Fila, bar, equipe, segurança e cronograma raramente recebem elogio quando funcionam. Basta um deles falhar para virar assunto da noite.'
 };
-const legacyPt={
+const legacyPt:Record<string,string>={
   eyebrow:'Sobre a GTRZ',
   title:'A FESTA TEM IDENTIDADE.',
   body1:'A GTRZ cria festas e experiências com personalidade própria para uma comunidade latina diversa. Na mesma pista convivem referências, ritmos e públicos da Colômbia, Argentina, Venezuela, Cuba, Brasil e muito mais.',
@@ -27,7 +27,7 @@ const legacyPt={
   metric3Value:'PT + ES',metric3Label:'Português e espanhol convivem de forma natural antes, durante e depois do evento.',
   metric4Value:'DO CONCEITO À OPERAÇÃO',metric4Label:'Visual, entrada, line-up, ambientação e experiência são pensados como um todo.'
 };
-const legacyEs={
+const legacyEs:Record<string,string>={
   eyebrow:'Sobre la GTRZ',
   title:'LA FIESTA TIENE IDENTIDAD.',
   body1:'GTRZ crea fiestas y experiencias con personalidad propia para una comunidad latina diversa. En la misma pista conviven referencias, ritmos y públicos de Colombia, Argentina, Venezuela, Cuba, Brasil y mucho más.',
@@ -38,13 +38,13 @@ const legacyEs={
   metric3Value:'PT + ES',metric3Label:'Portugués y español conviven de forma natural antes, durante y después del evento.',
   metric4Value:'DEL CONCEPTO A LA OPERACIÓN',metric4Label:'Visual, ingreso, line-up, ambientación y experiencia se piensan como un todo.'
 };
-const normalizedContent={...content};
-const legacy=es?legacyEs:legacyPt;
+const normalizedContent:Record<string,any>={...content};
+const legacy:Record<string,string>=es?legacyEs:legacyPt;
 for(const key of Object.keys(fresh)){
   const current=String(normalizedContent[key]??'').trim();
   if(!current||current===String(legacy[key]??'').trim()) normalizedContent[key]=fresh[key];
 }
-const c={...fresh,...normalizedContent};
+const c:Record<string,any>={...fresh,...normalizedContent};
 const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
 const proofs=[
   [c.metric1Value,c.metric1Label],
