@@ -8,30 +8,24 @@ const settings=siteSettings.event_popup||{};
 const c=getPublicCopy(siteSettings,locale,'popup');
 const isEs=locale==='es';
 const forcePreview=Astro.url.searchParams.get('popup')==='1';
-const enabled = forcePreview || settings.enabled !== false;
-const publicEvents = events.filter(event => ['published','sales_open','sold_out'].includes(event.status));
-const selectedEvent = settings.selectedEventId ? publicEvents.find(event => event.id === settings.selectedEventId) : undefined;
-const eventPool = selectedEvent ? [selectedEvent] : publicEvents;
-const activeEvents = eventPool.slice(0, Math.max(1, Math.min(6, Number(settings.maxEvents) || 4)));
-const frequency = forcePreview ? 'always' : (settings.frequency || 'session');
-const delayMs = forcePreview ? 80 : Math.max(0, Math.min(15000, Number(settings.delayMs ?? 700)));
+const enabled=forcePreview||settings.enabled!==false;
+const publicEvents=events.filter(event=>['published','sales_open','sold_out'].includes(event.status));
+const selectedEvent=settings.selectedEventId?publicEvents.find(event=>event.id===settings.selectedEventId):undefined;
+const eventPool=selectedEvent?[selectedEvent]:publicEvents;
+const activeEvents=eventPool.slice(0,Math.max(1,Math.min(6,Number(settings.maxEvents)||4)));
+const frequency=forcePreview?'always':(settings.frequency||'session');
+const delayMs=forcePreview?80:Math.max(0,Math.min(15000,Number(settings.delayMs??700)));
 const single=activeEvents.length===1;
 const cityCount=new Set(activeEvents.map(event=>`${event.city||''}|${event.state||''}`.toLowerCase())).size;
 const eventCount=activeEvents.length;
-const multiMeta=isEs
-  ? `${cityCount} ${cityCount===1?'CIUDAD':'CIUDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`
-  : `${cityCount} ${cityCount===1?'CIDADE':'CIDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`;
-
+const multiMeta=isEs?`${cityCount} ${cityCount===1?'CIUDAD':'CIUDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`:`${cityCount} ${cityCount===1?'CIDADE':'CIDADES'} · ${eventCount} ${eventCount===1?'EVENTO':'EVENTOS'}`;
 const ui=isEs?{
-  kicker:'AGENDA GTRZ', titleTop:'LA PRÓXIMA NOCHE GTRZ', titleBottom:'YA TIENE FECHA.', multiTop:'PRÓXIMAS NOCHES GTRZ.', multiBottom:'ELIGE LA TUYA.',
-  body:'Conoce la próxima edición, revisa fecha, lugar y entradas disponibles.', multiBody:'Compara ciudad, fecha y entradas y elige la próxima edición.',
-  from:'Desde', view:'VER EVENTO Y ENTRADAS', sold:'AGOTADO', continue:'Continuar en el sitio', venue:'LUGAR'
+  kicker:'AGENDA GTRZ',titleTop:'LA PRÓXIMA NOCHE GTRZ.',titleBottom:'YA TIENE FECHA.',multiTop:'PRÓXIMAS NOCHES GTRZ.',multiBottom:'ELIGE LA TUYA.',
+  body:'Conoce la próxima edición.',multiBody:'Elige ciudad y descubre la próxima edición.',from:'Desde',view:'VER EVENTO',sold:'AGOTADO',continue:'Continuar en el sitio',venue:'LUGAR',coming:'PRÓXIMAMENTE',available:'ENTRADAS DISPONIBLES'
 }:{
-  kicker:'AGENDA GTRZ', titleTop:'A PRÓXIMA NOITE GTRZ', titleBottom:'JÁ TEM DATA.', multiTop:'PRÓXIMAS NOITES GTRZ.', multiBottom:'ESCOLHA A SUA.',
-  body:'Confira a próxima edição, veja data, local e ingressos disponíveis.', multiBody:'Compare cidade, data e ingressos e escolha a próxima edição.',
-  from:'A partir de', view:'VER EVENTO E INGRESSOS', sold:'ESGOTADO', continue:'Continuar no site', venue:'LOCAL'
+  kicker:'AGENDA GTRZ',titleTop:'A PRÓXIMA NOITE GTRZ.',titleBottom:'JÁ TEM DATA.',multiTop:'PRÓXIMAS NOITES GTRZ.',multiBottom:'ESCOLHA A SUA.',
+  body:'Confira a próxima edição.',multiBody:'Escolha a cidade e descubra a próxima edição.',from:'A partir de',view:'VER EVENTO',sold:'ESGOTADO',continue:'Continuar no site',venue:'LOCAL',coming:'EM BREVE',available:'INGRESSOS DISPONÍVEIS'
 };
-
 const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
 const mediaId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
@@ -40,74 +34,124 @@ const shortTime=(event:CmsEvent)=>{const value=new Intl.DateTimeFormat('pt-BR',{
 const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:Number(event.min_price_cents)%100===0?0:2}).format(Number(event.min_price_cents)/100);
 const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
 const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
+const statusText=(event:CmsEvent)=>event.status==='sales_open'?ui.available:event.status==='sold_out'?ui.sold:ui.coming;
+const safeColor=(v:any,fallback:string)=>/^#[0-9a-f]{6}$/i.test(String(v||''))?String(v):fallback;
+const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback};
 ---
-{enabled && activeEvents.length > 0 && <div class="event-popup" data-event-popup hidden aria-hidden="true">
+{enabled&&activeEvents.length>0&&<div class="event-popup popup-v3" data-event-popup hidden aria-hidden="true">
   <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
     <div class="popup-head">
       <div class="popup-head-brand"><img src="/brand/gtrz-symbol.svg" alt=""/><small>{ui.kicker}</small></div>
-      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close>
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
-      </button>
+      <button class="popup-close" type="button" aria-label={c.closeLabel} data-popup-close><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg></button>
     </div>
     <div class="popup-layout">
       <div class="popup-copy">
-        {single?<div class="popup-city"><i></i>{cityLabel(activeEvents[0])}</div>:<div class="popup-multi-meta"><i></i>{multiMeta}</div>}
-        <h2 class="display" id="eventPopupTitle">{single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}</h2>
-        <p>{single?ui.body:ui.multiBody}</p>
-        <button class="popup-continue" type="button" data-popup-close>{ui.continue}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></button>
+        <div class:list={[single?'popup-city':'popup-multi-meta']}><i></i>{single?cityLabel(activeEvents[0]):multiMeta}</div>
+        <div class="popup-copy-row">
+          <h2 class="display" id="eventPopupTitle">{single?<>{ui.titleTop}<br/><span class="red">{ui.titleBottom}</span></>:<>{ui.multiTop}<br/><span class="red">{ui.multiBottom}</span></>}</h2>
+          <div class="popup-copy-side"><p>{single?ui.body:ui.multiBody}</p><button class="popup-continue" type="button" data-popup-close>{ui.continue}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></button></div>
+        </div>
       </div>
       <div class:list={["popup-events",single?'single-event':'multiple-events']}>
-        {activeEvents.map(event => {
+        {activeEvents.map(event=>{
           const artwork=mediaUrl(mediaId(event));
+          const theme=parseTheme(event);
+          const titleDesign=theme.posterTitle||{};
+          const titleMode=titleDesign.mode==='artwork'?'artwork':'text';
+          const titleText=String(titleDesign.text||event.title||event.slug);
+          const titleColor=safeColor(titleDesign.color,'#fffdf8');
+          const glowEnabled=titleDesign.glowEnabled===true;
+          const glowColor=safeColor(titleDesign.glowColor,titleColor);
+          const glowBlur=clamp(titleDesign.glowBlur,0,48,18);
+          const glowOpacity=clamp(titleDesign.glowOpacity,0,1,.7);
+          const scale=clamp(titleDesign.scale,50,180,100);
+          const titleArtwork=mediaUrl(titleDesign.artworkMediaId||null);
+          const fontId=titleDesign.fontMediaId||null;
+          const fontName=`GTRZPopupTitle_${String(event.id).replace(/[^a-zA-Z0-9_]/g,'')}`;
+          const textShadow=glowEnabled?`0 0 ${glowBlur}px color-mix(in srgb, ${glowColor} ${Math.round(glowOpacity*100)}%, transparent)`:undefined;
           return <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
+            {fontId&&<style is:inline>{`@font-face{font-family:"${fontName}";src:url("${mediaUrl(fontId)}");font-display:swap}`}</style>}
             <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
-              {artwork?<img src={artwork} alt="" loading="eager"/>:<><img class="popup-event-fallback-logo" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
+              {artwork?<img src={artwork} alt={event.title||event.slug} loading="eager"/>:<div class="popup-media-placeholder" aria-hidden="true"><img src="/brand/gtrz-symbol.svg" alt=""/></div>}
               <div class="popup-event-media-shade"></div>
+              <span class:list={["popup-ticket-status",event.status==='sales_open'?'open':event.status==='sold_out'?'sold':'coming']}>{statusText(event)}</span>
             </div>
             <div class="popup-event-content">
-              {!single&&<span class="popup-event-city-inline">{cityLabel(event)}</span>}
-              <div class="popup-event-date"><span>{shortDate(event)}</span><span>{shortTime(event)}</span></div>
-              <strong>{event.title||event.slug}</strong>
+              <div class="popup-event-meta"><span>{cityLabel(event)}</span><span>{shortDate(event)} · {shortTime(event)}</span></div>
+              <div class="popup-content-title">
+                {titleMode==='artwork'&&titleArtwork?<img class="popup-custom-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--popup-title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`}/>:<strong class="popup-custom-title-text" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--popup-title-scale:${scale/100}`}>{titleText}</strong>}
+              </div>
               <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
               <div class="popup-event-footer">
-                <div>{event.status==='sold_out'?<span class="popup-sold-out">{ui.sold}</span>:price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
+                <div>{event.status==='sales_open'&&price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
                 <span class="popup-event-cta">{ui.view}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></span>
               </div>
             </div>
-          </a>;
+          </a>
         })}
       </div>
     </div>
   </div>
 </div>}
-<script define:vars={{ frequency, delayMs }}>
-  const popup = document.querySelector('[data-event-popup]');
-  const key = 'gtrz_event_popup_seen';
-  const today = new Date().toISOString().slice(0,10);
-  const storageRead = (kind, storageKey) => { try { const storage = kind === 'local' ? window.localStorage : window.sessionStorage; return storage.getItem(storageKey); } catch { return null; } };
-  const storageWrite = (kind, storageKey, value) => { try { const storage = kind === 'local' ? window.localStorage : window.sessionStorage; storage.setItem(storageKey,value); } catch {} };
-  const handoff = storageRead('session','gtrz_language_handoff') === '1';
-  if (handoff) { try { sessionStorage.removeItem('gtrz_language_handoff'); } catch {} }
-  const seen = handoff ? false : frequency === 'always' ? false : frequency === 'day' ? storageRead('local',key) === today : storageRead('session',key) === '1';
-  const markSeen = () => { if (frequency === 'day') storageWrite('local',key,today); else if (frequency !== 'always') storageWrite('session',key,'1'); };
-  const track = (name) => { try { window.gtrzTrack?.(name,{section:'event_popup'}); } catch {} };
-  const clearHandoff = () => document.documentElement.classList.remove('gtrz-popup-handoff');
-  const closePopup = () => { if (!popup) return; popup.hidden=true; popup.setAttribute('hidden',''); popup.setAttribute('aria-hidden','true'); document.body.classList.remove('modal-open'); clearHandoff(); track('popup_close'); };
-  const openPopup = () => {
-    if (!popup) { clearHandoff(); return; }
-    const languageGate = document.querySelector('[data-language-gate]');
-    if (languageGate && !languageGate.hidden) return;
-    popup.hidden=false; popup.removeAttribute('hidden'); popup.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); clearHandoff(); markSeen(); track('popup_view');
-  };
-  const schedulePopup = () => {
-    if (!popup || seen) { clearHandoff(); return; }
-    const languageGate = document.querySelector('[data-language-gate]');
-    if (languageGate && !languageGate.hidden) return;
-    window.setTimeout(openPopup,handoff?0:delayMs);
-  };
+<style>
+.popup-v3 .event-popup-card{width:min(940px,calc(100vw - 36px));max-height:calc(100dvh - 36px);border-radius:22px}
+.popup-v3 .popup-head{min-height:58px;padding:13px 18px 11px}
+.popup-v3 .popup-layout{display:block;padding:18px 22px 22px}
+.popup-v3 .popup-copy{display:block}
+.popup-v3 .popup-city,.popup-v3 .popup-multi-meta{margin:0 0 10px;padding:5px 8px;font-size:.5rem}
+.popup-v3 .popup-copy-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end}
+.popup-v3 .popup-copy h2{max-width:560px;margin:0;font-size:clamp(2.15rem,4.2vw,3.35rem);line-height:.86}
+.popup-v3 .popup-copy-side{max-width:250px;display:grid;justify-items:end;gap:9px;text-align:right}
+.popup-v3 .popup-copy-side p{margin:0;color:#8f8784;font-size:.76rem;line-height:1.45}
+.popup-v3 .popup-continue{margin:0;font-size:.57rem}
+.popup-v3 .popup-events{margin-top:18px}
+.popup-v3 .multiple-events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.popup-v3 .single-event{display:grid;grid-template-columns:minmax(0,1fr)}
+.popup-v3 .popup-event-option{display:grid!important;grid-template-columns:132px minmax(0,1fr);min-height:172px;overflow:hidden;border:1px solid rgba(255,255,255,.12)!important;border-radius:16px!important;background:#0d0d0d!important;color:#fff!important;text-decoration:none!important}
+.popup-v3 .single-event .popup-event-option{grid-template-columns:170px minmax(0,1fr)}
+.popup-v3 .popup-event-media{position:relative;min-height:172px!important;height:100%;aspect-ratio:auto!important;background:#0b0b0b}
+.popup-v3 .popup-event-media.has-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.popup-v3 .popup-event-media.no-art{background:radial-gradient(circle at 68% 28%,rgba(255,32,24,.14),transparent 35%),linear-gradient(145deg,#15100f,#080808 72%)}
+.popup-v3 .popup-media-placeholder{position:absolute;inset:0;display:grid;place-items:center}
+.popup-v3 .popup-media-placeholder img{width:42px;opacity:.52}
+.popup-v3 .popup-event-media-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.32));pointer-events:none}
+.popup-v3 .popup-ticket-status{position:absolute;z-index:4;left:8px;top:8px;padding:5px 7px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(5,5,5,.76);font-size:.42rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.popup-v3 .popup-ticket-status:before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:5px;background:#ffb02e;box-shadow:0 0 9px rgba(255,176,46,.5)}
+.popup-v3 .popup-ticket-status.open:before{background:#4bdd86;box-shadow:0 0 9px rgba(75,221,134,.5)}
+.popup-v3 .popup-ticket-status.sold:before{background:#858585;box-shadow:none}
+.popup-v3 .popup-event-content{display:flex;flex-direction:column;min-width:0;padding:14px 15px 13px}
+.popup-v3 .popup-event-meta{display:flex;justify-content:space-between;gap:10px;color:#817a76;font-size:.48rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.popup-v3 .popup-content-title{display:flex;align-items:center;min-height:50px;margin-top:10px;overflow:visible}
+.popup-v3 .popup-custom-title-text{display:block;max-width:100%;font-family:var(--font-display,"Arial Narrow",Impact,sans-serif);font-size:clamp(1.55rem,2.4vw,2.25rem);font-weight:900;line-height:.88;text-transform:uppercase;transform:scale(var(--popup-title-scale,1));transform-origin:left center}
+.popup-v3 .popup-custom-title-art{display:block!important;width:auto!important;height:auto!important;max-width:92%!important;max-height:72px!important;object-fit:contain!important;object-position:left center!important;transform:scale(var(--popup-title-scale,1));transform-origin:left center}
+.popup-v3 .popup-event-place{display:grid;gap:2px;margin-top:7px}
+.popup-v3 .popup-event-place small{color:#65605d;font-size:.43rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.popup-v3 .popup-event-place b{color:#d5cfcc;font-size:.66rem;line-height:1.3}
+.popup-v3 .popup-event-footer{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
+.popup-v3 .popup-event-footer>div{display:grid;gap:1px}.popup-v3 .popup-event-footer small{color:#777;font-size:.42rem;text-transform:uppercase;font-weight:900}.popup-v3 .popup-event-footer b{font-size:.82rem}
+.popup-v3 .popup-event-cta{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:transparent;color:#fff;font-size:.48rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.popup-v3 .popup-event-option:hover{border-color:rgba(255,33,24,.5)!important}.popup-v3 .popup-event-option:hover .popup-event-cta{background:#ff2118;border-color:#ff2118}
+@media(max-width:760px){.popup-v3 .event-popup-card{width:calc(100vw - 20px);max-height:calc(100dvh - 20px)}.popup-v3 .popup-layout{padding:14px}.popup-v3 .popup-copy-row{grid-template-columns:1fr;gap:8px}.popup-v3 .popup-copy-side{max-width:none;justify-items:start;text-align:left}.popup-v3 .popup-copy-side p{display:none}.popup-v3 .multiple-events{grid-template-columns:1fr}.popup-v3 .popup-event-option,.popup-v3 .single-event .popup-event-option{grid-template-columns:108px minmax(0,1fr);min-height:148px}.popup-v3 .popup-event-media{min-height:148px!important}.popup-v3 .popup-event-content{padding:12px}.popup-v3 .popup-copy h2{font-size:clamp(2rem,9vw,2.8rem)}.popup-v3 .popup-content-title{min-height:40px;margin-top:7px}.popup-v3 .popup-custom-title-text{font-size:1.5rem}.popup-v3 .popup-custom-title-art{max-height:50px!important}.popup-v3 .popup-event-place{margin-top:5px}}
+@media(max-width:430px){.popup-v3 .popup-head{min-height:52px;padding:10px 12px}.popup-v3 .popup-layout{padding:11px 11px 13px}.popup-v3 .popup-events{margin-top:12px}.popup-v3 .popup-event-option,.popup-v3 .single-event .popup-event-option{grid-template-columns:96px minmax(0,1fr);min-height:138px}.popup-v3 .popup-event-media{min-height:138px!important}.popup-v3 .popup-event-meta{display:grid;gap:2px}.popup-v3 .popup-event-place{display:none}.popup-v3 .popup-event-footer{padding-top:7px}.popup-v3 .popup-ticket-status{font-size:.38rem;padding:4px 5px}.popup-v3 .popup-custom-title-text{font-size:1.28rem}.popup-v3 .popup-custom-title-art{max-height:44px!important}}
+</style>
+<script define:vars={{frequency,delayMs}}>
+  const popup=document.querySelector('[data-event-popup]');
+  const key='gtrz_event_popup_seen';
+  const today=new Date().toISOString().slice(0,10);
+  const storageRead=(kind,storageKey)=>{try{const storage=kind==='local'?window.localStorage:window.sessionStorage;return storage.getItem(storageKey)}catch{return null}};
+  const storageWrite=(kind,storageKey,value)=>{try{const storage=kind==='local'?window.localStorage:window.sessionStorage;storage.setItem(storageKey,value)}catch{}};
+  const handoff=storageRead('session','gtrz_language_handoff')==='1';
+  if(handoff){try{sessionStorage.removeItem('gtrz_language_handoff')}catch{}}
+  const seen=handoff?false:frequency==='always'?false:frequency==='day'?storageRead('local',key)===today:storageRead('session',key)==='1';
+  const markSeen=()=>{if(frequency==='day')storageWrite('local',key,today);else if(frequency!=='always')storageWrite('session',key,'1')};
+  const track=(name)=>{try{window.gtrzTrack?.(name,{section:'event_popup'})}catch{}};
+  const clearHandoff=()=>document.documentElement.classList.remove('gtrz-popup-handoff');
+  const closePopup=()=>{if(!popup)return;popup.hidden=true;popup.setAttribute('hidden','');popup.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');clearHandoff();track('popup_close')};
+  const openPopup=()=>{if(!popup){clearHandoff();return}const languageGate=document.querySelector('[data-language-gate]');if(languageGate&&!languageGate.hidden)return;popup.hidden=false;popup.removeAttribute('hidden');popup.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');clearHandoff();markSeen();track('popup_view')};
+  const schedulePopup=()=>{if(!popup||seen){clearHandoff();return}const languageGate=document.querySelector('[data-language-gate]');if(languageGate&&!languageGate.hidden)return;window.setTimeout(openPopup,handoff?0:delayMs)};
   schedulePopup();
   popup?.querySelectorAll('[data-popup-close]').forEach(button=>button.addEventListener('click',closePopup));
-  popup?.addEventListener('click',(event)=>{ if(event.target===popup) closePopup(); });
-  addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!popup?.hidden)closePopup()});
+  popup?.addEventListener('click',event=>{if(event.target===popup)closePopup()});
+  addEventListener('keydown',event=>{if(event.key==='Escape'&&!popup?.hidden)closePopup()});
   window.setTimeout(clearHandoff,1800);
 </script>
