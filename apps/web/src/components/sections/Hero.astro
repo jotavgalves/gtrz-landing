@@ -6,19 +6,22 @@ const defaults = defaultContent(locale).hero;
 const es = locale === 'es';
 const c: Record<string, any> = {
   ...defaults,
+  eyebrow: es ? 'GTRZ · EVENTOS' : 'GTRZ · EVENTOS',
+  title: es ? 'NO ES UNA FIESTA MÁS. TIENE QUE VALER SALIR DE CASA.' : 'NÃO É SÓ MAIS UMA FESTA. TEM QUE VALER A SAÍDA DE CASA.',
+  body: es ? 'GTRZ crea eventos propios y desarrolla proyectos con marcas, espacios, artistas y aliados. Cada edición nace con una propuesta clara y se construye para tener personalidad antes, durante y después de la pista.' : 'A GTRZ cria eventos próprios e desenvolve projetos com marcas, espaços, artistas e parceiros. Cada edição nasce com uma proposta clara e é construída para ter personalidade antes, durante e depois da pista.',
   primaryCta: es ? 'Ver eventos' : 'Ver eventos',
   secondaryCta: es ? 'Conocer GTRZ' : 'Conhecer a GTRZ',
-  originEyebrow: es ? 'DE VENEZUELA A BRASIL' : 'DA VENEZUELA PARA O BRASIL',
-  routeFrom: 'VENEZUELA',
-  routeTo: 'BRASIL',
+  originEyebrow: es ? 'LO QUE HACE FUNCIONAR UNA NOCHE' : 'O QUE FAZ UMA NOITE FUNCIONAR',
+  originTitle: es ? 'NO ES UNA SOLA COSA. ES EL CONJUNTO.' : 'NÃO É UMA COISA SÓ. É O CONJUNTO.',
+  originBody: es ? 'Buena música no salva una mala producción. Un visual bonito no corrige una comunicación débil. Una casa llena, por sí sola, tampoco construye marca. En GTRZ, cada parte tiene que sostener a la otra.' : 'Música boa não salva produção ruim. Visual bonito não resolve comunicação fraca. Casa cheia, sozinha, também não constrói marca. Na GTRZ, cada parte precisa sustentar a outra.',
+  routeFrom: es ? 'CONCEPTO' : 'CONCEITO',
+  routeTo: es ? 'EXPERIENCIA' : 'EXPERIÊNCIA',
   ...content
 };
 function splitDisplay(value: unknown, fallbackAccentWords = 1) {
   const text = String(value || '').trim();
   const sentences = text.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) || [];
-  if (sentences.length >= 2) {
-    return { lead: sentences.slice(0, -1).join(' '), accent: sentences.at(-1) || '' };
-  }
+  if (sentences.length >= 2) return { lead: sentences.slice(0, -1).join(' '), accent: sentences.at(-1) || '' };
   const words = text.split(/\s+/).filter(Boolean);
   const accent = words.splice(Math.max(0, words.length - fallbackAccentWords)).join(' ');
   return { lead: words.join(' '), accent };
