@@ -8,13 +8,32 @@ const MAX_BYTES = 8 * 1024 * 1024;
 const allowed = new Map([
   ['image/jpeg','jpg'],
   ['image/png','png'],
-  ['image/webp','webp']
+  ['image/webp','webp'],
+  ['image/svg+xml','svg'],
+  ['font/woff2','woff2'],
+  ['font/woff','woff'],
+  ['application/font-woff','woff'],
+  ['font/ttf','ttf'],
+  ['application/x-font-ttf','ttf'],
+  ['font/otf','otf'],
+  ['application/x-font-opentype','otf']
 ]);
 
+function bytesText(bytes:Uint8Array){return new TextDecoder().decode(bytes)}
+function safeSvg(bytes:Uint8Array){
+  const text=bytesText(bytes).trim();
+  if(!/^<svg[\s>]/i.test(text)&&!/^<\?xml[\s\S]*?<svg[\s>]/i.test(text))return false;
+  return !/<script\b|<foreignObject\b|\bon\w+\s*=|javascript\s*:|data\s*:\s*text\/html/i.test(text);
+}
 function validMagic(type:string, bytes:Uint8Array){
   if(type==='image/jpeg') return bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff;
   if(type==='image/png') return bytes[0]===0x89&&bytes[1]===0x50&&bytes[2]===0x4e&&bytes[3]===0x47;
   if(type==='image/webp') return String.fromCharCode(...bytes.slice(0,4))==='RIFF'&&String.fromCharCode(...bytes.slice(8,12))==='WEBP';
+  if(type==='image/svg+xml') return safeSvg(bytes);
+  if(type==='font/woff2') return String.fromCharCode(...bytes.slice(0,4))==='wOF2';
+  if(type==='font/woff'||type==='application/font-woff') return String.fromCharCode(...bytes.slice(0,4))==='wOFF';
+  if(type==='font/ttf'||type==='application/x-font-ttf') return (bytes[0]===0x00&&bytes[1]===0x01&&bytes[2]===0x00&&bytes[3]===0x00)||String.fromCharCode(...bytes.slice(0,4))==='true';
+  if(type==='font/otf'||type==='application/x-font-opentype') return String.fromCharCode(...bytes.slice(0,4))==='OTTO';
   return false;
 }
 
@@ -22,7 +41,7 @@ mediaRoutes.get('/', requireAdmin, async(c)=>{
   const rows=await c.env.DB.prepare(`
     SELECT m.id,m.file_name,m.mime_type,m.size_bytes,m.width,m.height,m.alt_pt,m.alt_es,m.created_at,
       (
-        (SELECT COUNT(*) FROM events e WHERE e.hero_media_id=m.id OR e.logo_media_id=m.id) +
+        (SELECT COUNT(*) FROM events e WHERE e.hero_media_id=m.id OR e.logo_media_id=m.id OR e.theme_json LIKE '%' || m.id || '%') +
         (SELECT COUNT(*) FROM event_artists a WHERE a.media_id=m.id) +
         (SELECT COUNT(*) FROM team_members t WHERE t.media_id=m.id) +
         (SELECT COUNT(*) FROM freelancer_applications f WHERE f.resume_media_id=m.id) +
@@ -79,12 +98,12 @@ mediaRoutes.delete('/:id', requireAdmin, async(c)=>{
   if(!asset)return c.json({error:'not_found'},404);
   const usage=await c.env.DB.prepare(`
     SELECT
-      (SELECT COUNT(*) FROM events WHERE hero_media_id=? OR logo_media_id=?) +
+      (SELECT COUNT(*) FROM events WHERE hero_media_id=? OR logo_media_id=? OR theme_json LIKE '%' || ? || '%') +
       (SELECT COUNT(*) FROM event_artists WHERE media_id=?) +
       (SELECT COUNT(*) FROM team_members WHERE media_id=?) +
       (SELECT COUNT(*) FROM freelancer_applications WHERE resume_media_id=?) +
       (SELECT COUNT(*) FROM page_localizations WHERE og_media_id=?) total
-  `).bind(id,id,id,id,id,id).first<{total:number}>();
+  `).bind(id,id,id,id,id,id,id).first<{total:number}>();
   if((usage?.total||0)>0)return c.json({error:'media_in_use',usageCount:usage?.total||0},409);
   await c.env.MEDIA.delete(asset.r2_key);
   await c.env.DB.prepare('DELETE FROM media_assets WHERE id=?').bind(id).run();
