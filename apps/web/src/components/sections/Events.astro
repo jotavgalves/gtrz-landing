@@ -45,7 +45,7 @@ const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);re
                 <div class="event-showcase-shade"></div><div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
               </div>
               <div class="event-showcase-copy">
-                <div class="event-showcase-meta"><span class="event-showcase-date">{formatDate(event.starts_at)}</span>{location&&<span class="event-showcase-city">{location}</span>}</div>
+                <div class="event-showcase-meta">{location&&<span class="event-showcase-city"><i aria-hidden="true"></i>{location}</span>}<span class="event-showcase-date">{formatDate(event.starts_at)}</span></div>
                 {titleMode==='artwork'&&titleArtwork?<img class="event-showcase-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />:<h3 class="display event-custom-title" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--title-scale:${scale/100}`}>{titleText}</h3>}
                 {event.summary&&<p>{event.summary}</p>}
                 <span class="event-showcase-cta"><span>{past?c.pastCta:c.activeCta}</span><b aria-hidden="true">→</b></span>
@@ -65,15 +65,17 @@ const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);re
 .events-premium .event-showcase .event-showcase-media.no-art .fallback-kicker{margin-bottom:8px}
 .events-premium .event-showcase .event-showcase-media.no-art .event-showcase-fallback-art i{margin-top:8px}
 .events-premium .event-showcase.event-count-2 .event-showcase-copy{min-height:190px;padding:22px 24px 22px}
-.events-premium .event-showcase.event-count-2 .event-showcase-meta{margin-bottom:13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.events-premium .event-showcase-date{color:#78706d;font-size:.7rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-.events-premium .event-showcase-city{display:inline-flex;align-items:center;min-height:25px;padding:5px 9px;border:1px solid rgba(255,42,32,.36);border-radius:999px;background:rgba(255,42,32,.08);color:#ff453c;font-size:.64rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.events-premium .event-showcase.event-count-2 .event-showcase-meta{margin-bottom:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.events-premium .event-showcase-date{color:#857d79;font-size:.68rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+.events-premium .event-showcase-city{display:inline-flex;align-items:center;gap:7px;min-height:28px;padding:6px 10px;border:1px solid rgba(255,42,32,.5);border-radius:999px;background:linear-gradient(180deg,rgba(255,42,32,.16),rgba(255,42,32,.08));color:#ff4b43;font-size:.64rem;font-weight:950;letter-spacing:.085em;text-transform:uppercase;line-height:1;box-shadow:0 0 0 1px rgba(255,42,32,.04) inset}
+.events-premium .event-showcase-city i{display:block;width:5px;height:5px;border-radius:50%;background:#ff2a20;box-shadow:0 0 8px rgba(255,42,32,.55)}
 .events-premium .event-showcase.event-count-2 .event-showcase-title-art{max-height:92px;max-width:88%}
 .events-premium .event-showcase.event-count-2 .event-showcase-copy h3{font-size:clamp(2.25rem,3.2vw,3.35rem)}
-.events-premium .event-showcase.event-count-2 .event-showcase-cta{padding-top:18px}
-.events-premium .event-showcase-cta{display:inline-flex!important;align-items:center!important;gap:9px!important;width:max-content!important;color:#fff!important;text-decoration:none!important;border-bottom:1px solid rgba(255,255,255,.42)!important;line-height:1!important}
-.events-premium .event-showcase-cta>span{display:block;padding-bottom:5px}
-.events-premium .event-showcase-cta b{display:inline!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;padding:0 0 5px!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#ff2a20!important;font:inherit!important;font-size:1rem!important;line-height:1!important;transform:none!important}
+.events-premium .event-showcase.event-count-2 .event-showcase-cta{margin-top:auto}
+.events-premium .event-showcase-cta{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:max-content!important;min-height:38px!important;padding:0 13px!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:999px!important;background:rgba(255,255,255,.025)!important;color:#fff!important;text-decoration:none!important;line-height:1!important;transition:border-color .18s ease,background .18s ease,transform .18s ease!important}
+.events-premium .event-showcase-cta>span{display:block;padding:0!important}
+.events-premium .event-showcase-cta b{display:inline!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#ff2a20!important;font:inherit!important;font-size:1rem!important;line-height:1!important;transform:none!important}
 .events-premium .event-showcase-cta b::before,.events-premium .event-showcase-cta b::after{content:none!important;display:none!important}
-@media(max-width:700px){.events-premium .event-showcase .event-showcase-media.no-art{min-height:150px!important;max-height:none!important}.events-premium .event-showcase.event-count-2 .event-showcase-copy{min-height:150px;padding:16px 14px}.events-premium .event-showcase.event-count-2 .event-showcase-title-art{max-height:60px}.events-premium .event-showcase-city{min-height:23px;padding:4px 8px;font-size:.58rem}}
+.events-premium .event-showcase-link:hover .event-showcase-cta{border-color:rgba(255,42,32,.62)!important;background:rgba(255,42,32,.08)!important;transform:translateY(-1px)}
+@media(max-width:700px){.events-premium .event-showcase .event-showcase-media.no-art{min-height:150px!important;max-height:none!important}.events-premium .event-showcase.event-count-2 .event-showcase-copy{min-height:150px;padding:16px 14px}.events-premium .event-showcase.event-count-2 .event-showcase-title-art{max-height:60px}.events-premium .event-showcase-city{min-height:25px;padding:5px 8px;font-size:.58rem}.events-premium .event-showcase-cta{min-height:36px!important;padding:0 12px!important}}
 </style>
