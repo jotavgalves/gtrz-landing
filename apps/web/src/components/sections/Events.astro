@@ -1,60 +1,58 @@
 ---
 import type { CmsEvent,Locale } from '@/lib/cms';
+import { API_BASE } from '@/lib/api';
 const {events,locale,content={}}=Astro.props as {events:CmsEvent[];locale:Locale;content?:Record<string,any>};
 const es=locale==='es';
 const c={
   eyebrow:'Agenda GTRZ',
   title:'EVENTOS.',
-  body:es
-    ?'Fechas, ciudades, line-up y entradas aparecen aquí cuando cada edición está confirmada.'
-    :'Datas, cidades, line-up e ingressos entram aqui quando cada edição estiver confirmada.',
-  emptyTitle:es?'SIN FECHA PUBLICADA. POR AHORA.':'SEM DATA PUBLICADA. POR ENQUANTO.',
-  emptyBody:es
-    ?'La próxima edición solo entra en agenda cuando ciudad, fecha y operación están cerradas. Hasta entonces, acompaña los anuncios de GTRZ.'
-    :'A próxima edição só entra na agenda quando cidade, data e operação estiverem fechadas. Até lá, acompanhe os anúncios da GTRZ.',
+  body:es?'Próximas noches, ciudades y experiencias GTRZ.':'Próximas noites, cidades e experiências GTRZ.',
+  emptyTitle:es?'PRÓXIMAMENTE.':'EM BREVE.',
+  emptyBody:es?'Nuevas ediciones entran aquí cuando estén listas para ser anunciadas.':'Novas edições entram aqui assim que estiverem prontas para ser anunciadas.',
   cta:es?'Seguir en Instagram':'Acompanhar no Instagram',
   secondaryCta:es?'Hablar con GTRZ':'Falar com a GTRZ',
+  statusComingSoon:es?'Próximamente':'Em breve',
   statusSalesOpen:es?'Entradas disponibles':'Ingressos disponíveis',
   statusSoldOut:es?'Agotado':'Esgotado',
   statusPast:es?'Realizado':'Realizado',
   statusActive:es?'Evento activo':'Evento ativo',
-  genericSummary:es?'Una experiencia GTRZ con identidad propia.':'Uma experiência GTRZ com identidade própria.',
-  activeCta:es?'Entrar al evento':'Entrar no evento',
+  activeCta:es?'Ver evento':'Ver evento',
   pastCta:es?'Revivir la edición':'Rever a edição',
   ...content
 };
 const formatDate=(iso:string)=>{try{return new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(iso)).replace('.','').toUpperCase()}catch{return ''}};
-const statusLabel=(status:string)=>status==='sales_open'?c.statusSalesOpen:status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(status)?c.statusPast:c.statusActive;
+const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
+const posterId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
+const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
+const statusLabel=(event:CmsEvent)=>event.status==='published'?c.statusComingSoon:event.status==='sales_open'?c.statusSalesOpen:event.status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(event.status)?c.statusPast:c.statusActive;
 ---
 <section id="eventos" class="events events-premium" data-section="events">
   <div class="wrap">
     <div class="section-head events-head reveal">
-      <div>
-        <div class="eyebrow">{c.eyebrow}</div>
-        <h2 class="display">{c.title}</h2>
-      </div>
+      <div><div class="eyebrow">{c.eyebrow}</div><h2 class="display">{c.title}</h2></div>
       <p>{c.body}</p>
     </div>
 
     {events.length ? (
-      <div class="event-grid event-grid-premium">
+      <div class:list={['event-showcase',`event-count-${Math.min(events.length,4)}`]}>
         {events.map((event,index)=>{
           const past=['finished','archived'].includes(event.status);
-          const titleParts=String(event.title||event.slug).trim().split(/\s+/);
-          const accent=titleParts.pop()||'';
-          const lead=titleParts.join(' ');
-          return <article class:list={['event-card','event-card-premium','reveal',index===0&&'event-card-featured',past&&'past']}>
-            <div class="event-card-top">
-              <span class="status"><span class="status-dot"></span>{statusLabel(event.status)}</span>
-              <div class="event-meta">{formatDate(event.starts_at)}<br/>{event.city}{event.state?` · ${event.state}`:''}</div>
-            </div>
-            <div class="event-card-copy">
-              <h3 class="display">{lead} <span class="red">{accent}</span></h3>
-              <p>{event.summary || c.genericSummary}</p>
-              <div class="event-actions">
-                <a class:list={['btn',!past&&'btn-red']} href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>{past?c.pastCta:c.activeCta}</a>
+          const comingSoon=event.status==='published';
+          const artwork=mediaUrl(posterId(event));
+          return <article class:list={['event-showcase-card','reveal',index===0&&'is-lead',past&&'is-past',comingSoon&&'is-coming-soon']}>
+            <a class="event-showcase-link" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>
+              <div class:list={['event-showcase-media',artwork?'has-art':'no-art']}>
+                {artwork?<img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />:<><img class="event-showcase-fallback" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
+                <div class="event-showcase-shade"></div>
+                <div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
               </div>
-            </div>
+              <div class="event-showcase-copy">
+                <div class="event-showcase-meta"><span>{formatDate(event.starts_at)}</span><span>{event.city}{event.state?` · ${event.state}`:''}</span></div>
+                <h3 class="display">{event.title||event.slug}</h3>
+                {event.summary&&<p>{event.summary}</p>}
+                <span class="event-showcase-cta">{past?c.pastCta:c.activeCta}<b aria-hidden="true">→</b></span>
+              </div>
+            </a>
           </article>
         })}
       </div>
@@ -64,18 +62,9 @@ const statusLabel=(status:string)=>status==='sales_open'?c.statusSalesOpen:statu
           <div class="events-empty-kicker"><span></span>{c.eyebrow}</div>
           <h3 class="display">{c.emptyTitle}</h3>
           <p>{c.emptyBody}</p>
-          <div class="events-empty-actions">
-            <a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a>
-            <a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a>
-          </div>
+          <div class="events-empty-actions"><a class="btn btn-red" href="#instagram" data-track="events.empty.instagram">{c.cta}</a><a class="btn" href="#contato" data-track="events.empty.contact">{c.secondaryCta}</a></div>
         </div>
-        <div class="events-empty-art" aria-hidden="true">
-          <div class="events-empty-orbit orbit-a"></div>
-          <div class="events-empty-orbit orbit-b"></div>
-          <div class="events-empty-orbit orbit-c"></div>
-          <img src="/brand/gtrz-symbol.svg" alt="" />
-          <span class="events-empty-pulse"></span>
-        </div>
+        <div class="events-empty-art" aria-hidden="true"><img src="/brand/gtrz-symbol.svg" alt="" /></div>
       </div>
     )}
   </div>
