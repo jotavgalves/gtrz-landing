@@ -41,6 +41,8 @@ const price=(event:CmsEvent)=>event.min_price_cents==null?'':new Intl.NumberForm
 const location=(event:CmsEvent)=>event.venue_name||[event.city,event.state].filter(Boolean).join(' · ');
 const cityLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
 const statusText=(event:CmsEvent)=>event.status==='sales_open'?ui.available:event.status==='sold_out'?ui.sold:ui.coming;
+const safeColor=(v:any,fallback:string)=>/^#[0-9a-f]{6}$/i.test(String(v||''))?String(v):fallback;
+const clamp=(v:any,min:number,max:number,fallback:number)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback};
 ---
 {enabled && activeEvents.length > 0 && <div class="event-popup popup-v2" data-event-popup hidden aria-hidden="true">
   <div class:list={["event-popup-card",single?'is-single':'is-multiple']} role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle">
@@ -58,16 +60,34 @@ const statusText=(event:CmsEvent)=>event.status==='sales_open'?ui.available:even
       <div class:list={["popup-events",single?'single-event':'multiple-events']}>
         {activeEvents.map(event => {
           const artwork=mediaUrl(mediaId(event));
+          const theme=parseTheme(event);
+          const titleDesign=theme.posterTitle||{};
+          const titleMode=titleDesign.mode==='artwork'?'artwork':'text';
+          const titleText=String(titleDesign.text||event.title||event.slug);
+          const titleColor=safeColor(titleDesign.color,'#fffdf8');
+          const glowEnabled=titleDesign.glowEnabled===true;
+          const glowColor=safeColor(titleDesign.glowColor,titleColor);
+          const glowBlur=clamp(titleDesign.glowBlur,0,48,18);
+          const glowOpacity=clamp(titleDesign.glowOpacity,0,1,.7);
+          const scale=clamp(titleDesign.scale,50,180,100);
+          const titleArtwork=mediaUrl(titleDesign.artworkMediaId||null);
+          const fontId=titleDesign.fontMediaId||null;
+          const fontName=`GTRZPopupTitle_${String(event.id).replace(/[^a-zA-Z0-9_]/g,'')}`;
+          const textShadow=glowEnabled?`0 0 ${glowBlur}px color-mix(in srgb, ${glowColor} ${Math.round(glowOpacity*100)}%, transparent)`:undefined;
+          const titleNode=titleMode==='artwork'&&titleArtwork
+            ? <img class="popup-custom-title-art" src={titleArtwork} alt={event.title||event.slug} style={`--popup-title-scale:${scale/100};${glowEnabled?`filter:drop-shadow(0 0 ${glowBlur}px ${glowColor});`:''}`} />
+            : <strong class="popup-custom-title-text" style={`font-family:${fontId?`"${fontName}"`:'inherit'};color:${titleColor};text-shadow:${textShadow||'none'};--popup-title-scale:${scale/100}`}>{titleText}</strong>;
           return <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
+            {fontId&&<style is:inline>{`@font-face{font-family:"${fontName}";src:url("${mediaUrl(fontId)}");font-display:swap}`}</style>}
             <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
-              {artwork?<img src={artwork} alt={event.title||event.slug} loading="eager"/>:<div class="popup-fallback-name">{event.title||event.slug}</div>}
+              {artwork?<img src={artwork} alt={event.title||event.slug} loading="eager"/>:<div class="popup-fallback-title">{titleNode}</div>}
               <div class="popup-event-media-shade"></div>
               <span class:list={["popup-ticket-status",event.status==='sales_open'?'open':event.status==='sold_out'?'sold':'coming']}>{statusText(event)}</span>
             </div>
             <div class="popup-event-content">
               <span class="popup-event-city-inline">{cityLabel(event)}</span>
               <div class="popup-event-date"><span>{shortDate(event)}</span><span>{shortTime(event)}</span></div>
-              <strong>{event.title||event.slug}</strong>
+              {artwork&&<div class="popup-content-title">{titleNode}</div>}
               <div class="popup-event-place"><small>{ui.venue}</small><b>{location(event)}</b></div>
               <div class="popup-event-footer">
                 <div>{event.status==='sales_open'&&price(event)?<><small>{ui.from}</small><b>{price(event)}</b></>:<span></span>}</div>
@@ -88,21 +108,25 @@ const statusText=(event:CmsEvent)=>event.status==='sales_open'?ui.available:even
 .popup-v2 .multiple-events{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .popup-v2 .popup-event-option{border-radius:18px!important;background:#0d0d0d!important}
 .popup-v2 .is-multiple .popup-event-media{aspect-ratio:4/5;min-height:0!important}
-.popup-v2 .popup-event-media.has-art img{object-fit:cover}
+.popup-v2 .popup-event-media.has-art>img{object-fit:cover}
 .popup-v2 .popup-event-media.no-art{aspect-ratio:4/5;min-height:0!important;background:linear-gradient(155deg,#17100f,#090909 65%,#050505)}
-.popup-v2 .popup-fallback-name{position:absolute;inset:auto 16px 18px;z-index:1;font-family:var(--font-display,"Arial Narrow",Impact,sans-serif);font-size:clamp(2rem,3vw,3rem);font-weight:900;line-height:.85;text-transform:uppercase;color:#f5f1ee}
+.popup-v2 .popup-fallback-title{position:absolute;inset:auto 16px 18px;z-index:1;display:flex;align-items:flex-end;min-width:0}
+.popup-v2 .popup-custom-title-text{display:block;max-width:100%;font-family:var(--font-display,"Arial Narrow",Impact,sans-serif);font-size:clamp(2rem,3vw,3rem);font-weight:900;line-height:.85;text-transform:uppercase;transform:scale(var(--popup-title-scale,1));transform-origin:left bottom}
+.popup-v2 .popup-custom-title-art{display:block!important;width:auto!important;height:auto!important;max-width:92%!important;max-height:105px!important;object-fit:contain!important;object-position:left bottom!important;transform:scale(var(--popup-title-scale,1));transform-origin:left bottom}
+.popup-v2 .popup-content-title{display:flex;align-items:center;min-height:44px;margin-top:7px;overflow:visible}
+.popup-v2 .popup-content-title .popup-custom-title-text{font-size:1.65rem}
+.popup-v2 .popup-content-title .popup-custom-title-art{max-height:58px!important;max-width:95%!important}
 .popup-v2 .popup-ticket-status{position:absolute;z-index:4;top:12px;left:12px;padding:6px 8px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(7,7,7,.74);backdrop-filter:blur(8px);font-size:.46rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .popup-v2 .popup-ticket-status:before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:6px;background:#ffb02e;box-shadow:0 0 10px rgba(255,176,46,.55)}
 .popup-v2 .popup-ticket-status.open:before{background:#4bdd86;box-shadow:0 0 10px rgba(75,221,134,.55)}
 .popup-v2 .popup-ticket-status.sold:before{background:#8a8a8a;box-shadow:none}
 .popup-v2 .is-multiple .popup-event-content{padding:14px 15px 15px}
 .popup-v2 .is-multiple .popup-event-city-inline{display:inline-flex;margin-bottom:8px;background:transparent;border:0;padding:0;color:#ff6a63}
-.popup-v2 .is-multiple .popup-event-content>strong{font-size:1.65rem;margin-top:7px}
 .popup-v2 .popup-event-cta{background:transparent;border:1px solid rgba(255,255,255,.2);padding:7px 10px;color:#fff}
 .popup-v2 .popup-event-option:hover .popup-event-cta{border-color:#ff332a;background:#ff2118}
 .popup-v2 .popup-event-footer{align-items:center}
 @media(max-width:900px){.popup-v2 .is-multiple .popup-layout{grid-template-columns:1fr;gap:14px}.popup-v2 .is-multiple .popup-copy h2{max-width:none;font-size:clamp(2.3rem,8vw,3.4rem)}.popup-v2 .is-multiple .popup-copy>p{max-width:none}.popup-v2 .multiple-events{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.popup-v2 .is-multiple .popup-layout{padding:13px}.popup-v2 .popup-copy>p{display:none}.popup-v2 .popup-continue{margin-top:8px}.popup-v2 .multiple-events{grid-template-columns:1fr}.popup-v2 .popup-event-option{display:grid!important;grid-template-columns:112px 1fr}.popup-v2 .is-multiple .popup-event-media{aspect-ratio:auto;height:100%;min-height:160px!important}.popup-v2 .popup-event-content{min-height:160px}.popup-v2 .popup-event-place{display:grid!important}.popup-v2 .popup-event-footer{margin-top:auto}.popup-v2 .popup-ticket-status{top:8px;left:8px;font-size:.42rem;padding:5px 6px}}
+@media(max-width:640px){.popup-v2 .is-multiple .popup-layout{padding:13px}.popup-v2 .popup-copy>p{display:none}.popup-v2 .popup-continue{margin-top:8px}.popup-v2 .multiple-events{grid-template-columns:1fr}.popup-v2 .popup-event-option{display:grid!important;grid-template-columns:112px 1fr}.popup-v2 .is-multiple .popup-event-media{aspect-ratio:auto;height:100%;min-height:160px!important}.popup-v2 .popup-event-content{min-height:160px}.popup-v2 .popup-event-place{display:grid!important}.popup-v2 .popup-event-footer{margin-top:auto}.popup-v2 .popup-ticket-status{top:8px;left:8px;font-size:.42rem;padding:5px 6px}.popup-v2 .popup-custom-title-art{max-height:62px!important}.popup-v2 .popup-custom-title-text{font-size:1.35rem}.popup-v2 .popup-content-title .popup-custom-title-text{font-size:1.35rem}.popup-v2 .popup-content-title .popup-custom-title-art{max-height:48px!important}}
 </style>
 <script define:vars={{ frequency, delayMs }}>
   const popup = document.querySelector('[data-event-popup]');
