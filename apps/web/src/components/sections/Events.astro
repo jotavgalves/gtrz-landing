@@ -6,7 +6,7 @@ const es=locale==='es';
 const c={
   eyebrow:'Agenda GTRZ',
   title:'EVENTOS.',
-  body:es?'Próximas noches, ciudades y experiencias GTRZ.':'Próximas noites, cidades e experiências GTRZ.',
+  body:es?'Elige tu próxima noche GTRZ.':'Escolha sua próxima noite GTRZ.',
   emptyTitle:es?'PRÓXIMAMENTE.':'EM BREVE.',
   emptyBody:es?'Nuevas ediciones entran aquí cuando estén listas para ser anunciadas.':'Novas edições entram aqui assim que estiverem prontas para ser anunciadas.',
   cta:es?'Seguir en Instagram':'Acompanhar no Instagram',
@@ -25,6 +25,7 @@ const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}'
 const posterId=(event:CmsEvent)=>{const theme=parseTheme(event);return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null};
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
 const statusLabel=(event:CmsEvent)=>event.status==='published'?c.statusComingSoon:event.status==='sales_open'?c.statusSalesOpen:event.status==='sold_out'?c.statusSoldOut:['finished','archived'].includes(event.status)?c.statusPast:c.statusActive;
+const locationLabel=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
 ---
 <section id="eventos" class="events events-premium" data-section="events">
   <div class="wrap">
@@ -39,18 +40,21 @@ const statusLabel=(event:CmsEvent)=>event.status==='published'?c.statusComingSoo
           const past=['finished','archived'].includes(event.status);
           const comingSoon=event.status==='published';
           const artwork=mediaUrl(posterId(event));
-          return <article class:list={['event-showcase-card','reveal',index===0&&'is-lead',past&&'is-past',comingSoon&&'is-coming-soon']}>
+          const location=locationLabel(event);
+          return <article class:list={['event-showcase-card','reveal',index===0&&'is-lead',past&&'is-past',comingSoon&&'is-coming-soon',artwork?'has-poster':'missing-poster']}>
             <a class="event-showcase-link" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`events.${event.slug}`}>
               <div class:list={['event-showcase-media',artwork?'has-art':'no-art']}>
-                {artwork?<img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />:<><img class="event-showcase-fallback" src="/brand/gtrz-symbol.svg" alt=""/><span>GTRZ</span></>}
+                {artwork
+                  ? <img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />
+                  : <div class="event-showcase-fallback-art" aria-hidden="true"><span class="fallback-kicker">GTRZ · {location||'EVENTO'}</span><strong>{event.title||event.slug}</strong><i></i></div>}
                 <div class="event-showcase-shade"></div>
                 <div class="event-showcase-status"><i></i>{statusLabel(event)}</div>
               </div>
               <div class="event-showcase-copy">
-                <div class="event-showcase-meta"><span>{formatDate(event.starts_at)}</span><span>{event.city}{event.state?` · ${event.state}`:''}</span></div>
+                <div class="event-showcase-meta"><span>{formatDate(event.starts_at)}</span>{location&&<span>{location}</span>}</div>
                 <h3 class="display">{event.title||event.slug}</h3>
                 {event.summary&&<p>{event.summary}</p>}
-                <span class="event-showcase-cta">{past?c.pastCta:c.activeCta}<b aria-hidden="true">→</b></span>
+                <span class="event-showcase-cta"><span>{past?c.pastCta:c.activeCta}</span><b aria-hidden="true">→</b></span>
               </div>
             </a>
           </article>
