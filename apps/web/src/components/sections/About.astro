@@ -1,18 +1,50 @@
 ---
 const {locale,content={}}=Astro.props;
 const es=locale==='es';
-const c={
-  eyebrow:es?'Sobre la GTRZ':'Sobre a GTRZ',
-  title:es?'LA FIESTA TIENE IDENTIDAD.':'A FESTA TEM IDENTIDADE.',
-  body1:es?'GTRZ crea fiestas y experiencias con personalidad propia para una comunidad latina diversa. En la misma pista conviven referencias, ritmos y públicos de Colombia, Argentina, Venezuela, Cuba, Brasil y mucho más.':'A GTRZ cria festas e experiências com personalidade própria para uma comunidade latina diversa. Na mesma pista convivem referências, ritmos e públicos da Colômbia, Argentina, Venezuela, Cuba, Brasil e muito mais.',
-  body2:es?'Cada edición se piensa de punta a punta: concepto, música, dirección visual, comunicación y operación. La idea no es repetir una fórmula, sino darle a cada noche una razón real para existir.':'Cada edição é pensada de ponta a ponta: conceito, música, direção visual, comunicação e operação. A ideia não é repetir uma fórmula, mas dar a cada noite uma razão real para existir.',
-  note:es?'NO HACEMOS FIESTAS EN SERIE. CADA EDICIÓN NECESITA CONCEPTO, RITMO Y PRESENCIA.':'NÃO FAZEMOS FESTAS EM SÉRIE. CADA EDIÇÃO PRECISA DE CONCEITO, RITMO E PRESENÇA.',
-  metric1Value:es?'COMUNIDAD LATINA REAL':'COMUNIDADE LATINA REAL',metric1Label:es?'Públicos diversos, referencias compartidas y una pista hecha para conectar personas.':'Públicos diversos, referências compartilhadas e uma pista feita para conectar pessoas.',
-  metric2Value:es?'CURADURÍA MUSICAL':'CURADORIA MUSICAL',metric2Label:es?'Reggaeton, salsa, merengue, bachata, funk y mezclas urbanas entran según la energía de cada edición.':'Reggaeton, salsa, merengue, bachata, funk e misturas urbanas entram conforme a energia de cada edição.',
-  metric3Value:'PT + ES',metric3Label:es?'Portugués y español conviven de forma natural antes, durante y después del evento.':'Português e espanhol convivem de forma natural antes, durante e depois do evento.',
-  metric4Value:es?'DEL CONCEPTO A LA OPERACIÓN':'DO CONCEITO À OPERAÇÃO',metric4Label:es?'Visual, ingreso, line-up, ambientación y experiencia se piensan como un todo.':'Visual, entrada, line-up, ambientação e experiência são pensados como um todo.',
-  ...content
+const fresh={
+  eyebrow:es?'ANTES DE ABRIR LA PUERTA':'ANTES DE ABRIR A PORTA',
+  title:es?'UN EVENTO PUEDE SALIR BIEN O MAL. MUCHO ANTES DE LA PRIMERA CANCIÓN.':'UM EVENTO JÁ PODE DAR CERTO OU ERRADO. MUITO ANTES DA PRIMEIRA MÚSICA.',
+  body1:es?'GTRZ trata el espacio, el line-up, la comunicación y la operación como partes de una misma noche. Cada decisión cambia quién va, cómo responde la pista y qué se lleva el público de ahí.':'A GTRZ trata espaço, line-up, comunicação e operação como partes da mesma noite. Cada escolha muda quem vai, como a pista responde e o que o público leva dali.',
+  body2:es?'No basta llenar la casa. Si la experiencia es olvidable, faltó dirección.':'Não adianta ter casa cheia se a experiência é esquecível.',
+  note:es?'SI TODO PARECE INTERCAMBIABLE, FALTÓ IDENTIDAD.':'SE TUDO PARECE INTERCAMBIÁVEL, FALTOU IDENTIDADE.',
+  metric1Value:es?'EL ESPACIO NO ES DECORADO':'O ESPAÇO NÃO É CENÁRIO',
+  metric1Label:es?'Entrada, capacidad, bar, escenario, circulación y horario cambian la noche. El lugar tiene que servir al evento, no solo estar disponible.':'Fluxo de entrada, capacidade, bar, palco, circulação e horário mudam a noite. O local precisa servir ao evento, não só estar disponível.',
+  metric2Value:es?'CADA ARTISTA TIENE UNA FUNCIÓN':'CADA ARTISTA TEM UMA FUNÇÃO',
+  metric2Label:es?'Abrir, crecer, sostener o cerrar la pista exigen decisiones distintas. Un buen line-up también es orden, horario y lectura de público.':'Abrir, crescer, segurar ou fechar a pista exigem escolhas diferentes. Line-up bom é também ordem, horário e leitura de público.',
+  metric3Value:es?'LA VENTA EMPIEZA EN LA COMUNICACIÓN':'A VENDA COMEÇA NA COMUNICAÇÃO',
+  metric3Label:es?'Nombre, visual, texto y contenido determinan quién presta atención y qué expectativa llega hasta la puerta.':'Nome, visual, texto e conteúdo determinam quem presta atenção e qual expectativa chega até a porta.',
+  metric4Value:es?'CUANDO LA OPERACIÓN FALLA, TODOS LO NOTAN':'QUANDO A OPERAÇÃO FALHA, TODO MUNDO PERCEBE',
+  metric4Label:es?'Fila, bar, equipo, seguridad y cronograma casi no reciben elogios cuando funcionan. Basta que uno falle para convertirse en el tema de la noche.':'Fila, bar, equipe, segurança e cronograma raramente recebem elogio quando funcionam. Basta um deles falhar para virar assunto da noite.'
 };
+const legacyPt={
+  eyebrow:'Sobre a GTRZ',
+  title:'A FESTA TEM IDENTIDADE.',
+  body1:'A GTRZ cria festas e experiências com personalidade própria para uma comunidade latina diversa. Na mesma pista convivem referências, ritmos e públicos da Colômbia, Argentina, Venezuela, Cuba, Brasil e muito mais.',
+  body2:'Cada edição é pensada de ponta a ponta: conceito, música, direção visual, comunicação e operação. A ideia não é repetir uma fórmula, mas dar a cada noite uma razão real para existir.',
+  note:'NÃO FAZEMOS FESTAS EM SÉRIE. CADA EDIÇÃO PRECISA DE CONCEITO, RITMO E PRESENÇA.',
+  metric1Value:'COMUNIDADE LATINA REAL',metric1Label:'Públicos diversos, referências compartilhadas e uma pista feita para conectar pessoas.',
+  metric2Value:'CURADORIA MUSICAL',metric2Label:'Reggaeton, salsa, merengue, bachata, funk e misturas urbanas entram conforme a energia de cada edição.',
+  metric3Value:'PT + ES',metric3Label:'Português e espanhol convivem de forma natural antes, durante e depois do evento.',
+  metric4Value:'DO CONCEITO À OPERAÇÃO',metric4Label:'Visual, entrada, line-up, ambientação e experiência são pensados como um todo.'
+};
+const legacyEs={
+  eyebrow:'Sobre la GTRZ',
+  title:'LA FIESTA TIENE IDENTIDAD.',
+  body1:'GTRZ crea fiestas y experiencias con personalidad propia para una comunidad latina diversa. En la misma pista conviven referencias, ritmos y públicos de Colombia, Argentina, Venezuela, Cuba, Brasil y mucho más.',
+  body2:'Cada edición se piensa de punta a punta: concepto, música, dirección visual, comunicación y operación. La idea no es repetir una fórmula, sino darle a cada noche una razón real para existir.',
+  note:'NO HACEMOS FIESTAS EN SERIE. CADA EDICIÓN NECESITA CONCEPTO, RITMO Y PRESENCIA.',
+  metric1Value:'COMUNIDAD LATINA REAL',metric1Label:'Públicos diversos, referencias compartidas y una pista hecha para conectar personas.',
+  metric2Value:'CURADURÍA MUSICAL',metric2Label:'Reggaeton, salsa, merengue, bachata, funk y mezclas urbanas entran según la energía de cada edición.',
+  metric3Value:'PT + ES',metric3Label:'Portugués y español conviven de forma natural antes, durante y después del evento.',
+  metric4Value:'DEL CONCEPTO A LA OPERACIÓN',metric4Label:'Visual, ingreso, line-up, ambientación y experiencia se piensan como un todo.'
+};
+const normalizedContent={...content};
+const legacy=es?legacyEs:legacyPt;
+for(const key of Object.keys(fresh)){
+  const current=String(normalizedContent[key]??'').trim();
+  if(!current||current===String(legacy[key]??'').trim()) normalizedContent[key]=fresh[key];
+}
+const c={...fresh,...normalizedContent};
 const titleParts=String(c.title).trim().split(/\s+/);const accent=titleParts.pop()||'';const lead=titleParts.join(' ');
 const proofs=[
   [c.metric1Value,c.metric1Label],
@@ -36,7 +68,7 @@ const proofs=[
 
     <div class="about-signature reveal"><span>{c.note}</span></div>
 
-    <div class="about-proof-grid" aria-label={es?'Lo que define a GTRZ':'O que define a GTRZ'}>
+    <div class="about-proof-grid" aria-label={es?'Decisiones que cambian una noche':'Decisões que mudam uma noite'}>
       {proofs.map(([title,body],index)=><article class="about-proof reveal">
         <small>{String(index+1).padStart(2,'0')}</small>
         <h3>{title}</h3>
