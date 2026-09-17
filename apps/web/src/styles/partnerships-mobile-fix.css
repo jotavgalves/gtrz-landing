@@ -1,0 +1,72 @@
+.partner-page .submit-final[hidden],
+.partner-page [data-submit][hidden] {
+  display: none !important;
+}
+
+.partner-page .submit-final {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .partner-page .progress-nav {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .partner-page .progress-nav > button {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    overflow: hidden !important;
+  }
+
+  .partner-page .progress-nav > button span {
+    display: none !important;
+  }
+
+  .partner-page .step-actions {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .partner-page .step-actions .step-meta {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+  }
+
+  .partner-page .step-actions [data-prev] {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+  }
+
+  .partner-page .step-actions [data-next],
+  .partner-page .step-actions [data-submit] {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .partner-page .submit-final {
+    font-size: 0 !important;
+    line-height: 1 !important;
+  }
+
+  .partner-page .submit-final::after {
+    content: 'CADASTRAR PROPOSTA';
+    font-size: .78rem;
+    line-height: 1.1;
+    letter-spacing: .12em;
+  }
+
+  html[lang='es'] .partner-page .submit-final::after {
+    content: 'REGISTRAR PROPUESTA';
+  }
+}
