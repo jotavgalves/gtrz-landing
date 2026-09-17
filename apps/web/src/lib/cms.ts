@@ -34,6 +34,7 @@ export interface EventPopupSettings {
   delayMs?: number;
   selectedEventId?: string|null;
   maxEvents?: number;
+  visual?: Record<string,any>;
 }
 export interface ChromeSettings {
   metaTitlePt?: string;
