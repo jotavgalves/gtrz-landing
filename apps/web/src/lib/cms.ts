@@ -65,10 +65,18 @@ export interface ChromeSettings {
   navPt?: Array<[string,string]>;
   navEs?: Array<[string,string]>;
 }
+export interface GeneralSettings {
+  siteName?: string;
+  tagline?: string;
+  contactEmail?: string;
+  contactWhatsapp?: string;
+  defaultLocale?: Locale;
+  homepageMode?: 'hub'|'full';
+}
 export interface SiteSettings {
   event_popup?: EventPopupSettings;
   social?: Record<string,unknown>;
-  general?: Record<string,unknown>;
+  general?: GeneralSettings;
   chrome?: ChromeSettings;
   copy?: Record<string,Record<string,Record<string,string>>>;
 }

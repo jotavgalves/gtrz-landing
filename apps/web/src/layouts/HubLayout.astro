@@ -1,0 +1,65 @@
+---
+import type { Locale } from '@/lib/cms';
+
+const { locale } = Astro.props as { locale:Locale };
+const es=locale==='es';
+const apiBase=import.meta.env.PUBLIC_API_BASE||'';
+const title=es?'GTRZ Eventos — Próximas noches':'GTRZ Eventos — Próximas noites';
+const description=es
+  ?'Agenda oficial de eventos GTRZ. Elige tu próxima noche.'
+  :'Agenda oficial de eventos GTRZ. Escolha sua próxima noite.';
+---
+<!doctype html>
+<html lang={es?'es':'pt-BR'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#070707" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <script define:vars={{apiBase,locale}}>
+      const sessionKey='gtrz_session_id';
+      const attributionKey='gtrz_attribution';
+      let sessionId=localStorage.getItem(sessionKey);
+      if(!sessionId){sessionId=crypto.randomUUID();localStorage.setItem(sessionKey,sessionId);}
+      const params=new URLSearchParams(location.search);
+      const incoming={
+        utmSource:params.get('utm_source')||undefined,
+        utmMedium:params.get('utm_medium')||undefined,
+        utmCampaign:params.get('utm_campaign')||undefined,
+        utmContent:params.get('utm_content')||undefined,
+        trackingLink:params.get('gtrz_link')||undefined
+      };
+      let stored={};
+      try{stored=JSON.parse(sessionStorage.getItem(attributionKey)||'{}');}catch{}
+      const hasIncoming=Object.values(incoming).some(Boolean);
+      const acquisition=hasIncoming?incoming:stored;
+      if(hasIncoming)sessionStorage.setItem(attributionKey,JSON.stringify(incoming));
+      const send=(eventName,extra={})=>{
+        const payload=JSON.stringify({eventName,path:location.pathname,language:locale,referrer:document.referrer||undefined,sessionId,...acquisition,...extra});
+        const url=`${apiBase}/api/analytics/collect`;
+        if(navigator.sendBeacon)navigator.sendBeacon(url,new Blob([payload],{type:'application/json'}));
+        else fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:payload,keepalive:true}).catch(()=>{});
+      };
+      window.gtrzTrack=send;
+      send('page_view',{section:'event_hub'});
+      document.addEventListener('click',(event)=>{
+        const el=event.target.closest('[data-track]');
+        if(el)send(el.dataset.trackEvent||'cta_click',{element:el.dataset.track,section:'event_hub'});
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root{--hub-bg:#070707;--hub-paper:#f2eee8;--hub-red:#ff241a;--hub-white:#fffdf9;--hub-muted:#99918d;--hub-line:rgba(255,255,255,.12)}
+  *{box-sizing:border-box}
+  html{background:var(--hub-bg);scroll-behavior:smooth}
+  body{margin:0;background:var(--hub-bg);color:var(--hub-white);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button,input,select,textarea{font:inherit}
+  img{display:block;max-width:100%}
+</style>

@@ -1,17 +1,27 @@
 ---
 import SiteLayout from '@/layouts/SiteLayout.astro';
+import HubLayout from '@/layouts/HubLayout.astro';
 import EventPopup from '@/components/EventPopup.astro';
+import EventHub from '@/components/EventHub.astro';
 import SectionRenderer from '@/components/SectionRenderer.astro';
 import {getHomePage,pickLocale,localizedSections} from '@/lib/cms';
 import type {Locale} from '@/lib/cms';
+
 const requested=Astro.url.searchParams.get('lang');
 const locale:Locale=requested==='es'?'es':'pt-BR';
 const payload=await getHomePage();
 const events=pickLocale(payload.events,locale);
 const team=pickLocale(payload.team,locale);
 const sections=localizedSections(payload.sections,locale);
+const homepageMode=payload.settings.general?.homepageMode==='full'?'full':'hub';
 ---
-<SiteLayout locale={locale} settings={payload.settings}>
-  <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events} team={team}/>)}</main>
-  <EventPopup events={events} locale={locale} siteSettings={payload.settings}/>
-</SiteLayout>
+{homepageMode==='full' ? (
+  <SiteLayout locale={locale} settings={payload.settings}>
+    <main>{sections.map(section=><SectionRenderer section={section} locale={locale} events={events} team={team}/>)}</main>
+    <EventPopup events={events} locale={locale} siteSettings={payload.settings}/>
+  </SiteLayout>
+) : (
+  <HubLayout locale={locale}>
+    <EventHub events={events} locale={locale} siteSettings={payload.settings}/>
+  </HubLayout>
+)}
