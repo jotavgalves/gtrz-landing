@@ -203,7 +203,9 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
                     <div class="hub-event-title-row">
                       <h2>{event.title||event.slug}</h2>
-                      <span class="hub-event-arrow" aria-hidden="true">↗</span>
+                      <svg class="hub-event-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M7 17 17 7M9 7h8v8" />
+  </svg>
                     </div>
 
                     {event.venue_name&&<p>{event.venue_name}</p>}
@@ -355,7 +357,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     display:flex;
     width:max-content;
     will-change:transform;
-    animation:hub-marquee 52s linear infinite
+    animation:hub-marquee 96s linear infinite
   }
   .hub-marquee-group{display:flex;align-items:center;flex:none;width:max-content}
   .hub-marquee-group span{flex:none;padding-left:34px}
@@ -475,7 +477,17 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     letter-spacing:-.025em;
     text-transform:uppercase
   }
-  .hub-event-arrow{flex:none;color:var(--event-accent);font-size:1.55rem;line-height:1}
+  .hub-event-arrow{
+    flex:none;
+    width:22px;
+    height:22px;
+    color:var(--event-accent);
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round
+  }
   .hub-event-info p{margin:10px 0 0;color:#918985;font-size:.76rem;line-height:1.45}
   .hub-event-cta{display:flex;align-items:center;gap:10px;margin-top:20px;color:#fff;font-size:.59rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
   .hub-event-cta i{height:1px;width:34px;background:var(--event-accent)}
