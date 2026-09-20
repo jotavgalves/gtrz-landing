@@ -8,6 +8,8 @@ const instagram=typeof siteSettings.social?.instagram==='string'&&siteSettings.s
   ?String(siteSettings.social.instagram)
   :'https://instagram.com/gtrzeventos';
 const activeEvents=events.filter(event=>['published','sales_open','sold_out'].includes(event.status)).slice(0,6);
+const marqueeText='GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·';
+const marqueeItems=Array.from({length:10});
 
 const copy=es?{
   navEvents:'Eventos',
@@ -98,14 +100,10 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
       <div class="hub-marquee" aria-hidden="true">
         <div class="hub-marquee-track">
           <div class="hub-marquee-group">
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            {marqueeItems.map(()=> <span>{marqueeText}</span>)}
           </div>
           <div class="hub-marquee-group">
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
-            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            {marqueeItems.map(()=> <span>{marqueeText}</span>)}
           </div>
         </div>
       </div>
@@ -251,7 +249,7 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     display:flex;
     width:max-content;
     will-change:transform;
-    animation:hub-marquee 32s linear infinite
+    animation:hub-marquee 52s linear infinite
   }
   .hub-marquee-group{
     display:flex;
