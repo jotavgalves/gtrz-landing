@@ -1,6 +1,6 @@
 ---
 import type { ChromeSettings,Locale } from '@/lib/cms';
-const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
+const { locale, chrome={}, compact=false, instagramUrl='https://www.instagram.com/gtrzeventos/' } = Astro.props as { locale:Locale; chrome?:ChromeSettings; compact?:boolean; instagramUrl?:string };
 const es = locale === 'es';
 const defaultPt:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciais','#diferenciais'],['Quem faz','#quem'],['Trabalhe conosco','#trabalhe'],['Parcerias','#parcerias'],['Instagram','#instagram']];
 const defaultEs:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Diferenciales','#diferenciais'],['Quiénes somos','#quem'],['Trabaja con nosotros','#trabalhe'],['Alianzas','#parcerias'],['Instagram','#instagram']];
@@ -16,6 +16,10 @@ const normalizeHref=(value:unknown)=>{
 };
 const safeNav=nav.filter(item=>Array.isArray(item)&&item.length>=2).map(([label,href])=>[String(label),normalizeHref(href)] as [string,string]);
 const eventsLabel=es?(chrome.eventsLabelEs||'Eventos'):(chrome.eventsLabelPt||'Eventos');
+const compactNav:[string,string][]=[
+  [eventsLabel,onHome?'#eventos':`${homeUrl}#eventos`],
+  ['Instagram',instagramUrl]
+];
 const langPt=chrome.langShortPt||'PT';
 const langEs=chrome.langShortEs||'ES';
 const brandHref=onHome?'#top':homeUrl;
@@ -27,16 +31,16 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     <a class="brand" href={brandHref} aria-label="GTRZ Eventos" data-track="nav.logo">
       <img class="brand-img" src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
     </a>
-    <nav class="nav" aria-label={es ? 'Navegación principal' : 'Navegação principal'}>
-      {safeNav.map(([label,href]) => <a href={href}>{label}</a>)}
+    <nav class:list={['nav',compact&&'nav-compact']} aria-label={es ? 'Navegación principal' : 'Navegação principal'}>
+      {(compact?compactNav:safeNav).map(([label,href]) => <a href={href} target={compact&&label==='Instagram'?'_blank':undefined} rel={compact&&label==='Instagram'?'noreferrer':undefined}>{label}</a>)}
     </nav>
     <div class="nav-actions">
       <div class="lang-switch" aria-label="Idioma">
         <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR">{langPt}</a>
         <a class:list={{active:es}} href="?lang=es" data-language="es">{langEs}</a>
       </div>
-      <a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>
-      <button class="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
+      {!compact&&<a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>}
+      <button class:list={['mobile-menu-button',compact&&'compact-menu-button']}  type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
     </div>
   </div>
   <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar" data-scroll-progress></span></div>
@@ -44,11 +48,11 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
 
 <div class="mobile-nav" id="mobileNav" data-mobile-nav data-open="false" aria-hidden="true">
   <nav class="mobile-nav-links" aria-label={es ? 'Navegación móvil' : 'Navegação móvel'}>
-    {safeNav.map(([label,href]) => <a href={href} data-mobile-nav-link><span>{label}</span><svg class="mobile-nav-link-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></a>)}
+    {(compact?compactNav:safeNav).map(([label,href]) => <a href={href} target={compact&&label==='Instagram'?'_blank':undefined} rel={compact&&label==='Instagram'?'noreferrer':undefined} data-mobile-nav-link><span>{label}</span><svg class="mobile-nav-link-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></a>)}
   </nav>
-  <div class="mobile-nav-actions">
+  {!compact&&<div class="mobile-nav-actions">
     <a class="mobile-nav-events" href={eventsHref} data-track="nav.events.mobile" data-mobile-nav-link>{eventsLabel}</a>
-  </div>
+  </div>}
 </div>
 
 <script>
