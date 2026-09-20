@@ -62,6 +62,31 @@ const formatTime=(iso:string)=>{
 };
 const status=(event:CmsEvent)=>event.status==='sales_open'?copy.sales:event.status==='sold_out'?copy.sold:copy.coming;
 const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join(' · ');
+
+type EventPalette={accent:string;accent2:string;glow:string};
+const eventPalette=(event:CmsEvent):EventPalette=>{
+  const key=`${event.slug} ${event.title||''}`.toLowerCase();
+  if(key.includes('misterio')||key.includes('mistério')){
+    return {accent:'#51f27a',accent2:'#123a21',glow:'rgba(81,242,122,.22)'};
+  }
+  if(key.includes('macabra')||key.includes('perreo')){
+    return {accent:'#ff7a1a',accent2:'#7d2cff',glow:'rgba(255,90,26,.24)'};
+  }
+  const theme=parseTheme(event);
+  const raw=theme.accentColor||theme.accent||theme.primaryColor||theme.primary;
+  if(typeof raw==='string'&&/^#[0-9a-f]{6}$/i.test(raw)){
+    return {accent:raw,accent2:'#2a1212',glow:'rgba(255,36,26,.2)'};
+  }
+  return {accent:'#ff241a',accent2:'#3a1010',glow:'rgba(255,36,26,.2)'};
+};
+
+const heroEvents=activeEvents.slice(0,2).map(event=>({
+  event,
+  artwork:mediaUrl(posterId(event)),
+  palette:eventPalette(event)
+}));
+const heroCities=[...new Set(activeEvents.map(event=>event.city).filter(Boolean))].slice(0,3).join(' · ');
+const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{month:'long',year:'numeric'}).format(new Date(activeEvents[0].starts_at)).toUpperCase():'';
 ---
 <div class="event-hub" id="top">
   <header class="hub-header">
@@ -82,13 +107,35 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
 
   <main>
     <section class="hub-hero">
+      <div class="hub-hero-ambient" aria-hidden="true">
+        <div class="hub-hero-light"></div>
+        {heroEvents.map((item,index)=>(
+          <div
+            class:list={['hub-ghost-card',index===0?'ghost-a':'ghost-b',!item.artwork&&'ghost-fallback']}
+            style={`--ghost-accent:${item.palette.accent};--ghost-accent-2:${item.palette.accent2};--ghost-glow:${item.palette.glow};--ghost-image:${item.artwork?`url('${item.artwork}')`:'none'}`}
+          >
+            <span>{item.event.title||item.event.slug}</span>
+          </div>
+        ))}
+      </div>
+
+      <div class="hub-edge-mark" aria-hidden="true"><span>GTRZ / 2026</span></div>
+
       <div class="hub-shell hub-hero-grid">
         <div class="hub-hero-copy">
           <div class="hub-eyebrow"><span></span>{copy.eyebrow}</div>
           <h1><span>{copy.titleTop}</span><strong>{copy.titleBottom}</strong></h1>
+          {(heroCities||heroPeriod)&&(
+            <div class="hub-hero-meta">
+              {heroCities&&<span>{heroCities}</span>}
+              {heroCities&&heroPeriod&&<i></i>}
+              {heroPeriod&&<span>{heroPeriod}</span>}
+            </div>
+          )}
         </div>
 
         <div class="hub-intro">
+          <div class="hub-intro-number">02</div>
           <p>{copy.intro}</p>
           <a href="#eventos" class="hub-scroll" data-track="hub.hero.events">
             <span>{copy.navEvents}</span>
@@ -123,28 +170,32 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
           {activeEvents.map((event,index)=>{
             const artwork=mediaUrl(posterId(event));
             const eventLocation=location(event);
+            const palette=eventPalette(event);
             return (
-              <article class:list={['hub-event-card',index===0&&'lead',!artwork&&'no-art']}>
+              <article
+                class:list={['hub-event-card',index===0&&'lead',!artwork&&'no-art']}
+                style={`--event-accent:${palette.accent};--event-accent-2:${palette.accent2};--event-glow:${palette.glow}`}
+              >
                 <a href={`/eventos/${event.slug}?lang=${locale}`} data-track={`hub.event.${event.slug}`} aria-label={`${copy.view}: ${event.title||event.slug}`}>
-                  {artwork&&(
-                    <div class="hub-event-media">
-                      <img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />
-                      <div class="hub-event-shade"></div>
-                    </div>
-                  )}
-
-                  <div class="hub-event-info">
+                  <div class="hub-event-visual">
+                    {artwork
+                      ? <img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />
+                      : (
+                        <div class="hub-event-generated" aria-hidden="true">
+                          <div class="hub-event-orbit"></div>
+                          <img src="/brand/gtrz-symbol.svg" alt="" />
+                          <span>{event.title||event.slug}</span>
+                        </div>
+                      )}
+                    <div class="hub-event-shade"></div>
+                    <div class="hub-event-accent-line"></div>
                     <div class="hub-event-topline">
                       <span class:list={['hub-status',event.status==='sales_open'&&'sales',event.status==='sold_out'&&'sold']}>{status(event)}</span>
                       <span class="hub-event-index">{String(index+1).padStart(2,'0')}</span>
                     </div>
+                  </div>
 
-                    {!artwork&&(
-                      <div class="hub-event-brand" aria-hidden="true">
-                        <img src="/brand/gtrz-symbol.svg" alt="" />
-                      </div>
-                    )}
-
+                  <div class="hub-event-info">
                     <div class="hub-event-meta">
                       <span>{eventLocation}</span>
                       <span>{formatDate(event.starts_at)} · {formatTime(event.starts_at)}</span>
@@ -185,7 +236,7 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     min-height:100vh;
     overflow:hidden;
     background:
-      radial-gradient(circle at 88% 1%,rgba(255,36,26,.10),transparent 23rem),
+      radial-gradient(circle at 88% 1%,rgba(255,36,26,.09),transparent 24rem),
       linear-gradient(180deg,#080808 0%,#060606 100%);
     color:var(--hub-white)
   }
@@ -200,7 +251,9 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     align-items:center;
     justify-content:space-between;
     gap:16px;
-    border-bottom:1px solid var(--hub-line)
+    border-bottom:1px solid var(--hub-line);
+    position:relative;
+    z-index:20
   }
   .hub-brand{display:flex;align-items:center;min-width:0}
   .hub-brand img{width:88px}
@@ -211,8 +264,56 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
   .hub-lang{display:flex;align-items:center;gap:6px;padding-left:12px;border-left:1px solid var(--hub-line)}
   .hub-lang a{color:#5e5956}.hub-lang a.active{color:#fff}.hub-lang span{color:#353230}
 
-  .hub-hero{padding-top:38px}
-  .hub-hero-grid{display:grid;grid-template-columns:1fr;gap:26px}
+  .hub-hero{position:relative;padding-top:38px;isolation:isolate}
+  .hub-hero-grid{position:relative;z-index:3;display:grid;grid-template-columns:1fr;gap:24px}
+  .hub-hero-ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .hub-hero-light{
+    position:absolute;
+    right:-18%;
+    top:-14%;
+    width:28rem;
+    height:28rem;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(255,36,26,.13),rgba(255,36,26,.035) 36%,transparent 70%);
+    filter:blur(10px)
+  }
+  .hub-ghost-card{
+    position:absolute;
+    width:150px;
+    aspect-ratio:3/4;
+    border:1px solid color-mix(in srgb,var(--ghost-accent) 28%,transparent);
+    background-image:
+      linear-gradient(180deg,rgba(7,7,7,.34),rgba(7,7,7,.92)),
+      var(--ghost-image),
+      radial-gradient(circle at 50% 42%,var(--ghost-glow),transparent 64%);
+    background-size:cover;
+    background-position:center;
+    box-shadow:0 0 65px var(--ghost-glow);
+    opacity:.17;
+    filter:saturate(.75) contrast(1.05);
+    transform:rotate(7deg)
+  }
+  .hub-ghost-card span{
+    position:absolute;
+    left:10px;
+    bottom:9px;
+    max-width:86%;
+    overflow:hidden;
+    color:var(--ghost-accent);
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:1.5rem;
+    font-weight:900;
+    line-height:.8;
+    text-transform:uppercase
+  }
+  .ghost-a{right:5%;top:8%}
+  .ghost-b{right:-8%;top:31%;transform:rotate(-8deg);opacity:.12}
+  .ghost-fallback{
+    background-image:
+      linear-gradient(135deg,var(--ghost-accent-2),#090909 62%),
+      radial-gradient(circle at 45% 35%,var(--ghost-glow),transparent 60%)
+  }
+  .hub-edge-mark{display:none}
   .hub-eyebrow{display:flex;align-items:center;gap:10px;color:#a9a29e;font-size:.60rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
   .hub-eyebrow span{width:24px;height:2px;background:var(--hub-red);flex:none}
   .hub-hero h1{
@@ -227,14 +328,17 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
   }
   .hub-hero h1 span,.hub-hero h1 strong{display:block}
   .hub-hero h1 strong{color:var(--hub-red);font-weight:900}
-  .hub-intro{max-width:32rem}
+  .hub-hero-meta{display:flex;align-items:center;gap:10px;margin-top:20px;color:#6f6864;font-size:.54rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  .hub-hero-meta i{width:18px;height:1px;background:#36312f}
+  .hub-intro{max-width:32rem;position:relative}
+  .hub-intro-number{display:none;color:rgba(255,255,255,.06);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:4rem;font-weight:900;line-height:1}
   .hub-intro p{margin:0;color:#a69e9a;font-size:.94rem;line-height:1.65}
   .hub-scroll{display:inline-flex;align-items:center;gap:12px;margin-top:20px;font-size:.61rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
   .hub-scroll i{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--hub-line);border-radius:50%;color:var(--hub-red);font-style:normal}
 
   .hub-marquee{
     width:100%;
-    margin-top:40px;
+    margin-top:34px;
     overflow:hidden;
     padding:11px 0;
     border-top:1px solid var(--hub-line);
@@ -243,7 +347,9 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     font-size:.54rem;
     font-weight:800;
     letter-spacing:.14em;
-    white-space:nowrap
+    white-space:nowrap;
+    position:relative;
+    z-index:5
   }
   .hub-marquee-track{
     display:flex;
@@ -251,20 +357,12 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     will-change:transform;
     animation:hub-marquee 52s linear infinite
   }
-  .hub-marquee-group{
-    display:flex;
-    align-items:center;
-    flex:none;
-    width:max-content
-  }
-  .hub-marquee-group span{
-    flex:none;
-    padding-left:34px
-  }
+  .hub-marquee-group{display:flex;align-items:center;flex:none;width:max-content}
+  .hub-marquee-group span{flex:none;padding-left:34px}
   @keyframes hub-marquee{to{transform:translateX(-50%)}}
 
-  .hub-events{padding-top:50px;padding-bottom:68px}
-  .hub-section-head{display:grid;grid-template-columns:38px minmax(0,1fr);gap:14px;align-items:center;margin-bottom:22px}
+  .hub-events{padding-top:42px;padding-bottom:68px;position:relative}
+  .hub-section-head{display:grid;grid-template-columns:38px minmax(0,1fr);gap:14px;align-items:center;margin-bottom:18px}
   .hub-section-number{
     font-family:'Barlow Condensed','Arial Narrow',sans-serif;
     color:var(--hub-red);
@@ -276,45 +374,112 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
   .hub-section-label span{white-space:nowrap}.hub-section-label i{height:1px;background:var(--hub-line)}
 
   .hub-event-grid{display:grid;grid-template-columns:1fr;gap:14px}
-  .hub-event-card{min-width:0;border:1px solid var(--hub-line);background:#0b0b0b}
-  .hub-event-card>a{display:block}
-  .hub-event-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:#111}
-  .hub-event-media img{width:100%;height:100%;object-fit:cover}
-  .hub-event-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03),transparent 58%,rgba(0,0,0,.34))}
-  .hub-event-info{position:relative;padding:15px 14px 19px}
-  .hub-event-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-  .hub-status{display:inline-flex;align-items:center;min-height:27px;padding:0 9px;border:1px solid rgba(255,255,255,.18);color:#d8d2ce;font-size:.53rem;font-weight:800;letter-spacing:.09em;white-space:nowrap}
-  .hub-status.sales{background:var(--hub-red);border-color:var(--hub-red);color:#fff}
+  .hub-event-card{
+    min-width:0;
+    border:1px solid rgba(255,255,255,.12);
+    background:#0a0a0a;
+    overflow:hidden;
+    position:relative
+  }
+  .hub-event-card::before{
+    content:'';
+    position:absolute;
+    inset:auto -10% -45% 22%;
+    height:65%;
+    background:radial-gradient(circle,var(--event-glow),transparent 68%);
+    opacity:.55;
+    pointer-events:none
+  }
+  .hub-event-card>a{display:block;position:relative;z-index:1}
+  .hub-event-visual{
+    position:relative;
+    min-height:190px;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    background:
+      linear-gradient(135deg,color-mix(in srgb,var(--event-accent-2) 76%,#080808),#080808 62%)
+  }
+  .hub-event-visual>img{width:100%;height:100%;object-fit:cover}
+  .hub-event-generated{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .hub-event-generated::before{
+    content:'';
+    position:absolute;
+    width:72%;
+    aspect-ratio:1;
+    border-radius:50%;
+    border:1px solid color-mix(in srgb,var(--event-accent) 28%,transparent);
+    box-shadow:0 0 72px var(--event-glow),inset 0 0 72px color-mix(in srgb,var(--event-accent) 7%,transparent)
+  }
+  .hub-event-generated::after{
+    content:'';
+    position:absolute;
+    inset:12% -15%;
+    background:linear-gradient(108deg,transparent 33%,color-mix(in srgb,var(--event-accent) 12%,transparent) 48%,transparent 62%);
+    transform:rotate(-7deg)
+  }
+  .hub-event-generated img{position:relative;z-index:2;width:54px;opacity:.85}
+  .hub-event-generated span{
+    position:absolute;
+    left:14px;
+    right:14px;
+    bottom:-5px;
+    color:color-mix(in srgb,var(--event-accent) 18%,transparent);
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:clamp(4rem,22vw,7rem);
+    font-weight:900;
+    line-height:.75;
+    letter-spacing:-.04em;
+    text-transform:uppercase;
+    white-space:nowrap
+  }
+  .hub-event-orbit{
+    position:absolute;
+    width:42%;
+    aspect-ratio:1;
+    border-radius:50%;
+    border:1px solid color-mix(in srgb,var(--event-accent) 45%,transparent);
+    transform:rotate(22deg)
+  }
+  .hub-event-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),transparent 50%,rgba(0,0,0,.72))}
+  .hub-event-accent-line{position:absolute;left:0;bottom:0;width:34%;height:3px;background:var(--event-accent)}
+  .hub-event-topline{position:absolute;left:12px;right:12px;top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:4}
+  .hub-status{
+    display:inline-flex;
+    align-items:center;
+    min-height:27px;
+    padding:0 9px;
+    border:1px solid rgba(255,255,255,.24);
+    background:rgba(7,7,7,.68);
+    backdrop-filter:blur(10px);
+    color:#eee9e5;
+    font-size:.53rem;
+    font-weight:800;
+    letter-spacing:.09em;
+    white-space:nowrap
+  }
+  .hub-status.sales{background:var(--event-accent);border-color:var(--event-accent);color:#050505}
   .hub-status.sold{background:#fff;border-color:#fff;color:#111}
-  .hub-event-index{font-family:'Barlow Condensed','Arial Narrow',sans-serif;color:#817a76;font-size:1.35rem;font-weight:900;line-height:1}
-  .hub-event-brand{height:54px;display:flex;align-items:center;margin:-2px 0 18px}
-  .hub-event-brand img{width:42px;opacity:.74}
-  .hub-event-meta{display:flex;flex-direction:column;gap:5px;color:#817a76;font-size:.57rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+  .hub-event-index{font-family:'Barlow Condensed','Arial Narrow',sans-serif;color:#d7d0cc;font-size:1.35rem;font-weight:900;line-height:1;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+  .hub-event-info{position:relative;padding:16px 14px 19px;background:linear-gradient(180deg,rgba(10,10,10,.94),#090909)}
+  .hub-event-meta{display:flex;flex-direction:column;gap:5px;color:#827a76;font-size:.57rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+  .hub-event-meta span:first-child{color:color-mix(in srgb,var(--event-accent) 68%,#aaa)}
   .hub-event-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:13px}
   .hub-event-title-row h2{
     margin:0;
     max-width:88%;
     overflow-wrap:anywhere;
     font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-    font-size:clamp(2.45rem,13vw,3.7rem);
+    font-size:clamp(2.55rem,13vw,3.85rem);
     font-weight:900;
     line-height:.86;
     letter-spacing:-.025em;
     text-transform:uppercase
   }
-  .hub-event-arrow{flex:none;color:var(--hub-red);font-size:1.55rem;line-height:1}
+  .hub-event-arrow{flex:none;color:var(--event-accent);font-size:1.55rem;line-height:1}
   .hub-event-info p{margin:10px 0 0;color:#918985;font-size:.76rem;line-height:1.45}
   .hub-event-cta{display:flex;align-items:center;gap:10px;margin-top:20px;color:#fff;font-size:.59rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
-  .hub-event-cta i{height:1px;width:34px;background:var(--hub-red)}
-
-  .hub-event-card.no-art{
-    background:
-      radial-gradient(circle at 78% 15%,rgba(255,36,26,.13),transparent 11rem),
-      #0b0b0b
-  }
-  .hub-event-card.no-art .hub-event-info{min-height:250px;display:flex;flex-direction:column}
-  .hub-event-card.no-art .hub-event-meta{margin-top:auto}
-  .hub-event-card.no-art .hub-event-topline{margin-bottom:12px}
+  .hub-event-cta i{height:1px;width:34px;background:var(--event-accent)}
+  .hub-event-card.no-art .hub-event-visual{aspect-ratio:16/8.4}
 
   .hub-empty{display:grid;gap:22px;padding:25px;border:1px solid var(--hub-line)}
   .hub-empty>img{width:52px;opacity:.72}
@@ -333,34 +498,59 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     .hub-hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:42px;align-items:end}
     .hub-hero h1{font-size:clamp(5.2rem,11vw,8.2rem)}
     .hub-intro{padding-bottom:8px}.hub-intro p{font-size:1rem}
-    .hub-marquee{margin-top:60px;font-size:.58rem;padding:12px 0}
-    .hub-events{padding-top:68px;padding-bottom:90px}
+    .hub-intro-number{display:block;position:absolute;right:0;top:-48px}
+    .hub-ghost-card{width:190px}
+    .ghost-a{right:12%;top:2%}.ghost-b{right:-2%;top:24%}
+    .hub-marquee{margin-top:48px;font-size:.58rem;padding:12px 0}
+    .hub-events{padding-top:54px;padding-bottom:90px}
     .hub-event-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .hub-event-media{aspect-ratio:16/11}
+    .hub-event-visual{aspect-ratio:16/9.3;min-height:220px}
+    .hub-event-card.no-art .hub-event-visual{aspect-ratio:16/8.8}
     .hub-event-info{padding:18px 18px 21px}
+    .hub-event-topline{left:16px;right:16px;top:16px}
     .hub-event-meta{flex-direction:row;justify-content:space-between;gap:16px}
-    .hub-event-title-row h2{font-size:clamp(2.9rem,5vw,4.3rem)}
-    .hub-event-card.no-art .hub-event-info{min-height:300px}
+    .hub-event-title-row h2{font-size:clamp(3rem,5vw,4.35rem)}
     .hub-empty{grid-template-columns:70px 1fr auto;align-items:center;padding:32px}
     .hub-footer{grid-template-columns:auto 1fr auto}.hub-footer span{display:block;text-align:center}
   }
 
   @media(min-width:1100px){
     .hub-header{height:86px}
-    .hub-hero{padding-top:72px}
+    .hub-hero{padding-top:66px}
     .hub-hero-grid{grid-template-columns:minmax(0,1.45fr) minmax(280px,.55fr);gap:64px}
     .hub-eyebrow{font-size:.65rem;letter-spacing:.16em}.hub-eyebrow span{width:32px}
     .hub-hero h1{font-size:clamp(6.5rem,9vw,9.2rem);line-height:.82}
     .hub-intro p{font-size:1.05rem}
-    .hub-events{padding-top:78px;padding-bottom:100px}
-    .hub-section-head{grid-template-columns:58px 1fr;gap:18px;margin-bottom:28px}
+    .hub-ghost-card{width:240px;opacity:.15}
+    .ghost-a{right:14%;top:-1%}.ghost-b{right:1%;top:20%}
+    .hub-edge-mark{
+      display:flex;
+      position:absolute;
+      left:18px;
+      top:44%;
+      z-index:4;
+      align-items:center;
+      gap:10px;
+      writing-mode:vertical-rl;
+      transform:rotate(180deg);
+      color:#45403e;
+      font-size:.5rem;
+      font-weight:800;
+      letter-spacing:.18em
+    }
+    .hub-edge-mark::before{content:'';width:1px;height:44px;background:#322e2c}
+    .hub-events{padding-top:58px;padding-bottom:96px}
+    .hub-section-head{grid-template-columns:58px 1fr;gap:18px;margin-bottom:24px}
     .hub-section-number{font-size:2rem}
-    .hub-event-card{transition:transform .2s ease,border-color .2s ease}
-    .hub-event-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.24)}
-    .hub-event-media img{transition:transform .35s ease}.hub-event-card:hover .hub-event-media img{transform:scale(1.015)}
+    .hub-event-card{transition:transform .24s ease,border-color .24s ease,box-shadow .24s ease}
+    .hub-event-card:hover{transform:translateY(-5px);border-color:color-mix(in srgb,var(--event-accent) 42%,rgba(255,255,255,.15));box-shadow:0 18px 44px rgba(0,0,0,.32)}
+    .hub-event-visual>img{transition:transform .55s cubic-bezier(.2,.75,.2,1),filter .3s ease}
+    .hub-event-card:hover .hub-event-visual>img{transform:scale(1.035);filter:saturate(1.08)}
+    .hub-event-generated{transition:transform .45s ease}.hub-event-card:hover .hub-event-generated{transform:scale(1.025)}
+    .hub-event-title-row h2{transition:transform .24s ease}.hub-event-card:hover .hub-event-title-row h2{transform:translateX(3px)}
     .hub-event-arrow,.hub-event-cta i{transition:transform .2s ease,width .2s ease}
     .hub-event-card:hover .hub-event-arrow{transform:translate(3px,-3px)}
-    .hub-event-card:hover .hub-event-cta i{width:54px}
+    .hub-event-card:hover .hub-event-cta i{width:58px}
   }
 
   @media(max-width:370px){
@@ -373,6 +563,6 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
 
   @media(prefers-reduced-motion:reduce){
     .hub-marquee-track{animation:none}
-    .hub-event-card,.hub-event-media img,.hub-event-arrow,.hub-event-cta i{transition:none}
+    .hub-event-card,.hub-event-visual>img,.hub-event-generated,.hub-event-title-row h2,.hub-event-arrow,.hub-event-cta i{transition:none}
   }
 </style>
