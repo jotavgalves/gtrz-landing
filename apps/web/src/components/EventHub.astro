@@ -96,8 +96,18 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
       </div>
 
       <div class="hub-marquee" aria-hidden="true">
-        <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
-        <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+        <div class="hub-marquee-track">
+          <div class="hub-marquee-group">
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+          </div>
+          <div class="hub-marquee-group">
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+            <span>GTRZ · JOÃO PESSOA · RECIFE · LATIN MUSIC · EXPERIÊNCIAS ·</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -225,9 +235,9 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
   .hub-scroll i{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--hub-line);border-radius:50%;color:var(--hub-red);font-style:normal}
 
   .hub-marquee{
+    width:100%;
     margin-top:40px;
-    display:flex;
-    width:max-content;
+    overflow:hidden;
     padding:11px 0;
     border-top:1px solid var(--hub-line);
     border-bottom:1px solid var(--hub-line);
@@ -235,10 +245,25 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
     font-size:.54rem;
     font-weight:800;
     letter-spacing:.14em;
-    white-space:nowrap;
-    animation:hub-marquee 30s linear infinite
+    white-space:nowrap
   }
-  .hub-marquee span{padding-left:34px}
+  .hub-marquee-track{
+    display:flex;
+    width:max-content;
+    min-width:200%;
+    will-change:transform;
+    animation:hub-marquee 32s linear infinite
+  }
+  .hub-marquee-group{
+    display:flex;
+    align-items:center;
+    flex:none;
+    min-width:100vw
+  }
+  .hub-marquee-group span{
+    flex:none;
+    padding-left:34px
+  }
   @keyframes hub-marquee{to{transform:translateX(-50%)}}
 
   .hub-events{padding-top:50px;padding-bottom:68px}
@@ -350,7 +375,7 @@ const location=(event:CmsEvent)=>[event.city,event.state].filter(Boolean).join('
   }
 
   @media(prefers-reduced-motion:reduce){
-    .hub-marquee{animation:none}
+    .hub-marquee-track{animation:none}
     .hub-event-card,.hub-event-media img,.hub-event-arrow,.hub-event-cta i{transition:none}
   }
 </style>
