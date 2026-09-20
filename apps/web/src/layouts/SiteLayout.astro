@@ -23,6 +23,12 @@ import '@/styles/privacy-checkbox-fix.css';
 interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings; }
 const { locale, settings={} } = Astro.props;
 const chrome=settings.chrome||{};
+const hubMode=settings.general?.homepageMode!=='full';
+const instagramUrl=typeof settings.social?.instagram==='string'
+  ?String(settings.social.instagram)
+  :typeof settings.social?.instagramUrl==='string'
+    ?String(settings.social.instagramUrl)
+    :'https://www.instagram.com/gtrzeventos/';
 const title=Astro.props.title||(locale==='es'?(chrome.metaTitleEs||'GTRZ Eventos'):(chrome.metaTitlePt||'GTRZ Eventos'));
 const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
 const configuredDescription=locale==='es'?chrome.metaDescriptionEs:chrome.metaDescriptionPt;
@@ -49,8 +55,8 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     </script>
   </head>
   <body>
-    <Header locale={locale} chrome={chrome} />
-    <LanguageGate locale={locale} chrome={chrome} />
+    <Header locale={locale} chrome={chrome} compact={hubMode} instagramUrl={instagramUrl} />
+    {!hubMode&&<LanguageGate locale={locale} chrome={chrome} />}
     <slot />
     <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>{footer}</span></div></footer>
     <script is:inline>
