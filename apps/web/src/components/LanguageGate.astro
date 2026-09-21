@@ -51,9 +51,10 @@ const optionEs=chrome.gateOptionEs||'Español';
     try {
       localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR');
       sessionStorage.setItem('gtrz_language_gate_seen','1');
-      sessionStorage.setItem('gtrz_language_handoff','1');
+      if (mode === 'session') sessionStorage.removeItem('gtrz_language_handoff');
+      else sessionStorage.setItem('gtrz_language_handoff','1');
     } catch {}
-    document.documentElement.classList.add('gtrz-popup-handoff');
+    if (mode !== 'session') document.documentElement.classList.add('gtrz-popup-handoff');
     document.body.classList.remove('modal-open');
   }));
 </script>

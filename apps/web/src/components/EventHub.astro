@@ -177,7 +177,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
                 class:list={['hub-event-card',index===0&&'lead',!artwork&&'no-art']}
                 style={`--event-accent:${palette.accent};--event-accent-2:${palette.accent2};--event-glow:${palette.glow}`}
               >
-                <a href={`/eventos/${event.slug}?lang=${locale}`} data-track={`hub.event.${event.slug}`} aria-label={`${copy.view}: ${event.title||event.slug}`}>
+                <a href={`/eventos/${event.slug}?lang=${locale}`} data-astro-prefetch="viewport" data-track={`hub.event.${event.slug}`} aria-label={`${copy.view}: ${event.title||event.slug}`}>
                   <div class="hub-event-visual">
                     {artwork
                       ? <img src={artwork} alt={event.title||event.slug} loading={index===0?'eager':'lazy'} />
