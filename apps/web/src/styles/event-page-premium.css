@@ -64,11 +64,16 @@
 .event-premium-hero-bg:before{
   content:"";
   position:absolute;
-  inset:-5%;
+  inset:0;
   z-index:1;
-  background:
-    radial-gradient(circle at 76% 30%,color-mix(in srgb,var(--event-accent) 23%,transparent),transparent 34%),
-    linear-gradient(112deg,rgba(4,4,4,.98) 2%,rgba(4,4,4,.88) 43%,rgba(4,4,4,.54) 72%,rgba(4,4,4,.76) 100%);
+  background:linear-gradient(
+    90deg,
+    rgba(0,0,0,.58) 0%,
+    rgba(0,0,0,.42) 22%,
+    rgba(0,0,0,.20) 40%,
+    rgba(0,0,0,.06) 58%,
+    rgba(0,0,0,0) 76%
+  );
   pointer-events:none;
 }
 
@@ -77,17 +82,26 @@
   position:absolute;
   inset:0;
   z-index:2;
-  background:linear-gradient(0deg,var(--event-bg) 0%,transparent 24%,transparent 78%,rgba(0,0,0,.38) 100%);
+  background:linear-gradient(
+    0deg,
+    rgba(7,7,7,.22) 0%,
+    rgba(7,7,7,.06) 14%,
+    transparent 28%,
+    transparent 90%,
+    rgba(0,0,0,.08) 100%
+  );
   pointer-events:none;
 }
 
 .event-premium-hero-bg img{
+  display:block;
   width:100%;
   height:100%;
   object-fit:cover;
-  opacity:.42;
-  filter:saturate(.88) contrast(1.08) blur(1px);
-  transform:scale(1.035);
+  object-position:center center;
+  opacity:1;
+  filter:none;
+  transform:none;
 }
 
 .event-premium-hero .event-shell{position:relative;z-index:2}
