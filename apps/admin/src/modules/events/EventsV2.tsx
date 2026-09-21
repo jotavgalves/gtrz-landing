@@ -21,7 +21,7 @@ const blankCopy=(lang:'pt'|'es'):TicketCopy=>({
   whatsappMessage:''
 });
 const emptyTicket=():TicketDraft=>({name:'',price:'',comparePrice:'',currency:'BRL',availability:'available',purchaseMode:'both',symplaUrl:'',whatsappUrl:'',customUrl:'',startsAt:'',endsAt:'',visible:true,featured:false,quantity:1,theme:'light',whatsappMessagePt:'',whatsappMessageEs:''});
-const statusLabel:Record<string,string>={draft:'Rascunho',scheduled:'Agendado',published:'Publicado',sales_open:'Vendas abertas',sold_out:'Esgotado',finished:'Realizado',archived:'Arquivado'};
+const statusLabel:Record<string,string>={draft:'Rascunho',scheduled:'Agendado',published:'Publicado',sales_open:'Ingressos à venda',sold_out:'Esgotado',finished:'Realizado',archived:'Arquivado'};
 const availabilityLabel:Record<string,string>={coming_soon:'Em breve',available:'Disponível',last_units:'Últimas unidades',sold_out:'Esgotado',closed:'Encerrado'};
 const statusTone=(status:string):'neutral'|'green'|'yellow'|'red'|'blue'=>status==='sales_open'?'green':status==='published'?'red':status==='sold_out'?'yellow':status==='scheduled'?'blue':'neutral';
 const availabilityTone=(status:string):'neutral'|'green'|'yellow'|'red'|'blue'=>status==='available'?'green':status==='last_units'?'yellow':status==='sold_out'?'red':status==='coming_soon'?'blue':'neutral';
