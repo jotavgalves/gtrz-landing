@@ -55,12 +55,33 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
       html.gtrz-popup-handoff{background:#080808}
       html.gtrz-popup-handoff body{visibility:hidden}
       html.gtrz-popup-handoff body .event-popup{visibility:visible}
-      ::view-transition-old(root){animation:160ms ease both gtrz-page-out}
-      ::view-transition-new(root){animation:220ms ease both gtrz-page-in}
-      @keyframes gtrz-page-out{to{opacity:0;transform:translateY(-4px)}}
-      @keyframes gtrz-page-in{from{opacity:0;transform:translateY(4px)}}
+      ::view-transition-old(root){animation:150ms cubic-bezier(.4,0,1,1) both gtrz-page-out}
+      ::view-transition-new(root){animation:260ms cubic-bezier(.16,1,.3,1) both gtrz-page-in}
+      @keyframes gtrz-page-out{to{opacity:.18}}
+      @keyframes gtrz-page-in{from{opacity:.18}}
+      html.gtrz-language-switching{cursor:progress}
+      html.gtrz-language-switching .lang-switch{pointer-events:none}
+      html.gtrz-language-switching .lang-switch a[aria-busy="true"]{background:#fff;color:#111}
+      html.gtrz-language-switching body:after{
+        content:"";
+        position:fixed;
+        z-index:99999;
+        left:0;
+        top:0;
+        width:100%;
+        height:2px;
+        pointer-events:none;
+        background:linear-gradient(90deg,#ff1a12 0%,#ff1a12 62%,rgba(255,26,18,0) 100%);
+        transform-origin:left center;
+        animation:gtrz-language-progress .75s cubic-bezier(.2,.8,.2,1) both;
+      }
+      @keyframes gtrz-language-progress{
+        from{transform:scaleX(.08);opacity:.7}
+        to{transform:scaleX(1);opacity:1}
+      }
       @media(prefers-reduced-motion:reduce){
         ::view-transition-old(root),::view-transition-new(root){animation:none}
+        html.gtrz-language-switching body:after{animation:none;transform:scaleX(1)}
       }
     </style>
     <script is:inline>
