@@ -614,6 +614,53 @@
   align-items:center;
 }
 
+.event-ticket-stage.is-multiple{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:42px;
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide{
+  order:-1;
+  display:grid;
+  grid-template-columns:minmax(260px,.82fr) minmax(320px,1.18fr);
+  column-gap:clamp(46px,7vw,100px);
+  row-gap:10px;
+  max-width:none;
+  padding:26px 0 30px;
+  border-top:1px solid rgba(0,0,0,.14);
+  border-bottom:1px solid rgba(0,0,0,.14);
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide-kicker{
+  grid-column:1;
+  grid-row:1;
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide h3{
+  grid-column:1;
+  grid-row:2;
+  margin-bottom:10px;
+  font-size:clamp(2.8rem,4vw,4.5rem);
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide>p{
+  grid-column:1;
+  grid-row:3;
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide-list{
+  grid-column:2;
+  grid-row:1 / span 3;
+  margin-top:0;
+}
+
+.event-ticket-stage.is-multiple .event-ticket-guide-meta{
+  grid-column:1 / -1;
+  grid-row:4;
+  margin-top:8px;
+}
+
 .event-ticket-grid{
   display:grid;
   gap:16px;
@@ -1018,6 +1065,7 @@
   .event-location-grid{gap:28px}
   .event-ticket-grid.count-2,.event-ticket-grid.count-3,.event-ticket-grid.count-4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .event-ticket-stage.is-single{grid-template-columns:minmax(360px,470px) minmax(280px,1fr);gap:52px}
+  .event-ticket-stage.is-multiple .event-ticket-guide{grid-template-columns:1fr 1fr;gap:34px}
   .event-countdown-inner{grid-template-columns:1fr}
   .event-clock{flex-wrap:wrap}
   .event-section-head-premium{align-items:flex-start;flex-direction:column}
@@ -1033,6 +1081,22 @@
   .event-artist-grid.count-1,.event-artist-grid.count-2,.event-artist-grid.count-3,.event-artist-grid.count-4,.event-artist-grid:not(.count-1):not(.count-2):not(.count-3):not(.count-4){grid-template-columns:repeat(2,minmax(0,1fr))}
   .event-artist-grid.count-1{grid-template-columns:1fr;max-width:650px}
   .event-ticket-stage.is-single{grid-template-columns:1fr;gap:42px}
+  .event-ticket-stage.is-multiple{gap:34px}
+  .event-ticket-stage.is-multiple .event-ticket-guide{
+    grid-template-columns:1fr;
+    gap:0;
+    padding:24px 0;
+  }
+  .event-ticket-stage.is-multiple .event-ticket-guide-kicker,
+  .event-ticket-stage.is-multiple .event-ticket-guide h3,
+  .event-ticket-stage.is-multiple .event-ticket-guide>p,
+  .event-ticket-stage.is-multiple .event-ticket-guide-list,
+  .event-ticket-stage.is-multiple .event-ticket-guide-meta{
+    grid-column:1;
+    grid-row:auto;
+  }
+  .event-ticket-stage.is-multiple .event-ticket-guide-list{margin-top:28px}
+  .event-ticket-stage.is-multiple .event-ticket-guide-meta{margin-top:20px}
   .event-ticket-grid.count-1{grid-template-columns:minmax(0,520px)}
   .event-ticket-guide{max-width:620px}
 }

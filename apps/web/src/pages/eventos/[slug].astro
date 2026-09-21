@@ -61,6 +61,9 @@ const isPurchasable=(ticket:any)=>['available','last_units'].includes(ticket.ava
 const firstPurchasable=tickets.find(isPurchasable);
 const ticketCount=tickets.length;
 const singleTicket=ticketCount===1?tickets[0]:null;
+const hasWhatsappTicket=tickets.some((ticket:any)=>['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp);
+const hasSymplaTicket=tickets.some((ticket:any)=>['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla);
+const hasCustomTicket=tickets.some((ticket:any)=>ticket.purchase_mode==='custom'&&ticket.custom);
 const ticketSequenceLabel=(ticket:any,index:number)=>{
   const raw=`${ticket?.copy?.title||''} ${ticket?.name||''}`;
   const prefix=/\blote\b/i.test(raw)?'LOTE':(ticket?.copy?.type||(isEs?'ENTRADA':'INGRESSO'));
@@ -197,18 +200,18 @@ const eventTerms=isEs?{
       <div class="event-shell event-countdown-inner"><div class="event-countdown-copy"><span class="event-eyebrow">{isEs?'CUENTA REGRESIVA':'CONTAGEM REGRESSIVA'}</span><strong>{isEs?'LA NOCHE EMPIEZA EN...':'A NOITE COMEÇA EM...'}</strong></div><div class="event-clock"><div class="event-clock-item"><b data-clock="days">{countdownPad(countdownInitialDays)}</b><small>{isEs?'Días':'Dias'}</small></div><div class="event-clock-item"><b data-clock="hours">{countdownPad(countdownInitialHours)}</b><small>{isEs?'Horas':'Horas'}</small></div><div class="event-clock-item"><b data-clock="minutes">{countdownPad(countdownInitialMinutes)}</b><small>Min</small></div><div class="event-clock-item"><b data-clock="seconds">{countdownPad(countdownInitialSeconds)}</b><small>Seg</small></div></div></div>
     </section>}
 
-    <section class:list={['event-tickets-premium',ticketCount===1&&'single-ticket']} id="ingressos" data-section="event_tickets">
+    <section class:list={['event-tickets-premium',ticketCount===1?'single-ticket':'multiple-tickets']} id="ingressos" data-section="event_tickets">
       <div class="event-shell">
         <div class="event-section-head-premium">
           <div>
             <span class="event-eyebrow">{c.ticketsEyebrow}</span>
             <h2 class="event-display">{c.ticketsTitle}</h2>
           </div>
-          {ticketCount!==1&&<p>{eventEnded?(isEs?'Esta edición ya fue realizada.':'Esta edição já foi realizada.'):(isEs?'Elige la opción que mejor funciona para tu noche.':'Escolha a opção que faz mais sentido para sua noite.')}</p>}
+          {eventEnded&&<p>{isEs?'Esta edición ya fue realizada.':'Esta edição já foi realizada.'}</p>}
         </div>
 
         {tickets.length?
-          <div class:list={['event-ticket-stage',ticketCount===1&&'is-single']}>
+          <div class:list={['event-ticket-stage',ticketCount===1?'is-single':'is-multiple']}>
             <div class:list={['event-ticket-grid',`count-${Math.min(ticketCount,4)}`]}>
               {tickets.map((ticket:any,index:number)=><article class:list={['event-ticket-card',ticket.featured&&'featured',ticketCount===1&&'single-feature']} data-theme={ticket.theme||'light'}>
                 <div class="event-ticket-top">
@@ -233,20 +236,24 @@ const eventTerms=isEs?{
               </article>)}
             </div>
 
-            {singleTicket&&<aside class="event-ticket-guide">
+            <aside class="event-ticket-guide">
               <span class="event-ticket-guide-kicker">{isEs?'COMPRA TU ENTRADA':'GARANTA SUA ENTRADA'}</span>
-              <h3>{isEs?'ELIGE CÓMO COMPRAR.':'ESCOLHA COMO COMPRAR.'}</h3>
-              <p>{isEs?'Compra por el canal que prefieras y asegura tu acceso a esta edición.':'Compre pelo canal que preferir e garanta seu acesso a esta edição.'}</p>
+              <h3>{ticketCount===1?(isEs?'ELIGE CÓMO COMPRAR.':'ESCOLHA COMO COMPRAR.'):(isEs?'ELIGE TU LOTE.':'ESCOLHA SEU LOTE.')}</h3>
+              <p>{ticketCount===1
+                ?(isEs?'Compra por el canal que prefieras y asegura tu acceso a esta edición.':'Compre pelo canal que preferir e garanta seu acesso a esta edição.')
+                :(isEs?'Compara las opciones disponibles y compra el lote que mejor funciona para tu noche.':'Compare as opções disponíveis e compre o lote que faz mais sentido para sua noite.')}</p>
               <div class="event-ticket-guide-list">
-                {['whatsapp','both'].includes(singleTicket.purchase_mode)&&singleTicket.whatsapp&&<div><span>01</span><strong>{isEs?'WhatsApp directo':'WhatsApp direto'}</strong><small>{isEs?'Compra directa, sin tasa de plataforma.':'Compra direta, sem taxa da plataforma.'}</small></div>}
-                {['sympla','both'].includes(singleTicket.purchase_mode)&&singleTicket.sympla&&<div><span>02</span><strong>Sympla</strong><small>{isEs?'Compra a través de la plataforma Sympla.':'Compra pela plataforma Sympla.'}</small></div>}
-                {singleTicket.purchase_mode==='custom'&&singleTicket.custom&&<div><span>01</span><strong>{isEs?'Compra online':'Compra online'}</strong><small>{isEs?'Acceso por el canal oficial de esta edición.':'Acesso pelo canal oficial desta edição.'}</small></div>}
+                {hasWhatsappTicket&&<div><span>01</span><strong>{isEs?'WhatsApp directo':'WhatsApp direto'}</strong><small>{isEs?'Compra directa, sin tasa de plataforma cuando esté disponible.':'Compra direta, sem taxa da plataforma quando disponível.'}</small></div>}
+                {hasSymplaTicket&&<div><span>{hasWhatsappTicket?'02':'01'}</span><strong>Sympla</strong><small>{isEs?'Compra a través de la plataforma Sympla.':'Compra pela plataforma Sympla.'}</small></div>}
+                {hasCustomTicket&&<div><span>{hasWhatsappTicket&&hasSymplaTicket?'03':(hasWhatsappTicket||hasSymplaTicket?'02':'01')}</span><strong>{isEs?'Canal oficial':'Canal oficial'}</strong><small>{isEs?'Compra por el canal oficial configurado para esta edición.':'Compra pelo canal oficial configurado para esta edição.'}</small></div>}
               </div>
               <div class="event-ticket-guide-meta">
-                <span>{Number(singleTicket.quantity||1)>1?(isEs?`${singleTicket.quantity} ENTRADAS`:`${singleTicket.quantity} INGRESSOS`):(isEs?'ACCESO INDIVIDUAL':'ACESSO INDIVIDUAL')}</span>
+                <span>{ticketCount===1
+                  ?(Number(singleTicket?.quantity||1)>1?(isEs?`${singleTicket?.quantity} ENTRADAS`:`${singleTicket?.quantity} INGRESSOS`):(isEs?'ACCESO INDIVIDUAL':'ACESSO INDIVIDUAL'))
+                  :(isEs?`${ticketCount} OPCIONES DISPONIBLES`:`${ticketCount} OPÇÕES DISPONÍVEIS`)}</span>
                 <span>{isEs?'EDICIÓN OFICIAL GTRZ':'EDIÇÃO OFICIAL GTRZ'}</span>
               </div>
-            </aside>}
+            </aside>
           </div>
         :<div class="event-empty-tickets">{c.noTickets}</div>}
       </div>
