@@ -75,6 +75,15 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     } catch {}
   };
 
+  const updateScrollProgress = () => {
+    const bar = document.querySelector<HTMLElement>('[data-scroll-progress]');
+    if (!bar) return;
+    const doc = document.documentElement;
+    const max = Math.max(1, doc.scrollHeight - innerHeight);
+    const progress = Math.min(1, Math.max(0, scrollY / max));
+    bar.style.width = `${(progress * 100).toFixed(3)}%`;
+  };
+
   const bindHeader = () => {
     document.querySelectorAll<HTMLAnchorElement>('[data-language]').forEach((el) => {
       if (el.dataset.languageBound === '1') return;
@@ -142,19 +151,24 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
 
   bindHeader();
   restoreLanguageScroll();
+  updateScrollProgress();
 
   if (!(window as any).__gtrzHeaderLifecycleBound) {
     (window as any).__gtrzHeaderLifecycleBound = true;
     document.addEventListener('astro:after-swap', () => {
       restoreLanguageScroll();
+      updateScrollProgress();
       document.documentElement.classList.remove(languageSwitchClass);
     });
     document.addEventListener('astro:page-load', () => {
       bindHeader();
       restoreLanguageScroll();
+      updateScrollProgress();
       document.documentElement.classList.remove(languageSwitchClass);
       document.querySelectorAll('[data-language][aria-busy="true"]').forEach((el)=>el.removeAttribute('aria-busy'));
     });
+    addEventListener('scroll', updateScrollProgress, {passive:true});
+    addEventListener('resize', updateScrollProgress, {passive:true});
     addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       const button = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
