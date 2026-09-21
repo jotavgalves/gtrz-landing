@@ -84,8 +84,15 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
         html.gtrz-language-switching body:after{animation:none;transform:scaleX(1)}
       }
     </style>
-    <script is:inline>
-      try { if (sessionStorage.getItem('gtrz_language_handoff') === '1') document.documentElement.classList.add('gtrz-popup-handoff'); } catch {}
+    <script is:inline define:vars={{hubMode}}>
+      try {
+        if (hubMode) {
+          sessionStorage.removeItem('gtrz_language_handoff');
+          document.documentElement.classList.remove('gtrz-popup-handoff');
+        } else if (sessionStorage.getItem('gtrz_language_handoff') === '1') {
+          document.documentElement.classList.add('gtrz-popup-handoff');
+        }
+      } catch {}
     </script>
   </head>
   <body>
