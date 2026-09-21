@@ -1,5 +1,6 @@
 ---
 import Header from '@/components/Header.astro';
+import { ClientRouter } from 'astro:transitions';
 import LanguageGate from '@/components/LanguageGate.astro';
 import type { SiteSettings } from '@/lib/cms';
 import '@/styles/global.css';
@@ -49,7 +50,19 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <meta name="theme-color" content="#080808" />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <style is:inline>html.gtrz-popup-handoff{background:#080808}html.gtrz-popup-handoff body{visibility:hidden}html.gtrz-popup-handoff body .event-popup{visibility:visible}</style>
+    <ClientRouter />
+    <style is:inline>
+      html.gtrz-popup-handoff{background:#080808}
+      html.gtrz-popup-handoff body{visibility:hidden}
+      html.gtrz-popup-handoff body .event-popup{visibility:visible}
+      ::view-transition-old(root){animation:160ms ease both gtrz-page-out}
+      ::view-transition-new(root){animation:220ms ease both gtrz-page-in}
+      @keyframes gtrz-page-out{to{opacity:0;transform:translateY(-4px)}}
+      @keyframes gtrz-page-in{from{opacity:0;transform:translateY(4px)}}
+      @media(prefers-reduced-motion:reduce){
+        ::view-transition-old(root),::view-transition-new(root){animation:none}
+      }
+    </style>
     <script is:inline>
       try { if (sessionStorage.getItem('gtrz_language_handoff') === '1') document.documentElement.classList.add('gtrz-popup-handoff'); } catch {}
     </script>
