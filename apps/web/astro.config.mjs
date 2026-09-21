@@ -4,5 +4,6 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
+  prefetch: true,
   site: 'https://gtrz.com.br'
 });
