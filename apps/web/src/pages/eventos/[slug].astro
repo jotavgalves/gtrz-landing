@@ -63,6 +63,69 @@ const dateLong=event?new Date(event.starts_at).toLocaleDateString(isEs?'es-VE':'
 const dateShort=event?new Date(event.starts_at).toLocaleDateString(isEs?'es-VE':'pt-BR',{day:'2-digit',month:'short'}).replace('.','').toUpperCase():'';
 const timeStart=event?new Date(event.starts_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
 const timeEnd=event?.ends_at?new Date(event.ends_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+const eventTerms=isEs?{
+  eyebrow:'INFORMACIÓN IMPORTANTE',
+  title:'TÉRMINOS DEL EVENTO',
+  intro:'Al adquirir una entrada y participar en un evento producido por GTRZ Eventos, el participante declara conocer y aceptar las condiciones de acceso y participación de esta edición.',
+  items:[
+    {
+      title:'Imagen, fotografía y audiovisual',
+      body:'Durante el evento podrán realizarse fotografías, grabaciones y otros registros audiovisuales del ambiente y del público. Al ingresar al evento, el participante autoriza gratuitamente el uso de su imagen, voz y apariencia eventualmente captadas en esos registros para fines institucionales, promocionales, publicitarios y de divulgación de GTRZ Eventos y de sus eventos, en medios físicos o digitales, en Brasil y en el exterior, incluidas redes sociales, sitios web, piezas publicitarias, videos y materiales de divulgación, sin limitación territorial. El uso deberá respetar la dignidad, el honor y la imagen del participante. Los derechos sobre las fotografías, videos y demás materiales producidos oficialmente para el evento serán ejercidos por GTRZ Eventos o por los respectivos profesionales contratados, conforme a los derechos de producción y utilización aplicables a cada material.'
+    },
+    {
+      title:'Cancelación y reembolso',
+      body:'Para entradas adquiridas por internet, las solicitudes de cancelación deberán respetar los derechos obligatorios previstos por la legislación aplicable. GTRZ acepta solicitudes realizadas dentro de los 7 días corridos posteriores a la compra, siempre que la solicitud sea presentada con una antelación mínima de 3 días corridos respecto de la fecha del evento. Por lo tanto, aun cuando la compra se encuentre dentro del plazo de 7 días, no se aceptarán solicitudes presentadas cuando falten menos de 3 días para el evento, salvo cuando la legislación aplicable garantice una condición más favorable al consumidor. En caso de cancelación del evento por la organización, se aplicarán las reglas de restitución correspondientes.'
+    },
+    {
+      title:'Artículos y conductas prohibidas',
+      body:'Está prohibido ingresar o permanecer en el evento portando, utilizando o distribuyendo drogas ilícitas, armas de cualquier naturaleza, objetos punzocortantes, materiales contundentes o cualquier otro artículo que pueda poner en riesgo la integridad física del público, del equipo o de terceros. La organización podrá impedir el ingreso o determinar la retirada de quien incumpla estas reglas, sin perjuicio de las medidas legales aplicables.'
+    },
+    {
+      title:'Alimentos y bebidas',
+      body:'No está permitido ingresar con bebidas o alimentos de cualquier especie adquiridos fuera del evento. Se exceptúan las situaciones justificadas por necesidad médica, alimentaria u otra condición cuya garantía resulte obligatoria conforme a la legislación aplicable.'
+    },
+    {
+      title:'Menores de edad',
+      body:'Los menores de 18 años solamente podrán ingresar cuando la participación de menores esté permitida para aquella edición y mediante presentación de la documentación y de la autorización firmada por el responsable legal exigidas por la organización. La autorización no elimina eventuales restricciones legales relacionadas con la clasificación del evento, el establecimiento o la comercialización y el consumo de bebidas alcohólicas.'
+    },
+    {
+      title:'Control de acceso',
+      body:'La organización podrá realizar la verificación de la entrada, documento de identificación e inspección de bolsos, mochilas y pertenencias, dentro de los límites legales, con el objetivo de preservar la seguridad y el cumplimiento de las reglas del evento.'
+    }
+  ],
+  accept:'La adquisición de la entrada implica el conocimiento de estas condiciones y de las informaciones específicas divulgadas para esta edición.'
+}:{
+  eyebrow:'INFORMAÇÕES IMPORTANTES',
+  title:'TERMOS DO EVENTO',
+  intro:'Ao adquirir um ingresso e participar de um evento produzido pela GTRZ Eventos, o participante declara estar ciente e de acordo com as condições de acesso e participação desta edição.',
+  items:[
+    {
+      title:'Imagem, fotografia e audiovisual',
+      body:'Durante o evento poderão ser realizadas fotografias, filmagens e outros registros audiovisuais do ambiente e do público. Ao ingressar no evento, o participante autoriza, de forma gratuita, o uso de sua imagem, voz e aparência eventualmente captadas nesses registros para fins institucionais, promocionais, publicitários e de divulgação da GTRZ Eventos e de seus eventos, em meios físicos ou digitais, no Brasil e no exterior, inclusive em redes sociais, websites, peças publicitárias, vídeos e materiais de divulgação, sem limitação territorial. A utilização deverá respeitar a dignidade, a honra e a imagem do participante. Os direitos sobre as fotografias, vídeos e demais materiais produzidos oficialmente para o evento serão exercidos pela GTRZ Eventos ou pelos respectivos profissionais contratados, conforme os direitos de produção e utilização aplicáveis a cada material.'
+    },
+    {
+      title:'Cancelamento e reembolso',
+      body:'Para ingressos adquiridos pela internet, os pedidos de cancelamento deverão respeitar os direitos obrigatórios previstos na legislação aplicável. A GTRZ aceita solicitações realizadas em até 7 dias corridos após a compra, desde que o pedido seja apresentado com antecedência mínima de 3 dias corridos da realização do evento. Assim, ainda que a compra esteja dentro do prazo de 7 dias, não serão aceitas solicitações apresentadas quando faltarem menos de 3 dias para o evento, salvo quando a legislação aplicável assegurar condição mais favorável ao consumidor. Em caso de cancelamento do evento pela organização, serão aplicadas as regras de restituição correspondentes.'
+    },
+    {
+      title:'Itens e condutas proibidas',
+      body:'É proibida a entrada ou permanência no evento portando, utilizando ou distribuindo drogas ilícitas, armas de qualquer natureza, objetos perfurocortantes, materiais contundentes ou quaisquer outros itens que possam colocar em risco a integridade física do público, da equipe ou de terceiros. A organização poderá impedir a entrada ou determinar a retirada de quem descumprir essas regras, sem prejuízo das medidas legais cabíveis.'
+    },
+    {
+      title:'Alimentos e bebidas',
+      body:'Não é permitida a entrada com bebidas ou alimentos de qualquer espécie adquiridos fora do evento. Ficam ressalvadas situações justificadas por necessidade médica, alimentar ou outra condição cuja garantia seja obrigatória conforme a legislação aplicável.'
+    },
+    {
+      title:'Menores de idade',
+      body:'Menores de 18 anos somente poderão ingressar quando a participação de menores for permitida para aquela edição e mediante apresentação da documentação e da autorização assinada pelo responsável legal exigidas pela organização. A autorização não afasta eventuais restrições legais relacionadas à classificação do evento, ao estabelecimento ou à comercialização e ao consumo de bebidas alcoólicas.'
+    },
+    {
+      title:'Controle de acesso',
+      body:'A organização poderá realizar conferência de ingresso, documento de identificação e inspeção de bolsas, mochilas e pertences, dentro dos limites legais, com a finalidade de preservar a segurança e o cumprimento das regras do evento.'
+    }
+  ],
+  accept:'A aquisição do ingresso implica ciência destas condições e das informações específicas divulgadas para esta edição.'
+};
 ---
 <SiteLayout locale={locale} title={loc?.seo_title||loc?.title||site.settings?.chrome?.[locale==='es'?'metaTitleEs':'metaTitlePt']||'GTRZ Eventos'} settings={site.settings}>
   {event ? <main class={`event-premium ${eventEnded?'event-finished':''}`} style={`--event-accent:${theme.primary||'#ff1a12'};--event-bg:${theme.background||'#090909'};--event-fg:${theme.foreground||'#fffdf8'}`}>
@@ -107,6 +170,31 @@ const timeEnd=event?.ends_at?new Date(event.ends_at).toLocaleTimeString(isEs?'es
     {countdownEnabled&&<section class="event-countdown" data-section="event_countdown" data-countdown-end={event.starts_at}>
       <div class="event-shell event-countdown-inner"><div class="event-countdown-copy"><span class="event-eyebrow">{isEs?'CUENTA REGRESIVA':'CONTAGEM REGRESSIVA'}</span><strong>{isEs?'NOS VEMOS EN LA PISTA.':'NOS VEMOS NA PISTA.'}</strong></div><div class="event-clock"><div class="event-clock-item"><b data-clock="days">00</b><small>{isEs?'Días':'Dias'}</small></div><div class="event-clock-item"><b data-clock="hours">00</b><small>{isEs?'Horas':'Horas'}</small></div><div class="event-clock-item"><b data-clock="minutes">00</b><small>Min</small></div><div class="event-clock-item"><b data-clock="seconds">00</b><small>Seg</small></div></div></div>
     </section>}
+
+    <section class="event-terms-premium" data-section="event_terms">
+      <div class="event-shell event-terms-wrap">
+        <div class="event-terms-head">
+          <div>
+            <span class="event-eyebrow">{eventTerms.eyebrow}</span>
+            <h2 class="event-display">{eventTerms.title}</h2>
+          </div>
+          <p>{eventTerms.intro}</p>
+        </div>
+        <div class="event-terms-list">
+          {eventTerms.items.map((item,index)=>(
+            <details class="event-term-item">
+              <summary>
+                <span>{String(index+1).padStart(2,'0')}</span>
+                <strong>{item.title}</strong>
+                <i aria-hidden="true"></i>
+              </summary>
+              <div class="event-term-body"><p>{item.body}</p></div>
+            </details>
+          ))}
+        </div>
+        <p class="event-terms-accept">{eventTerms.accept}</p>
+      </div>
+    </section>
 
     <section class="event-instagram-premium" data-section="event_instagram"><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos ↗</a></div></section>
 
