@@ -59,6 +59,13 @@ const tickets=rawTickets.map((ticket:any)=>{
 });
 const isPurchasable=(ticket:any)=>['available','last_units'].includes(ticket.availability)&&((['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp)||(['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla)||(ticket.purchase_mode==='custom'&&ticket.custom));
 const firstPurchasable=tickets.find(isPurchasable);
+const ticketCount=tickets.length;
+const singleTicket=ticketCount===1?tickets[0]:null;
+const ticketSequenceLabel=(ticket:any,index:number)=>{
+  const raw=`${ticket?.copy?.title||''} ${ticket?.name||''}`;
+  const prefix=/\blote\b/i.test(raw)?'LOTE':(ticket?.copy?.type||(isEs?'ENTRADA':'INGRESSO'));
+  return `${String(prefix).toUpperCase()} ${String(index+1).padStart(2,'0')}`;
+};
 const instagram=(site.settings as any)?.social?.instagramUrl||(site.settings as any)?.social?.instagram||(site.settings as any)?.social?.instagram_url||'https://www.instagram.com/gtrzeventos/';
 const mapQuery=event?.venue_address||[event?.venue_name,event?.city,event?.state].filter(Boolean).join(', ');
 const mapEmbed=mapQuery?`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`:'';
@@ -190,7 +197,60 @@ const eventTerms=isEs?{
       <div class="event-shell event-countdown-inner"><div class="event-countdown-copy"><span class="event-eyebrow">{isEs?'CUENTA REGRESIVA':'CONTAGEM REGRESSIVA'}</span><strong>{isEs?'LA NOCHE EMPIEZA EN...':'A NOITE COMEÇA EM...'}</strong></div><div class="event-clock"><div class="event-clock-item"><b data-clock="days">{countdownPad(countdownInitialDays)}</b><small>{isEs?'Días':'Dias'}</small></div><div class="event-clock-item"><b data-clock="hours">{countdownPad(countdownInitialHours)}</b><small>{isEs?'Horas':'Horas'}</small></div><div class="event-clock-item"><b data-clock="minutes">{countdownPad(countdownInitialMinutes)}</b><small>Min</small></div><div class="event-clock-item"><b data-clock="seconds">{countdownPad(countdownInitialSeconds)}</b><small>Seg</small></div></div></div>
     </section>}
 
-    <section class="event-tickets-premium" id="ingressos" data-section="event_tickets"><div class="event-shell"><div class="event-section-head-premium"><div><span class="event-eyebrow">{c.ticketsEyebrow}</span><h2 class="event-display">{c.ticketsTitle}</h2></div><p>{eventEnded?(isEs?'Esta edición ya fue realizada.':'Esta edição já foi realizada.'):(isEs?'Elige la opción que mejor funciona para tu noche.':'Escolha a opção que faz mais sentido para sua noite.')}</p></div>{tickets.length?<div class="event-ticket-grid">{tickets.map((ticket:any)=><article class={`event-ticket-card ${ticket.featured?'featured':''}`} data-theme={ticket.theme||'light'}><div class="event-ticket-top"><span class="event-ticket-type">{ticket.copy.type||'INGRESSO'}</span>{ticket.copy.badge&&<span class="event-ticket-badge">{ticket.copy.badge}</span>}</div><span class="event-ticket-status">{availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability}</span><h3>{ticket.copy.title||ticket.name}</h3>{ticket.copy.description&&<p class="event-ticket-desc">{ticket.copy.description}</p>}<div class="event-ticket-price-wrap">{ticket.price_cents!=null&&Number(ticket.compare_price_cents)>Number(ticket.price_cents)&&<span class="event-ticket-compare">{money(ticket.compare_price_cents,ticket.currency||'BRL')}</span>}{ticket.price_cents!=null?<strong class="event-ticket-price">{money(ticket.price_cents,ticket.currency||'BRL')}</strong>:<strong class="event-ticket-price">{isEs?'CONSULTAR':'CONSULTE'}</strong>}</div><span class="event-ticket-meta">{ticket.copy.meta||`${ticket.quantity||1} ${Number(ticket.quantity||1)>1?(isEs?'entradas':'ingressos'):(isEs?'entrada':'ingresso')}`}</span>{ticket.copy.saving&&<span class="event-ticket-saving">{ticket.copy.saving}</span>}{ticket.copy.note&&<p class="event-ticket-note">{ticket.copy.note}</p>}{isPurchasable(ticket)?<div class="event-ticket-actions">{['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp&&<a class="event-ticket-action primary" href={ticket.whatsapp} target="_blank" rel="noopener" data-track={`ticket.whatsapp.${ticket.id}`}>{ticket.copy.buttonPrimary||'WhatsApp'}</a>}{['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla&&<a class={`event-ticket-action ${ticket.purchase_mode==='sympla'?'primary':''}`} href={ticket.sympla} target="_blank" rel="noopener" data-track={`ticket.sympla.${ticket.id}`}>{ticket.purchase_mode==='both'?(ticket.copy.buttonSecondary||'Sympla'):(ticket.copy.buttonPrimary||'Sympla')}</a>}{ticket.purchase_mode==='custom'&&ticket.custom&&<a class="event-ticket-action primary" href={ticket.custom} target="_blank" rel="noopener" data-track={`ticket.custom.${ticket.id}`}>{ticket.copy.buttonPrimary||c.buyLabel}</a>}</div>:<div class="event-ticket-unavailable">{ticket.availability==='sold_out'?(ticket.copy.soldOutLabel||availabilityLabels.sold_out):ticket.availability==='coming_soon'?(ticket.copy.lockedLabel||availabilityLabels.coming_soon):(availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability)}</div>}</article>)}</div>:<div class="event-empty-tickets">{c.noTickets}</div>}</div></section>
+    <section class:list={['event-tickets-premium',ticketCount===1&&'single-ticket']} id="ingressos" data-section="event_tickets">
+      <div class="event-shell">
+        <div class="event-section-head-premium">
+          <div>
+            <span class="event-eyebrow">{c.ticketsEyebrow}</span>
+            <h2 class="event-display">{c.ticketsTitle}</h2>
+          </div>
+          {ticketCount!==1&&<p>{eventEnded?(isEs?'Esta edición ya fue realizada.':'Esta edição já foi realizada.'):(isEs?'Elige la opción que mejor funciona para tu noche.':'Escolha a opção que faz mais sentido para sua noite.')}</p>}
+        </div>
+
+        {tickets.length?
+          <div class:list={['event-ticket-stage',ticketCount===1&&'is-single']}>
+            <div class:list={['event-ticket-grid',`count-${Math.min(ticketCount,4)}`]}>
+              {tickets.map((ticket:any,index:number)=><article class:list={['event-ticket-card',ticket.featured&&'featured',ticketCount===1&&'single-feature']} data-theme={ticket.theme||'light'}>
+                <div class="event-ticket-top">
+                  <span class="event-ticket-type">{ticketSequenceLabel(ticket,index)}</span>
+                  <span class="event-ticket-status">{availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability}</span>
+                </div>
+                {ticket.copy.badge&&<span class="event-ticket-badge">{ticket.copy.badge}</span>}
+                <h3>{ticket.copy.title||ticket.name}</h3>
+                {ticket.copy.description&&<p class="event-ticket-desc">{ticket.copy.description}</p>}
+                <div class="event-ticket-price-wrap">
+                  {ticket.price_cents!=null&&Number(ticket.compare_price_cents)>Number(ticket.price_cents)&&<span class="event-ticket-compare">{money(ticket.compare_price_cents,ticket.currency||'BRL')}</span>}
+                  {ticket.price_cents!=null?<strong class="event-ticket-price">{money(ticket.price_cents,ticket.currency||'BRL')}</strong>:<strong class="event-ticket-price">{isEs?'CONSULTAR':'CONSULTE'}</strong>}
+                </div>
+                <span class="event-ticket-meta">{ticket.copy.meta||`${ticket.quantity||1} ${Number(ticket.quantity||1)>1?(isEs?'entradas':'ingressos'):(isEs?'entrada':'ingresso')}`}</span>
+                {ticket.copy.saving&&<span class="event-ticket-saving">{ticket.copy.saving}</span>}
+                {ticket.copy.note&&<p class="event-ticket-note">{ticket.copy.note}</p>}
+                {isPurchasable(ticket)?<div class="event-ticket-actions">
+                  {['whatsapp','both'].includes(ticket.purchase_mode)&&ticket.whatsapp&&<a class="event-ticket-action primary" href={ticket.whatsapp} target="_blank" rel="noopener" data-track={`ticket.whatsapp.${ticket.id}`}>{ticket.copy.buttonPrimary||'WhatsApp'}</a>}
+                  {['sympla','both'].includes(ticket.purchase_mode)&&ticket.sympla&&<a class:list={['event-ticket-action',ticket.purchase_mode==='sympla'&&'primary']} href={ticket.sympla} target="_blank" rel="noopener" data-track={`ticket.sympla.${ticket.id}`}>{ticket.purchase_mode==='both'?(ticket.copy.buttonSecondary||'Sympla'):(ticket.copy.buttonPrimary||'Sympla')}</a>}
+                  {ticket.purchase_mode==='custom'&&ticket.custom&&<a class="event-ticket-action primary" href={ticket.custom} target="_blank" rel="noopener" data-track={`ticket.custom.${ticket.id}`}>{ticket.copy.buttonPrimary||c.buyLabel}</a>}
+                </div>:<div class="event-ticket-unavailable">{ticket.availability==='sold_out'?(ticket.copy.soldOutLabel||availabilityLabels.sold_out):ticket.availability==='coming_soon'?(ticket.copy.lockedLabel||availabilityLabels.coming_soon):(availabilityLabels[ticket.availability as keyof typeof availabilityLabels]||ticket.availability)}</div>}
+              </article>)}
+            </div>
+
+            {singleTicket&&<aside class="event-ticket-guide">
+              <span class="event-ticket-guide-kicker">{isEs?'COMPRA TU ENTRADA':'GARANTA SUA ENTRADA'}</span>
+              <h3>{isEs?'ELIGE CÓMO COMPRAR.':'ESCOLHA COMO COMPRAR.'}</h3>
+              <p>{isEs?'Compra por el canal que prefieras y asegura tu acceso a esta edición.':'Compre pelo canal que preferir e garanta seu acesso a esta edição.'}</p>
+              <div class="event-ticket-guide-list">
+                {['whatsapp','both'].includes(singleTicket.purchase_mode)&&singleTicket.whatsapp&&<div><span>01</span><strong>{isEs?'WhatsApp directo':'WhatsApp direto'}</strong><small>{isEs?'Compra directa, sin tasa de plataforma.':'Compra direta, sem taxa da plataforma.'}</small></div>}
+                {['sympla','both'].includes(singleTicket.purchase_mode)&&singleTicket.sympla&&<div><span>02</span><strong>Sympla</strong><small>{isEs?'Compra a través de la plataforma Sympla.':'Compra pela plataforma Sympla.'}</small></div>}
+                {singleTicket.purchase_mode==='custom'&&singleTicket.custom&&<div><span>01</span><strong>{isEs?'Compra online':'Compra online'}</strong><small>{isEs?'Acceso por el canal oficial de esta edición.':'Acesso pelo canal oficial desta edição.'}</small></div>}
+              </div>
+              <div class="event-ticket-guide-meta">
+                <span>{Number(singleTicket.quantity||1)>1?(isEs?`${singleTicket.quantity} ENTRADAS`:`${singleTicket.quantity} INGRESSOS`):(isEs?'ACCESO INDIVIDUAL':'ACESSO INDIVIDUAL')}</span>
+                <span>{isEs?'EDICIÓN OFICIAL GTRZ':'EDIÇÃO OFICIAL GTRZ'}</span>
+              </div>
+            </aside>}
+          </div>
+        :<div class="event-empty-tickets">{c.noTickets}</div>}
+      </div>
+    </section>
 
     {mapEmbed&&<section class="event-location-premium" data-section="event_location"><div class="event-shell event-location-grid"><div class="event-location-copy"><span class="event-eyebrow">{isEs?'DÓNDE ES':'ONDE É'}</span><h2 class="event-display">{event.venue_name||event.city}</h2><div class="event-location-address">{event.venue_address||`${event.city}${event.state?` · ${event.state}`:''}`}</div><a class="event-map-button" href={mapLink} target="_blank" rel="noopener">{isEs?'ABRIR EN GOOGLE MAPS':'ABRIR NO GOOGLE MAPS'} ↗</a></div><div class="event-map-frame"><iframe title={`${isEs?'Mapa de':'Mapa de'} ${event.venue_name||event.city}`} src={mapEmbed} loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>}
 
