@@ -305,7 +305,7 @@
 }
 
 .event-countdown{
-  padding:30px 0;
+  padding:42px 0;
   border-bottom:1px solid rgba(0,0,0,.1);
   background:#f5f1eb;
   color:#111;
@@ -313,27 +313,33 @@
 
 .event-countdown-inner{
   display:grid;
-  grid-template-columns:1fr auto;
-  gap:28px;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:42px;
   align-items:center;
 }
 
 .event-countdown-copy strong{
   display:block;
-  margin-top:5px;
+  margin-top:7px;
   font-family:var(--font-display);
-  font-size:clamp(2rem,4vw,4rem);
-  line-height:.95;
+  font-size:clamp(2.65rem,4.6vw,4.85rem);
+  line-height:.93;
+  letter-spacing:-.025em;
   text-transform:uppercase;
 }
 
-.event-clock{display:flex;gap:8px}
+.event-countdown .event-eyebrow{
+  font-size:.62rem;
+  letter-spacing:.13em;
+}
+
+.event-clock{display:flex;gap:10px}
 
 .event-clock-item{
-  min-width:92px;
-  padding:13px 14px;
+  min-width:106px;
+  padding:17px 16px 15px;
   border:1px solid rgba(0,0,0,.12);
-  border-radius:14px;
+  border-radius:16px;
   background:rgba(255,255,255,.42);
   text-align:center;
 }
@@ -341,8 +347,8 @@
 .event-clock-item b{
   display:block;
   font-family:var(--font-display);
-  font-size:2.15rem;
-  line-height:1;
+  font-size:2.55rem;
+  line-height:.95;
 }
 
 .event-clock-item small{
@@ -808,11 +814,12 @@
   .event-facts-strip .event-fact:nth-child(2):after{display:none}
   .event-facts-strip .event-fact:nth-child(3):after{display:block}
   .event-fact strong{font-size:.82rem;white-space:normal}
-  .event-countdown{padding:25px 0}
-  .event-clock{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-  .event-clock-item{min-width:0;padding:10px 5px}
-  .event-clock-item b{font-size:1.55rem}
-  .event-countdown-copy strong{font-size:2rem}
+  .event-countdown{padding:32px 0}
+  .event-countdown-inner{gap:22px}
+  .event-clock{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .event-clock-item{min-width:0;padding:12px 5px 11px;border-radius:12px}
+  .event-clock-item b{font-size:1.8rem}
+  .event-countdown-copy strong{font-size:2.35rem}
   .event-about-premium,.event-lineup-premium,.event-tickets-premium,.event-location-premium{padding:72px 0}
   .event-terms-premium{padding:64px 0 68px}
   .event-terms-head{grid-template-columns:1fr;gap:20px;margin-bottom:24px}
