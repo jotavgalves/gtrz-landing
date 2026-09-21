@@ -33,7 +33,7 @@ const eventEndIso=event?normalizeEventDate(event.ends_at):'';
 const eventStart=eventStartIso?Date.parse(eventStartIso):0;
 const eventEnd=eventEndIso?Date.parse(eventEndIso):0;
 const eventEnded=!!event&&(event.status==='finished'||(eventEnd>0&&eventEnd<now));
-const eventStatusLabel=(status:string)=>isEs?({scheduled:'PRÓXIMAMENTE',sales_open:'ENTRADAS A LA VENTA',sold_out:'AGOTADO',finished:'EVENTO REALIZADO'} as Record<string,string>)[status]||'':({scheduled:'EM BREVE',sales_open:'INGRESSOS À VENDA',sold_out:'ESGOTADO',finished:'EVENTO REALIZADO'} as Record<string,string>)[status]||'';
+const eventStatusLabel=(status:string)=>isEs?({scheduled:'PRÓXIMAMENTE',sales_open:'VENTAS ABIERTAS',sold_out:'AGOTADO',finished:'EVENTO REALIZADO'} as Record<string,string>)[status]||'':({scheduled:'EM BREVE',sales_open:'VENDAS ABERTAS',sold_out:'ESGOTADO',finished:'EVENTO REALIZADO'} as Record<string,string>)[status]||'';
 const availabilityLabels=isEs?{coming_soon:'PRÓXIMAMENTE',available:'DISPONIBLE',last_units:'ÚLTIMAS ENTRADAS',sold_out:'AGOTADO',closed:'VENTAS CERRADAS'}:{coming_soon:'EM BREVE',available:'DISPONÍVEL',last_units:'ÚLTIMOS INGRESSOS',sold_out:'ESGOTADO',closed:'VENDAS ENCERRADAS'};
 const effectiveAvailability=(ticket:any)=>{
   if(eventEnded)return 'closed';
@@ -76,10 +76,12 @@ const logoMedia=mediaUrl(event?.logo_media_id);
 const posterMedia=mediaUrl(theme.posterMediaId||theme.poster_media_id);
 const backgroundMedia=heroMedia;
 const statusText=event?eventStatusLabel(event.status):'';
-const dateLong=event?new Date(event.starts_at).toLocaleDateString(isEs?'es-VE':'pt-BR',{weekday:'short',day:'2-digit',month:'long',year:'numeric'}):'';
-const dateShort=event?new Date(event.starts_at).toLocaleDateString(isEs?'es-VE':'pt-BR',{day:'2-digit',month:'short'}).replace('.','').toUpperCase():'';
-const timeStart=event?new Date(event.starts_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-const timeEnd=event?.ends_at?new Date(event.ends_at).toLocaleTimeString(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+const eventTimeZone='America/Recife';
+const capitalizeFirst=(value:string)=>value?value.charAt(0).toUpperCase()+value.slice(1):value;
+const dateLong=eventStartIso?capitalizeFirst(new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{weekday:'short',day:'2-digit',month:'long',year:'numeric',timeZone:eventTimeZone}).format(new Date(eventStartIso))):'';
+const dateShort=eventStartIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{day:'2-digit',month:'short',timeZone:eventTimeZone}).format(new Date(eventStartIso)).replace('.','').toUpperCase():'';
+const timeStart=eventStartIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:eventTimeZone}).format(new Date(eventStartIso)):'';
+const timeEnd=eventEndIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:eventTimeZone}).format(new Date(eventEndIso)):'';
 const eventTerms=isEs?{
   eyebrow:'INFORMACIÓN IMPORTANTE',
   title:'TÉRMINOS DEL EVENTO',
@@ -172,7 +174,7 @@ const eventTerms=isEs?{
         <div class="event-shell">
           <div class="event-facts event-facts-strip">
             <div class="event-fact"><small>{c.dateLabel}</small><strong>{dateLong}</strong></div>
-            <div class="event-fact"><small>{isEs?'HORARIO':'HORÁRIO'}</small><strong>{timeStart}{timeEnd?` → ${timeEnd}`:''}</strong></div>
+            <div class="event-fact event-fact-time"><small>{isEs?'HORARIO':'HORÁRIO'}</small><strong><span>{isEs?'INICIO':'INÍCIO'} {timeStart}</span>{timeEnd&&<><b aria-hidden="true">·</b><span>{isEs?'FIN':'FIM'} {timeEnd}</span></>}</strong></div>
             <div class="event-fact"><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div>
             <div class="event-fact"><small>{isEs?'CIUDAD':'CIDADE'}</small><strong>{event.city}{event.state?` · ${event.state}`:''}</strong></div>
           </div>
