@@ -48,7 +48,7 @@ const copy=es?{
 const parseTheme=(event:CmsEvent)=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}};
 const posterId=(event:CmsEvent)=>{
   const theme=parseTheme(event);
-  return theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null;
+  return theme.hubCardMediaId||theme.hub_card_media_id||theme.posterMediaId||theme.poster_media_id||event.hero_media_id||null;
 };
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
 const formatDate=(iso:string)=>{
