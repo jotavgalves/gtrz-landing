@@ -75,13 +75,61 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     } catch {}
   };
 
-  const updateScrollProgress = () => {
-    const bar = document.querySelector<HTMLElement>('[data-scroll-progress]');
-    if (!bar) return;
+  type ScrollProgressState = {
+    current:number;
+    target:number;
+    raf:number;
+  };
+
+  const getScrollProgressState = ():ScrollProgressState => {
+    const win = window as any;
+    if (!win.__gtrzScrollProgressState) {
+      win.__gtrzScrollProgressState = { current:0, target:0, raf:0 };
+    }
+    return win.__gtrzScrollProgressState as ScrollProgressState;
+  };
+
+  const scrollProgressValue = () => {
     const doc = document.documentElement;
     const max = Math.max(1, doc.scrollHeight - innerHeight);
-    const progress = Math.min(1, Math.max(0, scrollY / max));
-    bar.style.width = `${(progress * 100).toFixed(3)}%`;
+    return Math.min(1, Math.max(0, scrollY / max));
+  };
+
+  const updateScrollProgress = (immediate=false) => {
+    const state = getScrollProgressState();
+    state.target = scrollProgressValue();
+
+    if (immediate) {
+      state.current = state.target;
+      const bar = document.querySelector<HTMLElement>('[data-scroll-progress]');
+      if (bar) bar.style.transform = `scaleX(${state.current})`;
+      return;
+    }
+
+    if (state.raf) return;
+
+    const animate = () => {
+      const bar = document.querySelector<HTMLElement>('[data-scroll-progress]');
+      if (!bar) {
+        state.raf = 0;
+        return;
+      }
+
+      const delta = state.target - state.current;
+      state.current += delta * .22;
+
+      if (Math.abs(delta) < .00035) {
+        state.current = state.target;
+        bar.style.transform = `scaleX(${state.current})`;
+        state.raf = 0;
+        return;
+      }
+
+      bar.style.transform = `scaleX(${state.current})`;
+      state.raf = requestAnimationFrame(animate);
+    };
+
+    state.raf = requestAnimationFrame(animate);
   };
 
   const bindHeader = () => {
@@ -151,24 +199,24 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
 
   bindHeader();
   restoreLanguageScroll();
-  updateScrollProgress();
+  updateScrollProgress(true);
 
   if (!(window as any).__gtrzHeaderLifecycleBound) {
     (window as any).__gtrzHeaderLifecycleBound = true;
     document.addEventListener('astro:after-swap', () => {
       restoreLanguageScroll();
-      updateScrollProgress();
+      updateScrollProgress(true);
       document.documentElement.classList.remove(languageSwitchClass);
     });
     document.addEventListener('astro:page-load', () => {
       bindHeader();
       restoreLanguageScroll();
-      updateScrollProgress();
+      updateScrollProgress(true);
       document.documentElement.classList.remove(languageSwitchClass);
       document.querySelectorAll('[data-language][aria-busy="true"]').forEach((el)=>el.removeAttribute('aria-busy'));
     });
-    addEventListener('scroll', updateScrollProgress, {passive:true});
-    addEventListener('resize', updateScrollProgress, {passive:true});
+    addEventListener('scroll', () => updateScrollProgress(false), {passive:true});
+    addEventListener('resize', () => updateScrollProgress(true), {passive:true});
     addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       const button = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
