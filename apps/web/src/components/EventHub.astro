@@ -99,7 +99,6 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
       <a class="hub-nav-instagram" href={instagram} target="_blank" rel="noreferrer" data-track="hub.nav.instagram">{copy.navInstagram}</a>
       <div class="hub-lang" aria-label="Idioma">
         <a class:list={{active:!es}} href="?lang=pt-BR" data-track="hub.lang.pt">PT</a>
-        <span>/</span>
         <a class:list={{active:es}} href="?lang=es" data-track="hub.lang.es">ES</a>
       </div>
     </nav>
@@ -245,10 +244,11 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-shell{width:calc(100% - 28px);max-width:1320px;margin-inline:auto}
 
   .hub-header{
-    width:calc(100% - 28px);
-    max-width:1320px;
+    width:100%;
+    max-width:none;
     height:68px;
-    margin:auto;
+    margin:0;
+    padding-inline:max(14px,calc((100vw - 1320px)/2));
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -263,8 +263,30 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-nav a{white-space:nowrap}
   .hub-nav-events{display:none}
   .hub-nav-instagram{color:#c5bfbb}
-  .hub-lang{display:flex;align-items:center;gap:6px;padding-left:12px;border-left:1px solid var(--hub-line)}
-  .hub-lang a{color:#5e5956}.hub-lang a.active{color:#fff}.hub-lang span{color:#353230}
+  .hub-lang{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    padding:3px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:999px;
+    background:#0e0e0e
+  }
+  .hub-lang a{
+    min-width:34px;
+    height:30px;
+    padding:0 8px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    color:#625b59;
+    font-size:.62rem;
+    font-weight:950;
+    letter-spacing:.08em;
+    transition:.18s ease
+  }
+  .hub-lang a:hover{color:#fff}
+  .hub-lang a.active{color:#fff;background:#222}
 
   .hub-hero{position:relative;padding-top:38px;isolation:isolate}
   .hub-hero-grid{position:relative;z-index:3;display:grid;grid-template-columns:1fr;gap:24px}
@@ -503,9 +525,9 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-footer img{width:76px;opacity:.85}.hub-footer span{display:none}.hub-footer a{color:#99918d}
 
   @media(min-width:700px){
-    .hub-shell,.hub-header,.hub-footer{width:min(calc(100% - 48px),1320px)}
-    .hub-header{height:78px}.hub-brand img{width:104px}
-    .hub-nav{gap:22px;font-size:.63rem}.hub-nav-events{display:block}.hub-lang{padding-left:20px}
+    .hub-shell,.hub-footer{width:min(calc(100% - 48px),1320px)}
+    .hub-header{height:78px;padding-inline:max(24px,calc((100vw - 1320px)/2))}.hub-brand img{width:104px}
+    .hub-nav{gap:22px;font-size:.63rem}.hub-nav-events{display:block}
     .hub-hero{padding-top:58px}
     .hub-hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:42px;align-items:end}
     .hub-hero h1{font-size:clamp(5.2rem,11vw,8.2rem)}
@@ -566,9 +588,11 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   }
 
   @media(max-width:370px){
-    .hub-header,.hub-shell,.hub-footer{width:calc(100% - 22px)}
+    .hub-shell,.hub-footer{width:calc(100% - 22px)}
+    .hub-header{padding-inline:11px}
     .hub-brand img{width:80px}
-    .hub-nav{gap:10px;font-size:.54rem}.hub-lang{padding-left:9px}
+    .hub-nav{gap:10px;font-size:.54rem}
+    .hub-lang a{min-width:30px;height:28px;padding:0 6px;font-size:.57rem}
     .hub-hero h1{font-size:clamp(3.4rem,18vw,4.4rem)}
     .hub-event-title-row h2{font-size:2.35rem}
   }
