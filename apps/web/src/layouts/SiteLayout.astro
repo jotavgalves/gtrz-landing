@@ -25,6 +25,7 @@ interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings
 const { locale, settings={} } = Astro.props;
 const chrome=settings.chrome||{};
 const hubMode=settings.general?.homepageMode!=='full';
+const eventPopupHandoffEnabled=Astro.url.pathname==='/'&&!hubMode;
 const instagramUrl=typeof settings.social?.instagram==='string'
   ?String(settings.social.instagram)
   :typeof settings.social?.instagramUrl==='string'
@@ -43,7 +44,7 @@ const footer=configuredFooter&&!legacyCountryFocus.test(configuredFooter)
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 ---
 <!doctype html>
-<html lang={locale === 'es' ? 'es' : 'pt-BR'}>
+<html lang={locale === 'es' ? 'es' : 'pt-BR'} data-event-popup-handoff={eventPopupHandoffEnabled?'1':undefined}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -54,8 +55,8 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <ClientRouter />
     <style is:inline>
       html.gtrz-popup-handoff{background:#080808}
-      html.gtrz-popup-handoff body{visibility:hidden}
-      html.gtrz-popup-handoff body .event-popup{visibility:visible}
+      html[data-event-popup-handoff="1"].gtrz-popup-handoff body{visibility:hidden}
+      html[data-event-popup-handoff="1"].gtrz-popup-handoff body .event-popup{visibility:visible}
       ::view-transition-old(root){animation:150ms cubic-bezier(.4,0,1,1) both gtrz-page-out}
       ::view-transition-new(root){animation:260ms cubic-bezier(.16,1,.3,1) both gtrz-page-in}
       @keyframes gtrz-page-out{to{opacity:.18}}
@@ -85,9 +86,9 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
         html.gtrz-language-switching body:after{animation:none;transform:scaleX(1)}
       }
     </style>
-    <script is:inline define:vars={{hubMode}}>
+    <script is:inline define:vars={{eventPopupHandoffEnabled}}>
       try {
-        if (hubMode) {
+        if (!eventPopupHandoffEnabled) {
           sessionStorage.removeItem('gtrz_language_handoff');
           document.documentElement.classList.remove('gtrz-popup-handoff');
         } else if (sessionStorage.getItem('gtrz_language_handoff') === '1') {
