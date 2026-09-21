@@ -684,9 +684,16 @@
   margin-bottom:34px;
 }
 
+.event-terms-head .event-eyebrow{
+  position:relative;
+  z-index:2;
+  line-height:1.35;
+}
+
 .event-terms-head h2{
-  margin:8px 0 0;
+  margin:26px 0 0;
   font-size:clamp(3.8rem,7vw,7rem);
+  line-height:.9;
 }
 
 .event-terms-head>p{
@@ -864,7 +871,7 @@
   .event-about-premium,.event-lineup-premium,.event-tickets-premium,.event-location-premium{padding:72px 0}
   .event-terms-premium{padding:64px 0 68px}
   .event-terms-head{grid-template-columns:1fr;gap:20px;margin-bottom:24px}
-  .event-terms-head h2{font-size:clamp(3.2rem,16vw,5rem)}
+  .event-terms-head h2{margin-top:20px;font-size:clamp(3.2rem,16vw,5rem)}
   .event-terms-head>p{font-size:.9rem;line-height:1.6}
   .event-term-item summary{grid-template-columns:34px minmax(0,1fr) 24px;gap:10px;min-height:68px}
   .event-term-item summary>span{font-size:1rem}
