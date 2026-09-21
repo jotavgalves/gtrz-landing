@@ -36,8 +36,8 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     </nav>
     <div class="nav-actions">
       <div class="lang-switch" aria-label="Idioma">
-        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-astro-prefetch="hover">{langPt}</a>
-        <a class:list={{active:es}} href="?lang=es" data-language="es" data-astro-prefetch="hover">{langEs}</a>
+        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-astro-prefetch="viewport">{langPt}</a>
+        <a class:list={{active:es}} href="?lang=es" data-language="es" data-astro-prefetch="viewport">{langEs}</a>
       </div>
       {!compact&&<a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>}
       <button class:list={['mobile-menu-button',compact&&'compact-menu-button']}  type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
@@ -56,7 +56,10 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
 </div>
 
 <script>
+  import { navigate } from 'astro:transitions/client';
+
   const languageScrollKey = 'gtrz_language_scroll';
+  const languageSwitchClass = 'gtrz-language-switching';
 
   const storeLanguage = (value: string | null) => {
     try { localStorage.setItem('gtrz_locale', value || 'pt-BR'); } catch {}
@@ -73,12 +76,52 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
   };
 
   const bindHeader = () => {
-    document.querySelectorAll<HTMLElement>('[data-language]').forEach((el) => {
+    document.querySelectorAll<HTMLAnchorElement>('[data-language]').forEach((el) => {
       if (el.dataset.languageBound === '1') return;
       el.dataset.languageBound = '1';
-      el.addEventListener('click', () => {
+
+      const warmLanguage = () => {
+        if (el.dataset.languageWarmed === '1' || el.classList.contains('active')) return;
+        el.dataset.languageWarmed = '1';
+        try {
+          const href = new URL(el.href, location.href).toString();
+          fetch(href,{credentials:'same-origin',cache:'force-cache'}).catch(()=>{});
+        } catch {}
+      };
+
+      el.addEventListener('pointerenter', warmLanguage, {passive:true});
+      el.addEventListener('touchstart', warmLanguage, {passive:true,once:true});
+
+      el.addEventListener('click', (event) => {
+        if (el.classList.contains('active')) {
+          event.preventDefault();
+          return;
+        }
+
+        event.preventDefault();
         storeLanguage(el.getAttribute('data-language'));
         try { sessionStorage.setItem(languageScrollKey, String(scrollY)); } catch {}
+
+        document.documentElement.classList.add(languageSwitchClass);
+        el.setAttribute('aria-busy','true');
+
+        const href = new URL(el.href, location.href).toString();
+        navigate(href,{
+          history:'push',
+          sourceElement:el,
+          info:{languageSwitch:true}
+        });
+      });
+    });
+
+    const idle = (window as any).requestIdleCallback || ((cb:()=>void)=>setTimeout(cb,180));
+    idle(() => {
+      document.querySelectorAll<HTMLAnchorElement>('[data-language]:not(.active)').forEach((el) => {
+        if (el.dataset.languageWarmed === '1') return;
+        el.dataset.languageWarmed = '1';
+        try {
+          fetch(new URL(el.href,location.href).toString(),{credentials:'same-origin',cache:'force-cache'}).catch(()=>{});
+        } catch {}
       });
     });
 
@@ -102,9 +145,15 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
 
   if (!(window as any).__gtrzHeaderLifecycleBound) {
     (window as any).__gtrzHeaderLifecycleBound = true;
+    document.addEventListener('astro:after-swap', () => {
+      restoreLanguageScroll();
+      document.documentElement.classList.remove(languageSwitchClass);
+    });
     document.addEventListener('astro:page-load', () => {
       bindHeader();
       restoreLanguageScroll();
+      document.documentElement.classList.remove(languageSwitchClass);
+      document.querySelectorAll('[data-language][aria-busy="true"]').forEach((el)=>el.removeAttribute('aria-busy'));
     });
     addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
