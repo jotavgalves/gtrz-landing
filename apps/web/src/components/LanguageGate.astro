@@ -1,6 +1,6 @@
 ---
 import type { ChromeSettings,Locale } from '@/lib/cms';
-const { locale, chrome={} } = Astro.props as { locale:Locale; chrome?:ChromeSettings };
+const { locale, chrome={}, mode='default' } = Astro.props as { locale:Locale; chrome?:ChromeSettings; mode?:'default'|'session' };
 const es=locale==='es';
 const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
 const configuredEyebrow=es?(chrome.gateEyebrowEs||chrome.gateEyebrow):(chrome.gateEyebrowPt||chrome.gateEyebrow);
@@ -27,22 +27,30 @@ const optionEs=chrome.gateOptionEs||'Español';
     <p class="language-hint">{hint}</p>
   </div>
 </div>
-<script>
-  const gate = document.querySelector<HTMLElement>('[data-language-gate]');
-  let saved: string | null = null;
-  try { saved = localStorage.getItem('gtrz_locale'); } catch {}
+<script define:vars={{mode}}>
+  const gate = document.querySelector('[data-language-gate]');
+  let saved = null;
+  let seenThisSession = false;
+  try {
+    saved = localStorage.getItem('gtrz_locale');
+    seenThisSession = sessionStorage.getItem('gtrz_language_gate_seen') === '1';
+  } catch {}
   const explicitLanguage = new URLSearchParams(location.search).has('lang');
+  const shouldOpen = mode === 'session'
+    ? !seenThisSession
+    : (!saved && !explicitLanguage);
 
-  if (!saved && !explicitLanguage && gate) {
+  if (shouldOpen && gate) {
     gate.hidden = false;
     gate.removeAttribute('hidden');
     gate.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
   }
 
-  document.querySelectorAll<HTMLAnchorElement>('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
+  document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
     try {
       localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR');
+      sessionStorage.setItem('gtrz_language_gate_seen','1');
       sessionStorage.setItem('gtrz_language_handoff','1');
     } catch {}
     document.documentElement.classList.add('gtrz-popup-handoff');
@@ -51,6 +59,82 @@ const optionEs=chrome.gateOptionEs||'Español';
 </script>
 
 <style>
+  :global(body.modal-open){overflow:hidden}
+  .language-gate{
+    position:fixed;
+    inset:0;
+    z-index:260;
+    display:grid;
+    place-items:center;
+    background:#080808;
+    color:#fff;
+    opacity:1;
+    visibility:visible;
+  }
+  .language-gate[hidden]{display:none}
+  .language-card{
+    text-align:center;
+    padding:46px 34px 38px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:30px;
+    background:
+      radial-gradient(80% 70% at 50% 0%,rgba(255,26,18,.18),transparent 68%),
+      #0b0b0b;
+    box-shadow:0 28px 90px rgba(0,0,0,.48);
+  }
+  .language-card img{
+    width:min(210px,55%);
+    margin:0 auto 34px;
+  }
+  .language-card .eyebrow{
+    margin-bottom:14px;
+    color:#9a918d;
+    font-size:.68rem;
+    font-weight:900;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .language-card h2{
+    margin:0;
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:clamp(4rem,9vw,7rem);
+    font-weight:900;
+    line-height:.84;
+    letter-spacing:-.035em;
+    text-transform:uppercase;
+  }
+  .language-card .red{color:#ff241a}
+  .language-card>p:not(.language-hint){
+    max-width:520px;
+    margin:22px auto 28px;
+    color:#968d89;
+    line-height:1.7;
+  }
+  .language-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .language-options a{
+    border:1px solid rgba(255,255,255,.15);
+    background:#111;
+    color:#fff;
+    font-weight:900;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    transition:.2s ease;
+  }
+  .language-options a:hover{
+    border-color:#ff241a;
+    background:#ff241a;
+  }
+  .language-hint{
+    margin:18px 0 0;
+    color:#5f5754;
+    font-size:.7rem;
+    line-height:1.5;
+  }
+
   .language-gate{
     min-height:100vh;
     min-height:100dvh;

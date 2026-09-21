@@ -1,6 +1,7 @@
 ---
 import type { CmsEvent,Locale,SiteSettings } from '@/lib/cms';
 import { API_BASE } from '@/lib/api';
+import LanguageGate from '@/components/LanguageGate.astro';
 
 const {events,locale,siteSettings={}}=Astro.props as {events:CmsEvent[];locale:Locale;siteSettings?:SiteSettings};
 const es=locale==='es';
@@ -88,6 +89,7 @@ const heroEvents=activeEvents.slice(0,2).map(event=>({
 const heroCities=[...new Set(activeEvents.map(event=>event.city).filter(Boolean))].slice(0,3).join(' · ');
 const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{month:'long',year:'numeric'}).format(new Date(activeEvents[0].starts_at)).toUpperCase():'';
 ---
+<LanguageGate locale={locale} chrome={siteSettings.chrome||{}} mode="session" />
 <div class="event-hub" id="top">
   <header class="hub-header">
     <a class="hub-brand" href="#top" aria-label="GTRZ Eventos" data-track="hub.logo">
@@ -134,7 +136,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
         </div>
 
         <div class="hub-intro">
-          <div class="hub-intro-number">02</div>
+          <div class="hub-intro-number">{activeEvents.length?'01':'00'}</div>
           <p>{copy.intro}</p>
           <a href="#eventos" class="hub-scroll" data-track="hub.hero.events">
             <span>{copy.navEvents}</span>
