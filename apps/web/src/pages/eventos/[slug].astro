@@ -150,11 +150,15 @@ const eventTerms=isEs?{
             <img src={posterMedia} alt={`${isEs?'Cartel oficial de':'Post oficial de'} ${loc?.title||event.slug}`}/>
           </figure>}
         </div>
-        <div class="event-facts event-facts-strip">
-          <div class="event-fact"><small>{c.dateLabel}</small><strong>{dateLong}</strong></div>
-          <div class="event-fact"><small>{isEs?'HORARIO':'HORÁRIO'}</small><strong>{timeStart}{timeEnd?` → ${timeEnd}`:''}</strong></div>
-          <div class="event-fact"><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div>
-          <div class="event-fact"><small>{isEs?'CIUDAD':'CIDADE'}</small><strong>{event.city}{event.state?` · ${event.state}`:''}</strong></div>
+      </div>
+      <div class="event-facts-band">
+        <div class="event-shell">
+          <div class="event-facts event-facts-strip">
+            <div class="event-fact"><small>{c.dateLabel}</small><strong>{dateLong}</strong></div>
+            <div class="event-fact"><small>{isEs?'HORARIO':'HORÁRIO'}</small><strong>{timeStart}{timeEnd?` → ${timeEnd}`:''}</strong></div>
+            <div class="event-fact"><small>{c.venueLabel}</small><strong>{event.venue_name||event.city}</strong></div>
+            <div class="event-fact"><small>{isEs?'CIUDAD':'CIDADE'}</small><strong>{event.city}{event.state?` · ${event.state}`:''}</strong></div>
+          </div>
         </div>
       </div>
     </section>
