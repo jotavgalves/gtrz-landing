@@ -20,6 +20,26 @@ const artists=payload?.artists||[];
 const theme=event?(()=>{try{return JSON.parse(event.theme_json||'{}')}catch{return {}}})():{};
 const mediaUrl=(id?:string|null)=>id?`${API_BASE}/api/media/${encodeURIComponent(id)}`:'';
 const parseJson=(value:any)=>{if(value&&typeof value==='object')return value;try{return JSON.parse(value||'{}')}catch{return {}}};
+const eventSectionDefaults=[
+  {id:'about',theme:'dark'},
+  {id:'lineup',theme:'dark'},
+  {id:'countdown',theme:'light'},
+  {id:'tickets',theme:'light'},
+  {id:'location',theme:'dark'},
+  {id:'terms',theme:'dark'},
+  {id:'instagram',theme:'light'}
+] as const;
+const defaultSectionIds=eventSectionDefaults.map(section=>section.id);
+const configuredSectionOrder=Array.isArray(theme.sectionOrder)?theme.sectionOrder.filter((id:any)=>defaultSectionIds.includes(id)):[];
+const eventSectionOrder=[...configuredSectionOrder,...defaultSectionIds.filter(id=>!configuredSectionOrder.includes(id))];
+const eventSectionOrderMap=Object.fromEntries(eventSectionOrder.map((id,index)=>[id,index+10]));
+const eventSectionThemes=parseJson(theme.sectionThemes);
+const sectionTheme=(id:string)=>{
+  const configured=eventSectionThemes?.[id];
+  if(configured==='light'||configured==='dark')return configured;
+  return eventSectionDefaults.find(section=>section.id===id)?.theme||'dark';
+};
+const sectionStyle=(id:string)=>`order:${eventSectionOrderMap[id]??99}`;
 const normalizeEventDate=(value?:string|null)=>{
   if(!value)return '';
   const raw=String(value).trim();
@@ -192,15 +212,15 @@ const eventTerms=isEs?{
       </div>
     </section>
 
-    {loc?.description&&<section class="event-about-premium" data-section="event_about"><div class="event-shell event-about-grid"><div><span class="event-eyebrow">{c.aboutLabel}</span><h2 class="event-display">{isEs?'LA NOCHE.':'A NOITE.'}</h2><div class="event-about-stamp">{dateShort} · {event.city.toUpperCase()}</div></div><div class="event-about-copy">{loc.description}</div></div></section>}
+    {loc?.description&&<section class="event-about-premium" data-section="event_about" data-section-theme={sectionTheme('about')} style={sectionStyle('about')}><div class="event-shell event-about-grid"><div><span class="event-eyebrow">{c.aboutLabel}</span><h2 class="event-display">{isEs?'LA NOCHE.':'A NOITE.'}</h2><div class="event-about-stamp">{dateShort} · {event.city.toUpperCase()}</div></div><div class="event-about-copy">{loc.description}</div></div></section>}
 
-    {artists.length>0&&<section class="event-lineup-premium" data-section="event_lineup"><div class="event-shell"><div class="event-section-head-premium"><div><span class="event-eyebrow">{c.lineupEyebrow}</span><h2 class="event-display">{c.lineupTitle}</h2></div><p>{isEs?'Los nombres que van a conducir esta edición.':'Os nomes que vão conduzir esta edição.'}</p></div><div class={`event-artist-grid count-${Math.min(artists.length,4)}`}>{artists.map((artist:any,index:number)=><article class={`event-artist-card ${artist.media_id?'has-photo':'no-photo'}`}>{artist.media_id&&<img src={mediaUrl(artist.media_id)} alt={artist.name} loading="lazy"/>}<span class="event-artist-number">{String(index+1).padStart(2,'0')}</span><div class="event-artist-copy"><strong>{artist.name}</strong><span>{artist.role||''}</span>{artist.instagram_url&&<a class="event-back" href={artist.instagram_url} target="_blank" rel="noopener">Instagram ↗</a>}</div></article>)}</div></div></section>}
+    {artists.length>0&&<section class="event-lineup-premium" data-section="event_lineup" data-section-theme={sectionTheme('lineup')} style={sectionStyle('lineup')}><div class="event-shell"><div class="event-section-head-premium"><div><span class="event-eyebrow">{c.lineupEyebrow}</span><h2 class="event-display">{c.lineupTitle}</h2></div><p>{isEs?'Los nombres que van a conducir esta edición.':'Os nomes que vão conduzir esta edição.'}</p></div><div class={`event-artist-grid count-${Math.min(artists.length,4)}`}>{artists.map((artist:any,index:number)=><article class={`event-artist-card ${artist.media_id?'has-photo':'no-photo'}`}>{artist.media_id&&<img src={mediaUrl(artist.media_id)} alt={artist.name} loading="lazy"/>}<span class="event-artist-number">{String(index+1).padStart(2,'0')}</span><div class="event-artist-copy"><strong>{artist.name}</strong><span>{artist.role||''}</span>{artist.instagram_url&&<a class="event-back" href={artist.instagram_url} target="_blank" rel="noopener">Instagram ↗</a>}</div></article>)}</div></div></section>}
 
-    {countdownEnabled&&<section class="event-countdown" data-section="event_countdown" data-countdown-end={countdownTarget}>
+    {countdownEnabled&&<section class="event-countdown" data-section="event_countdown" data-section-theme={sectionTheme('countdown')} style={sectionStyle('countdown')} data-countdown-end={countdownTarget}>
       <div class="event-shell event-countdown-inner"><div class="event-countdown-copy"><span class="event-eyebrow">{isEs?'CUENTA REGRESIVA':'CONTAGEM REGRESSIVA'}</span><strong>{isEs?'LA NOCHE EMPIEZA EN...':'A NOITE COMEÇA EM...'}</strong></div><div class="event-clock"><div class="event-clock-item"><b data-clock="days">{countdownPad(countdownInitialDays)}</b><small>{isEs?'Días':'Dias'}</small></div><div class="event-clock-item"><b data-clock="hours">{countdownPad(countdownInitialHours)}</b><small>{isEs?'Horas':'Horas'}</small></div><div class="event-clock-item"><b data-clock="minutes">{countdownPad(countdownInitialMinutes)}</b><small>Min</small></div><div class="event-clock-item"><b data-clock="seconds">{countdownPad(countdownInitialSeconds)}</b><small>Seg</small></div></div></div>
     </section>}
 
-    <section class:list={['event-tickets-premium',ticketCount===1?'single-ticket':'multiple-tickets']} id="ingressos" data-section="event_tickets">
+    <section class:list={['event-tickets-premium',ticketCount===1?'single-ticket':'multiple-tickets']} id="ingressos" data-section="event_tickets" data-section-theme={sectionTheme('tickets')} style={sectionStyle('tickets')}>
       <div class="event-shell">
         <div class="event-section-head-premium">
           <div>
@@ -259,9 +279,9 @@ const eventTerms=isEs?{
       </div>
     </section>
 
-    {mapEmbed&&<section class="event-location-premium" data-section="event_location"><div class="event-shell event-location-grid"><div class="event-location-copy"><span class="event-eyebrow">{isEs?'DÓNDE ES':'ONDE É'}</span><h2 class="event-display">{event.venue_name||event.city}</h2><div class="event-location-address">{event.venue_address||`${event.city}${event.state?` · ${event.state}`:''}`}</div><a class="event-map-button" href={mapLink} target="_blank" rel="noopener">{isEs?'ABRIR EN GOOGLE MAPS':'ABRIR NO GOOGLE MAPS'} ↗</a></div><div class="event-map-frame"><iframe title={`${isEs?'Mapa de':'Mapa de'} ${event.venue_name||event.city}`} src={mapEmbed} loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>}
+    {mapEmbed&&<section class="event-location-premium" data-section="event_location" data-section-theme={sectionTheme('location')} style={sectionStyle('location')}><div class="event-shell event-location-grid"><div class="event-location-copy"><span class="event-eyebrow">{isEs?'DÓNDE ES':'ONDE É'}</span><h2 class="event-display">{event.venue_name||event.city}</h2><div class="event-location-address">{event.venue_address||`${event.city}${event.state?` · ${event.state}`:''}`}</div><a class="event-map-button" href={mapLink} target="_blank" rel="noopener">{isEs?'ABRIR EN GOOGLE MAPS':'ABRIR NO GOOGLE MAPS'} ↗</a></div><div class="event-map-frame"><iframe title={`${isEs?'Mapa de':'Mapa de'} ${event.venue_name||event.city}`} src={mapEmbed} loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>}
 
-    <section class="event-terms-premium" data-section="event_terms">
+    <section class="event-terms-premium" data-section="event_terms" data-section-theme={sectionTheme('terms')} style={sectionStyle('terms')}>
       <div class="event-shell event-terms-wrap">
         <div class="event-terms-head">
           <div>
@@ -286,7 +306,7 @@ const eventTerms=isEs?{
       </div>
     </section>
 
-    <section class="event-instagram-premium" data-section="event_instagram"><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos ↗</a></div></section>
+    <section class="event-instagram-premium" data-section="event_instagram" data-section-theme={sectionTheme('instagram')} style={sectionStyle('instagram')}><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos</a></div></section>
 
     {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy"><div><small>{isEs?'ENTRADAS':'INGRESSOS'}</small><strong>{firstPurchasable.copy.title||firstPurchasable.name} · {money(firstPurchasable.price_cents,firstPurchasable.currency||'BRL')}</strong></div><a href="#ingressos">{isEs?'COMPRAR':'COMPRAR'}</a></div>}
 

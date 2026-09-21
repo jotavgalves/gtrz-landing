@@ -40,3 +40,12 @@
 @media(max-width:1260px){.ticket-create-basics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1100px){.ticket-option-editor .form-grid{grid-template-columns:1fr 1fr}.ticket-locale-grid,.ticket-channel-grid{grid-template-columns:1fr}.ticket-switch-row{grid-template-columns:1fr 1fr}.ticket-create-basics{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.ticket-option-head{flex-direction:column}.ticket-option-actions{justify-content:flex-start}.ticket-option-editor .form-grid,.ticket-switch-row,.ticket-create-basics,.ticket-button-copy-grid,.ticket-message-grid,.ticket-alt-grid{grid-template-columns:1fr}.ticket-option-editor .form-grid .span2{grid-column:auto}.ticket-option-body{padding:15px}.ticket-locale{padding:13px}.ticket-commerce-box{padding:13px}.ticket-commerce-head{flex-direction:column}.ticket-commerce-state{white-space:normal}.ticket-channel-card{padding:14px}}
+
+.event-section-layout-editor{margin-top:18px}
+.event-section-layout-list{display:grid;gap:9px}
+.event-section-layout-row{display:grid;grid-template-columns:36px minmax(180px,1fr) minmax(190px,240px) auto;gap:12px;align-items:center;padding:13px 14px;border:1px solid #272727;border-radius:13px;background:#0d0d0d}
+.event-section-layout-index{font-size:.62rem;font-weight:950;letter-spacing:.12em;color:#ff2b20}
+.event-section-layout-name{display:grid;gap:3px;min-width:0}.event-section-layout-name strong{color:#f3efeb;font-size:.82rem}.event-section-layout-name small{color:#6f6f6f;font-size:.67rem}
+.event-section-theme-select{display:grid;gap:5px}.event-section-theme-select>span{font-size:.55rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#707070}.event-section-theme-select select{width:100%}
+.event-section-layout-actions{display:flex;gap:6px}.event-section-layout-actions button{min-height:34px;padding:0 10px;font-size:.62rem}
+@media(max-width:760px){.event-section-layout-row{grid-template-columns:30px 1fr}.event-section-theme-select,.event-section-layout-actions{grid-column:2}.event-section-layout-actions{justify-content:flex-start}}
