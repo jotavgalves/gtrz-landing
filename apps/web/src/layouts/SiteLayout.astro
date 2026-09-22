@@ -21,8 +21,28 @@ import '@/styles/mobile-hardening.css';
 import '@/styles/mobile-polish.css';
 import '@/styles/partnerships-mobile-fix.css';
 import '@/styles/privacy-checkbox-fix.css';
-interface Props { title?: string; locale: 'pt-BR' | 'es'; settings?:SiteSettings; }
-const { locale, settings={} } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+  locale: 'pt-BR' | 'es';
+  settings?:SiteSettings;
+  canonicalUrl?: string;
+  alternatePtUrl?: string;
+  alternateEsUrl?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  socialType?: 'website' | 'article';
+}
+const {
+  locale,
+  settings={},
+  canonicalUrl,
+  alternatePtUrl,
+  alternateEsUrl,
+  ogImage,
+  ogImageAlt,
+  socialType='website'
+} = Astro.props;
 const chrome=settings.chrome||{};
 const hubMode=settings.general?.homepageMode!=='full';
 const eventPopupHandoffEnabled=Astro.url.pathname==='/'&&!hubMode;
@@ -35,9 +55,13 @@ const title=Astro.props.title||(locale==='es'?(chrome.metaTitleEs||'GTRZ Eventos
 const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
 const configuredDescription=locale==='es'?chrome.metaDescriptionEs:chrome.metaDescriptionPt;
 const configuredFooter=locale==='es'?chrome.footerEs:chrome.footerPt;
-const description=configuredDescription&&!legacyCountryFocus.test(configuredDescription)
+const defaultDescription=configuredDescription&&!legacyCountryFocus.test(configuredDescription)
   ?configuredDescription
   :(locale==='es'?'GTRZ Eventos — fiestas, música y experiencias para una comunidad latina multicultural.':'GTRZ Eventos — festas, música e experiências para uma comunidade latina multicultural.');
+const description=Astro.props.description||defaultDescription;
+const absoluteOgImage=ogImage?new URL(ogImage,Astro.url.origin).toString():'';
+const socialLocale=locale==='es'?'es_ES':'pt_BR';
+const socialLocaleAlternate=locale==='es'?'pt_BR':'es_ES';
 const footer=configuredFooter&&!legacyCountryFocus.test(configuredFooter)
   ?configuredFooter
   :(locale==='es'?'GTRZ Eventos · Cultura latina en movimiento':'GTRZ Eventos · Cultura latina em movimento');
@@ -51,6 +75,27 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <meta name="theme-color" content="#080808" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
+    {canonicalUrl&&<link rel="canonical" href={canonicalUrl} />}
+    {alternatePtUrl&&<link rel="alternate" hreflang="pt-BR" href={alternatePtUrl} />}
+    {alternateEsUrl&&<link rel="alternate" hreflang="es" href={alternateEsUrl} />}
+    {alternatePtUrl&&<link rel="alternate" hreflang="x-default" href={alternatePtUrl} />}
+
+    <meta property="og:type" content={socialType} />
+    <meta property="og:site_name" content="GTRZ Eventos" />
+    <meta property="og:locale" content={socialLocale} />
+    <meta property="og:locale:alternate" content={socialLocaleAlternate} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonicalUrl&&<meta property="og:url" content={canonicalUrl} />}
+    {absoluteOgImage&&<meta property="og:image" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta property="og:image:secure_url" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta property="og:image:alt" content={ogImageAlt||title} />}
+
+    <meta name="twitter:card" content={absoluteOgImage?'summary_large_image':'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {absoluteOgImage&&<meta name="twitter:image" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta name="twitter:image:alt" content={ogImageAlt||title} />}
     <title>{title}</title>
     <ClientRouter />
     <style is:inline>

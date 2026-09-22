@@ -14,6 +14,16 @@ const events=pickLocale(payload.events,locale);
 const team=pickLocale(payload.team,locale);
 const sections=localizedSections(payload.sections,locale);
 const homepageMode=payload.settings.general?.homepageMode==='full'?'full':'hub';
+const apiBase=import.meta.env.PUBLIC_API_BASE||'';
+const activeHubEvent=events.find(event=>['published','sales_open','sold_out'].includes(event.status));
+let hubSocialMediaId=activeHubEvent?.hero_media_id||null;
+if(!hubSocialMediaId&&activeHubEvent?.theme_json){
+  try{
+    const theme=JSON.parse(activeHubEvent.theme_json);
+    hubSocialMediaId=theme.hubCardMediaId||theme.hub_card_media_id||theme.posterMediaId||theme.poster_media_id||null;
+  }catch{}
+}
+const hubOgImage=hubSocialMediaId?`${apiBase}/api/media/${encodeURIComponent(hubSocialMediaId)}`:'';
 ---
 {homepageMode==='full' ? (
   <SiteLayout locale={locale} settings={payload.settings}>
@@ -21,7 +31,7 @@ const homepageMode=payload.settings.general?.homepageMode==='full'?'full':'hub';
     <EventPopup events={events} locale={locale} siteSettings={payload.settings}/>
   </SiteLayout>
 ) : (
-  <HubLayout locale={locale}>
+  <HubLayout locale={locale} ogImage={hubOgImage}>
     <EventHub events={events} locale={locale} siteSettings={payload.settings}/>
   </HubLayout>
 )}
