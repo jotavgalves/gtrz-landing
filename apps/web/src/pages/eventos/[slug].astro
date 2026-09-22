@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '@/layouts/SiteLayout.astro';
+import EventFeedbackInvite from '@/components/EventFeedbackInvite.astro';
 import { API_BASE, publicApi } from '@/lib/api';
 import { getHomePage } from '@/lib/cms';
 import { getPublicCopy } from '@/lib/public-copy';
@@ -341,6 +342,8 @@ const eventTerms=isEs?{
     </section>
 
     <section class="event-instagram-premium" data-section="event_instagram" data-section-theme={sectionTheme('instagram')} style={sectionStyle('instagram')}><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos</a></div></section>
+
+    <EventFeedbackInvite locale={locale} eventName={loc?.title||event.slug} slug={event.slug} />
 
     {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy" data-event-mobile-buy aria-hidden="true">
       <div>
