@@ -1,0 +1,100 @@
+---
+const {eyebrow,title,intro}=Astro.props as {eyebrow:string;title:string;intro:string};
+---
+<main class="utility-page">
+  <section class="utility-hero">
+    <div class="utility-shell">
+      <span class="utility-eyebrow">{eyebrow}</span>
+      <h1>{title}</h1>
+      <p>{intro}</p>
+    </div>
+  </section>
+  <section class="utility-content">
+    <div class="utility-shell utility-body"><slot /></div>
+  </section>
+</main>
+
+<style>
+  .utility-page{background:#090909;color:#f7f3ef;min-height:70vh}
+  .utility-shell{width:min(calc(100% - 32px),980px);margin-inline:auto}
+  .utility-hero{
+    padding:132px 0 48px;
+    background:radial-gradient(60% 90% at 100% 0%,rgba(255,36,26,.11),transparent 70%),#090909;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .utility-eyebrow{
+    display:block;
+    margin-bottom:18px;
+    color:#8c8581;
+    font-size:.62rem;
+    font-weight:900;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .utility-hero h1{
+    max-width:850px;
+    margin:0;
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:clamp(3.7rem,10vw,7rem);
+    line-height:.84;
+    letter-spacing:-.03em;
+    text-transform:uppercase;
+  }
+  .utility-hero p{
+    max-width:660px;
+    margin:24px 0 0;
+    color:#9d9692;
+    font-size:1rem;
+    line-height:1.7;
+  }
+  .utility-content{padding:42px 0 90px}
+  .utility-body{display:grid;gap:0}
+  :global(.utility-block){
+    padding:25px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  :global(.utility-block:first-child){padding-top:0}
+  :global(.utility-block h2){
+    margin:0 0 12px;
+    color:#fff;
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:1.75rem;
+    font-weight:900;
+    letter-spacing:.01em;
+    text-transform:uppercase;
+  }
+  :global(.utility-block p){
+    max-width:800px;
+    margin:0;
+    color:#aaa29e;
+    font-size:.92rem;
+    line-height:1.75;
+  }
+  :global(.utility-block p + p){margin-top:12px}
+  :global(.utility-link){
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    width:max-content;
+    max-width:100%;
+    margin-top:16px;
+    color:#fff;
+    font-size:.68rem;
+    font-weight:900;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    text-decoration:none;
+  }
+  :global(.utility-link::after){content:'↗';color:#ff241a}
+  :global(.utility-meta){
+    color:#69625f!important;
+    font-size:.72rem!important;
+    letter-spacing:.04em;
+  }
+  @media(min-width:700px){
+    .utility-shell{width:min(calc(100% - 48px),980px)}
+    .utility-hero{padding-top:155px;padding-bottom:58px}
+    .utility-content{padding-top:54px;padding-bottom:110px}
+    :global(.utility-block){padding:30px 0}
+  }
+</style>
