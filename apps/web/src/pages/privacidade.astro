@@ -1,0 +1,68 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import UtilityPage from '@/components/UtilityPage.astro';
+import { getHomePage } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+
+const locale:Locale=Astro.url.searchParams.get('lang')==='es'?'es':'pt-BR';
+const es=locale==='es';
+const site=await getHomePage();
+const canonicalPt=new URL('/privacidade',Astro.url.origin).toString();
+const canonicalEs=new URL('/privacidade?lang=es',Astro.url.origin).toString();
+const copy=es?{
+  eyebrow:'PRIVACIDAD',
+  title:'PRIVACIDAD EN GTRZ.',
+  intro:'Información general sobre el tratamiento de datos al navegar por el sitio y utilizar los canales digitales de GTRZ.',
+  collected:'DATOS TÉCNICOS Y DE NAVEGACIÓN',
+  collectedText:'El sitio puede registrar datos técnicos necesarios para funcionamiento, seguridad y medición de uso, como página visitada, idioma, origen de la visita, identificador de sesión, referencias de campaña y eventos de interacción. Parte de esta información puede almacenarse localmente o durante la sesión en el navegador.',
+  purposes:'FINALIDADES',
+  purposesText:'Estos datos se utilizan para operar el sitio, entender el uso de las páginas, medir campañas, mejorar la experiencia, prevenir abusos y prestar los servicios solicitados por el usuario.',
+  forms:'FORMULARIOS Y SERVICIOS ESPECÍFICOS',
+  formsText:'Cuando el usuario envía información en formularios, los datos se tratan conforme a la finalidad presentada en cada flujo. El banco de freelancers posee un aviso de privacidad específico, disponible en la propia página de registro.',
+  sharing:'COMPARTICIÓN',
+  sharingText:'GTRZ puede utilizar proveedores técnicos necesarios para alojamiento, seguridad, mensajería, medición y operación de sus servicios. No se autoriza el uso de los datos para finalidades incompatibles con las informadas.',
+  rights:'DERECHOS Y CONTACTO',
+  rightsText:'El titular puede utilizar los canales oficiales de GTRZ para solicitar información y ejercer los derechos previstos por la legislación aplicable de protección de datos.',
+  updates:'ACTUALIZACIONES',
+  updatesText:'Este aviso puede actualizarse para reflejar cambios en el sitio, en los servicios o en requisitos legales. La versión vigente será la publicada en esta página.',
+  contact:'CONTACTAR A GTRZ',
+  freelancer:'PRIVACIDAD DEL BANCO DE FREELANCERS'
+}:{
+  eyebrow:'PRIVACIDADE',
+  title:'PRIVACIDADE NA GTRZ.',
+  intro:'Informações gerais sobre o tratamento de dados ao navegar pelo site e utilizar os canais digitais da GTRZ.',
+  collected:'DADOS TÉCNICOS E DE NAVEGAÇÃO',
+  collectedText:'O site pode registrar dados técnicos necessários ao funcionamento, segurança e medição de uso, como página visitada, idioma, origem da visita, identificador de sessão, referências de campanha e eventos de interação. Parte dessas informações pode ser armazenada localmente ou durante a sessão no navegador.',
+  purposes:'FINALIDADES',
+  purposesText:'Esses dados são utilizados para operar o site, compreender o uso das páginas, medir campanhas, melhorar a experiência, prevenir abusos e prestar os serviços solicitados pelo usuário.',
+  forms:'FORMULÁRIOS E SERVIÇOS ESPECÍFICOS',
+  formsText:'Quando o usuário envia informações em formulários, os dados são tratados conforme a finalidade apresentada em cada fluxo. O banco de freelancers possui aviso de privacidade específico, disponível na própria página de cadastro.',
+  sharing:'COMPARTILHAMENTO',
+  sharingText:'A GTRZ pode utilizar fornecedores técnicos necessários para hospedagem, segurança, mensageria, mensuração e operação de seus serviços. Não é autorizado o uso dos dados para finalidades incompatíveis com as informadas.',
+  rights:'DIREITOS E CONTATO',
+  rightsText:'O titular pode utilizar os canais oficiais da GTRZ para solicitar informações e exercer os direitos previstos na legislação aplicável de proteção de dados.',
+  updates:'ATUALIZAÇÕES',
+  updatesText:'Este aviso pode ser atualizado para refletir alterações no site, nos serviços ou em requisitos legais. A versão vigente será a publicada nesta página.',
+  contact:'FALAR COM A GTRZ',
+  freelancer:'PRIVACIDADE DO BANCO DE FREELANCERS'
+};
+const q=es?'?lang=es':'';
+---
+<SiteLayout
+  locale={locale}
+  settings={site.settings}
+  title={es?'Privacidad · GTRZ Eventos':'Privacidade · GTRZ Eventos'}
+  description={copy.intro}
+  canonicalUrl={es?canonicalEs:canonicalPt}
+  alternatePtUrl={canonicalPt}
+  alternateEsUrl={canonicalEs}
+>
+  <UtilityPage eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro}>
+    <div class="utility-block"><h2>{copy.collected}</h2><p>{copy.collectedText}</p></div>
+    <div class="utility-block"><h2>{copy.purposes}</h2><p>{copy.purposesText}</p></div>
+    <div class="utility-block"><h2>{copy.forms}</h2><p>{copy.formsText}</p><a class="utility-link" href={`/privacidade-profissionais${q}`}>{copy.freelancer}</a></div>
+    <div class="utility-block"><h2>{copy.sharing}</h2><p>{copy.sharingText}</p></div>
+    <div class="utility-block"><h2>{copy.rights}</h2><p>{copy.rightsText}</p><a class="utility-link" href={`/contato${q}`}>{copy.contact}</a></div>
+    <div class="utility-block"><h2>{copy.updates}</h2><p>{copy.updatesText}</p></div>
+  </UtilityPage>
+</SiteLayout>
