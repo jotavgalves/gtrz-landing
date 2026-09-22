@@ -2,6 +2,7 @@
 import Header from '@/components/Header.astro';
 import { ClientRouter } from 'astro:transitions';
 import LanguageGate from '@/components/LanguageGate.astro';
+import GtrzFooter from '@/components/GtrzFooter.astro';
 import type { SiteSettings } from '@/lib/cms';
 import '@/styles/global.css';
 import '@/styles/pages.css';
@@ -146,7 +147,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
     <Header locale={locale} chrome={chrome} compact={hubMode} instagramUrl={instagramUrl} />
     {!hubMode&&<LanguageGate locale={locale} chrome={chrome} />}
     <slot />
-    <footer class="site-footer"><div class="wrap"><img src="/brand/gtrz-wordmark.svg" alt="GTRZ"/><span>{footer}</span></div></footer>
+    <GtrzFooter locale={locale} settings={settings} />
     <script is:inline>
       (()=>{
         const forbidden=/[\p{Extended_Pictographic}\uFE0F\u2190-\u21FF]/gu;
