@@ -16,6 +16,8 @@ const marqueeItems=Array.from({length:10});
 const copy=es?{
   navEvents:'Eventos',
   navInstagram:'Instagram',
+  navSuggestions:'Sugestões',
+  navSuggestions:'Sugerencias',
   eyebrow:'AGENDA OFICIAL GTRZ',
   titleTop:'PRÓXIMAS',
   titleBottom:'NOCHES',
@@ -28,6 +30,14 @@ const copy=es?{
   emptyTitle:'NUEVAS FECHAS EN CAMINO',
   emptyBody:'Sigue a GTRZ para recibir primero los próximos anuncios.',
   emptyCta:'SEGUIR EN INSTAGRAM',
+  feedbackEyebrow:'TU OPINIÓN',
+  feedbackTitle:'¿HAY ALGO QUE PODRÍA SER MEJOR?',
+  feedbackBody:'Cuéntanos qué funcionó, qué cambiarías o qué te gustaría encontrar en una próxima edición.',
+  feedbackCta:'ENVIAR SUGERENCIA',
+  feedbackEyebrow:'SUA OPINIÃO',
+  feedbackTitle:'TEM ALGO QUE PODERIA SER MELHOR?',
+  feedbackBody:'Conte o que funcionou, o que você mudaria ou o que gostaria de encontrar em uma próxima edição.',
+  feedbackCta:'ENVIAR SUGESTÃO',
   freelancerEyebrow:'OPORTUNIDADES',
   freelancerTitle:'SÉ PARTE DE LAS PRÓXIMAS PRODUCCIONES.',
   freelancerBody:'Estamos ampliando nuestra base de freelancers para los eventos GTRZ.',
@@ -107,6 +117,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
     <nav class="hub-nav" aria-label={es?'Navegación':'Navegação'}>
       <a class="hub-nav-events" href="#eventos" data-track="hub.nav.events">{copy.navEvents}</a>
+      <a class="hub-nav-suggestions" href={es?'/sugestoes?lang=es':'/sugestoes'} data-track="hub.nav.suggestions">{copy.navSuggestions}</a>
       <a class="hub-nav-instagram" href={instagram} target="_blank" rel="noreferrer" data-track="hub.nav.instagram">{copy.navInstagram}</a>
       <div class="hub-lang" aria-label="Idioma">
         <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-track="hub.lang.pt">PT</a>
@@ -235,6 +246,27 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
       )}
     </section>
 
+    <section class="hub-feedback hub-shell" data-section="feedback">
+      <div class="hub-feedback-inner">
+        <div class="hub-feedback-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M5 5.5h14v9H9.5L6 18v-3.5H5z" />
+          </svg>
+        </div>
+        <div class="hub-feedback-copy">
+          <span>{copy.feedbackEyebrow}</span>
+          <h2>{copy.feedbackTitle}</h2>
+          <p>{copy.feedbackBody}</p>
+        </div>
+        <a class="hub-feedback-link" href={es?'/sugestoes?lang=es':'/sugestoes'} data-track="hub.feedback">
+          <span>{copy.feedbackCta}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M7 17 17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
+    </section>
+
     <section class="hub-freelancers hub-shell" data-section="freelancers">
       <div class="hub-freelancers-inner">
         <div class="hub-freelancers-kicker">{copy.freelancerEyebrow}</div>
@@ -302,6 +334,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-nav{display:flex;align-items:center;gap:14px;min-width:0;font-size:.59rem;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:#8f8884}
   .hub-nav a{white-space:nowrap}
   .hub-nav-events{display:none}
+  .hub-nav-suggestions{display:none}
   .hub-nav-instagram{color:#c5bfbb}
   .hub-lang{
     display:flex;
@@ -561,6 +594,109 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-empty p{margin-bottom:0;color:#938985;line-height:1.55}
   .hub-empty>a{width:max-content;padding:13px 16px;background:var(--hub-red);font-size:.59rem;font-weight:800;letter-spacing:.09em}
 
+  .hub-feedback{
+    padding:0 0 34px;
+  }
+  .hub-feedback-inner{
+    position:relative;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr);
+    gap:16px 18px;
+    align-items:center;
+    padding:24px 20px;
+    border:1px solid rgba(255,255,255,.11);
+    background:
+      radial-gradient(circle at 88% 18%,rgba(255,36,26,.1),transparent 18rem),
+      #0a0a0a;
+  }
+  .hub-feedback-inner::after{
+    content:'';
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:var(--hub-red);
+  }
+  .hub-feedback-icon{
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(255,36,26,.25);
+    background:rgba(255,36,26,.06);
+    color:var(--hub-red);
+  }
+  .hub-feedback-icon svg{
+    width:20px;
+    height:20px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .hub-feedback-copy{min-width:0}
+  .hub-feedback-copy>span{
+    display:block;
+    color:var(--hub-red);
+    font-size:.53rem;
+    font-weight:900;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .hub-feedback-copy h2{
+    margin:7px 0 0;
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:clamp(2.15rem,9vw,3.35rem);
+    font-weight:900;
+    line-height:.88;
+    letter-spacing:-.025em;
+    text-transform:uppercase;
+  }
+  .hub-feedback-copy p{
+    max-width:620px;
+    margin:10px 0 0;
+    color:#8c8581;
+    font-size:.78rem;
+    line-height:1.55;
+  }
+  .hub-feedback-link{
+    grid-column:1 / -1;
+    width:100%;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:0 15px;
+    border:1px solid rgba(255,255,255,.13);
+    color:#eee9e5;
+    font-size:.59rem;
+    font-weight:900;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    transition:border-color .18s ease,background .18s ease,color .18s ease;
+  }
+  .hub-feedback-link svg{
+    width:18px;
+    height:18px;
+    flex:none;
+    fill:none;
+    stroke:var(--hub-red);
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    transition:transform .18s ease;
+  }
+  .hub-feedback-link:hover{
+    border-color:rgba(255,36,26,.45);
+    background:rgba(255,36,26,.045);
+    color:#fff;
+  }
+  .hub-feedback-link:hover svg{transform:translate(3px,-3px)}
+
   .hub-freelancers{
     padding:0 0 54px;
   }
@@ -627,7 +763,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   @media(min-width:700px){
     .hub-shell,.hub-footer{width:min(calc(100% - 48px),1320px)}
     .hub-header{height:78px;padding-inline:max(24px,calc((100vw - 1320px)/2))}.hub-brand img{width:104px}
-    .hub-nav{gap:22px;font-size:.63rem}.hub-nav-events{display:block}
+    .hub-nav{gap:22px;font-size:.63rem}.hub-nav-events,.hub-nav-suggestions{display:block}
     .hub-hero{padding-top:58px}
     .hub-hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:42px;align-items:end}
     .hub-hero h1{font-size:clamp(5.2rem,11vw,8.2rem)}
@@ -645,6 +781,13 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     .hub-event-meta{flex-direction:row;justify-content:space-between;gap:16px}
     .hub-event-title-row h2{font-size:clamp(3rem,5vw,4.35rem)}
     .hub-empty{grid-template-columns:70px 1fr auto;align-items:center;padding:32px}
+    .hub-feedback{padding-bottom:42px}
+    .hub-feedback-inner{grid-template-columns:54px minmax(0,1fr) auto;gap:24px;padding:28px 26px}
+    .hub-feedback-icon{width:54px;height:54px}
+    .hub-feedback-icon svg{width:23px;height:23px}
+    .hub-feedback-copy h2{font-size:clamp(2.6rem,4.6vw,4rem)}
+    .hub-feedback-copy p{font-size:.84rem}
+    .hub-feedback-link{grid-column:auto;width:auto;min-height:48px;padding:0 18px}
     .hub-freelancers{padding-bottom:64px}
     .hub-freelancers-inner{grid-template-columns:130px minmax(0,1fr) auto;gap:30px;align-items:end;padding-top:34px}
     .hub-freelancers-copy h2{font-size:clamp(2.8rem,5.4vw,4.4rem)}
@@ -708,6 +851,6 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
   @media(prefers-reduced-motion:reduce){
     .hub-marquee-track{animation:none}
-    .hub-event-card,.hub-event-visual>img,.hub-event-generated,.hub-event-title-row h2,.hub-event-arrow,.hub-event-cta i,.hub-freelancers-link,.hub-freelancers-link svg{transition:none}
+    .hub-event-card,.hub-event-visual>img,.hub-event-generated,.hub-event-title-row h2,.hub-event-arrow,.hub-event-cta i,.hub-feedback-link,.hub-feedback-link svg,.hub-freelancers-link,.hub-freelancers-link svg{transition:none}
   }
 </style>
