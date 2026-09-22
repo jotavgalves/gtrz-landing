@@ -30,8 +30,8 @@ const copy=es?{
   emptyBody:'Sigue a GTRZ para recibir primero los próximos anuncios.',
   emptyCta:'SEGUIR EN INSTAGRAM',
   feedbackEyebrow:'TU OPINIÓN',
-  feedbackTitle:'TU OPINIÓN IMPORTA.',
-  feedbackBody:'¿Hay algo que podamos mejorar? Cuéntaselo a GTRZ.',
+  feedbackTitle:'AYÚDANOS A HACERLO MEJOR.',
+  feedbackBody:'Ideas, críticas y sugerencias sobre nuestras fiestas. También puedes enviarlo de forma anónima.',
   feedbackCta:'ENVIAR SUGERENCIA',
   freelancerEyebrow:'OPORTUNIDADES',
   freelancerTitle:'SÉ PARTE DE LAS PRÓXIMAS PRODUCCIONES.',
@@ -55,8 +55,8 @@ const copy=es?{
   emptyBody:'Acompanhe a GTRZ para receber primeiro os próximos anúncios.',
   emptyCta:'SEGUIR NO INSTAGRAM',
   feedbackEyebrow:'SUA OPINIÃO',
-  feedbackTitle:'SUA OPINIÃO IMPORTA.',
-  feedbackBody:'Tem algo que a gente pode melhorar? Conte pra GTRZ.',
+  feedbackTitle:'AJUDE A GTRZ A FAZER MELHOR.',
+  feedbackBody:'Ideias, críticas e sugestões sobre nossas festas. Você também pode enviar de forma anônima.',
   feedbackCta:'ENVIAR SUGESTÃO',
   freelancerEyebrow:'OPORTUNIDADES',
   freelancerTitle:'FAÇA PARTE DAS PRÓXIMAS PRODUÇÕES.',
@@ -248,10 +248,11 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
     <section class="hub-feedback hub-shell" data-section="feedback" aria-label={copy.feedbackEyebrow}>
       <div class="hub-feedback-inner">
-        <div class="hub-feedback-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
+        <div class="hub-feedback-marker">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M5 5.5h14v9H9.5L6 18v-3.5H5z" />
           </svg>
+          <span>{copy.feedbackEyebrow}</span>
         </div>
         <div class="hub-feedback-copy">
           <strong>{copy.feedbackTitle}</strong>
@@ -594,78 +595,93 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-empty>a{width:max-content;padding:13px 16px;background:var(--hub-red);font-size:.59rem;font-weight:800;letter-spacing:.09em}
 
   .hub-feedback{
-    padding:0 0 30px;
+    padding:0 0 36px;
   }
   .hub-feedback-inner{
+    overflow:hidden;
     display:grid;
-    grid-template-columns:36px minmax(0,1fr);
-    gap:13px 15px;
+    grid-template-columns:1fr;
+    border:1px solid rgba(255,255,255,.11);
+    background:#0b0b0b;
+  }
+  .hub-feedback-marker{
+    min-height:44px;
+    display:flex;
     align-items:center;
-    padding:17px 2px;
-    border-top:1px solid rgba(255,255,255,.10);
-    border-bottom:1px solid rgba(255,255,255,.10);
+    gap:10px;
+    padding:0 15px;
+    background:var(--hub-red);
+    color:#080808;
   }
-  .hub-feedback-icon{
-    width:36px;
-    height:36px;
-    display:grid;
-    place-items:center;
-    border-radius:50%;
-    background:rgba(255,36,26,.08);
-    color:var(--hub-red);
-  }
-  .hub-feedback-icon svg{
+  .hub-feedback-marker svg{
     width:17px;
     height:17px;
+    flex:none;
     fill:none;
     stroke:currentColor;
-    stroke-width:1.7;
+    stroke-width:1.9;
     stroke-linecap:round;
     stroke-linejoin:round;
   }
-  .hub-feedback-copy{min-width:0}
+  .hub-feedback-marker span{
+    font-size:.56rem;
+    font-weight:950;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  .hub-feedback-copy{
+    min-width:0;
+    padding:20px 18px 13px;
+  }
   .hub-feedback-copy strong{
     display:block;
-    color:#f3efec;
+    max-width:620px;
+    color:#f5f1ed;
     font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-    font-size:1.35rem;
+    font-size:clamp(2rem,8.5vw,2.85rem);
     font-weight:900;
-    line-height:1;
-    letter-spacing:.015em;
+    line-height:.9;
+    letter-spacing:-.02em;
     text-transform:uppercase;
   }
   .hub-feedback-copy p{
-    margin:5px 0 0;
-    color:#756e6a;
-    font-size:.70rem;
-    line-height:1.45;
+    max-width:650px;
+    margin:9px 0 0;
+    color:#817a76;
+    font-size:.74rem;
+    line-height:1.55;
   }
   .hub-feedback-link{
-    grid-column:2;
-    width:max-content;
-    max-width:100%;
-    display:inline-flex;
+    min-height:46px;
+    margin:0 18px 18px;
+    display:flex;
     align-items:center;
-    gap:9px;
-    color:#b9b1ad;
-    font-size:.56rem;
-    font-weight:900;
-    letter-spacing:.10em;
+    justify-content:space-between;
+    gap:12px;
+    padding:0 15px;
+    background:#f1ede9;
+    color:#090909;
+    font-size:.57rem;
+    font-weight:950;
+    letter-spacing:.1em;
     text-transform:uppercase;
-    transition:color .18s ease;
+    transition:background .18s ease,transform .18s ease;
   }
   .hub-feedback-link svg{
-    width:16px;
-    height:16px;
+    width:17px;
+    height:17px;
     flex:none;
     fill:none;
     stroke:var(--hub-red);
-    stroke-width:1.7;
+    stroke-width:1.9;
     stroke-linecap:round;
     stroke-linejoin:round;
     transition:transform .18s ease;
   }
-  .hub-feedback-link:hover{color:#fff}
+  .hub-feedback-link:hover{
+    background:#fff;
+    transform:translateY(-1px);
+  }
   .hub-feedback-link:hover svg{transform:translate(3px,-3px)}
 
   .hub-freelancers{
@@ -752,18 +768,33 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     .hub-event-meta{flex-direction:row;justify-content:space-between;gap:16px}
     .hub-event-title-row h2{font-size:clamp(3rem,5vw,4.35rem)}
     .hub-empty{grid-template-columns:70px 1fr auto;align-items:center;padding:32px}
-    .hub-feedback{padding-bottom:46px}
+    .hub-feedback{padding-bottom:52px}
     .hub-feedback-inner{
-      min-height:88px;
-      grid-template-columns:38px minmax(0,1fr) auto;
-      gap:20px;
-      padding:18px 0;
+      min-height:116px;
+      grid-template-columns:128px minmax(0,1fr) auto;
+      align-items:stretch;
     }
-    .hub-feedback-icon{width:38px;height:38px}
-    .hub-feedback-icon svg{width:18px;height:18px}
-    .hub-feedback-copy strong{font-size:1.5rem}
-    .hub-feedback-copy p{font-size:.74rem}
-    .hub-feedback-link{grid-column:auto}
+    .hub-feedback-marker{
+      min-height:116px;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:center;
+      gap:11px;
+      padding:20px 21px;
+    }
+    .hub-feedback-marker svg{width:22px;height:22px}
+    .hub-feedback-copy{
+      align-self:center;
+      padding:20px 30px;
+    }
+    .hub-feedback-copy strong{font-size:2rem}
+    .hub-feedback-copy p{font-size:.76rem}
+    .hub-feedback-link{
+      align-self:center;
+      min-height:46px;
+      margin:0 24px 0 0;
+      padding:0 17px;
+    }
     .hub-freelancers{padding-bottom:64px}
     .hub-freelancers-inner{grid-template-columns:130px minmax(0,1fr) auto;gap:30px;align-items:end;padding-top:34px}
     .hub-freelancers-copy h2{font-size:clamp(2.8rem,5.4vw,4.4rem)}
