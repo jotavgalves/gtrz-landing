@@ -114,6 +114,23 @@ const dateLong=eventStartIso?capitalizeFirst(new Intl.DateTimeFormat(isEs?'es-VE
 const dateShort=eventStartIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{day:'2-digit',month:'short',timeZone:eventTimeZone}).format(new Date(eventStartIso)).replace('.','').toUpperCase():'';
 const timeStart=eventStartIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:eventTimeZone}).format(new Date(eventStartIso)):'';
 const timeEnd=eventEndIso?new Intl.DateTimeFormat(isEs?'es-VE':'pt-BR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:eventTimeZone}).format(new Date(eventEndIso)):'';
+const eventTitle=loc?.seo_title||loc?.title||event?.slug||'GTRZ Eventos';
+const eventShareTitle=event?(`${eventTitle} · GTRZ Eventos`):eventTitle;
+const eventSeoDescription=event
+  ?(loc?.summary||(
+    isEs
+      ?`${eventTitle} — ${dateLong}${event.venue_name?` en ${event.venue_name}`:''}, ${event.city}${event.state?` · ${event.state}`:''}. Entradas e información oficial de GTRZ Eventos.`
+      :`${eventTitle} — ${dateLong}${event.venue_name?` em ${event.venue_name}`:''}, ${event.city}${event.state?` · ${event.state}`:''}. Ingressos e informações oficiais da GTRZ Eventos.`
+  ))
+  :(isEs?'Evento GTRZ no disponible.':'Evento GTRZ não disponível.');
+const canonicalPtUrl=new URL(`/eventos/${encodeURIComponent(slug||'')}`,Astro.url.origin).toString();
+const canonicalEsUrl=new URL(`/es/eventos/${encodeURIComponent(slug||'')}`,Astro.url.origin).toString();
+const canonicalUrl=isEs?canonicalEsUrl:canonicalPtUrl;
+const eventOgImage=heroMedia||posterMedia||logoMedia||'';
+const eventOgImageAlt=isEs
+  ?`Arte oficial de ${eventTitle}, evento de GTRZ Eventos`
+  :`Arte oficial de ${eventTitle}, evento da GTRZ Eventos`;
+
 const eventTerms=isEs?{
   eyebrow:'INFORMACIÓN IMPORTANTE',
   title:'TÉRMINOS DEL EVENTO',
@@ -178,7 +195,17 @@ const eventTerms=isEs?{
   accept:'A aquisição do ingresso implica ciência destas condições e das informações específicas divulgadas para esta edição.'
 };
 ---
-<SiteLayout locale={locale} title={loc?.seo_title||loc?.title||site.settings?.chrome?.[locale==='es'?'metaTitleEs':'metaTitlePt']||'GTRZ Eventos'} settings={site.settings}>
+<SiteLayout
+  locale={locale}
+  title={eventShareTitle}
+  description={eventSeoDescription}
+  settings={site.settings}
+  canonicalUrl={canonicalUrl}
+  alternatePtUrl={canonicalPtUrl}
+  alternateEsUrl={canonicalEsUrl}
+  ogImage={eventOgImage}
+  ogImageAlt={eventOgImageAlt}
+>
   {event ? <main class={`event-premium ${eventEnded?'event-finished':''}`} style={`--event-accent:${theme.primary||'#ff1a12'};--event-bg:${theme.background||'#090909'};--event-fg:${theme.foreground||'#fffdf8'}`}>
     <section class="event-premium-hero" data-section="event_hero">
       <div class="event-premium-hero-bg">{backgroundMedia&&<img src={backgroundMedia} alt="" />}</div>
