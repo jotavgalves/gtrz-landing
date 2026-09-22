@@ -74,7 +74,7 @@ const cssVars=`--popup-width:${clamp(visual.modalWidth,760,1120,940)}px;--headli
           const fontId=titleDesign.fontMediaId||null;
           const fontName=`GTRZPopupTitle_${String(event.id).replace(/[^a-zA-Z0-9_]/g,'')}`;
           const textShadow=glowEnabled?`0 0 ${glowBlur}px color-mix(in srgb, ${glowColor} ${Math.round(glowOpacity*100)}%, transparent)`:undefined;
-          return <a class="popup-event-option" href={`/eventos/${event.slug}?lang=${locale}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
+          return <a class="popup-event-option" href={isEs?`/es/eventos/${event.slug}`:`/eventos/${event.slug}`} data-track={`popup.event.${event.slug}`} data-track-event="popup_click">
             {fontId&&<style is:inline>{`@font-face{font-family:"${fontName}";src:url("${mediaUrl(fontId)}");font-display:swap}`}</style>}
             <div class:list={["popup-event-media",artwork?'has-art':'no-art']}>
               {artwork?<img src={artwork} alt={event.title||event.slug} loading="eager"/>:<div class="popup-media-placeholder" aria-hidden="true"><span>GTRZ</span></div>}
