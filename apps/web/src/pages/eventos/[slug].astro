@@ -184,7 +184,9 @@ const eventTerms=isEs?{
       <div class="event-premium-hero-bg">{backgroundMedia&&<img src={backgroundMedia} alt="" />}</div>
       <div class="event-shell">
         <a class="event-back event-back-hero" href={eventListHref} aria-label={isEs?'Volver a eventos':'Voltar aos eventos'}>
-          <span class="event-back-arrow" aria-hidden="true">←</span>
+          <svg class="event-back-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M11.75 4.75 6.5 10l5.25 5.25M6.75 10h7.75" />
+          </svg>
           <span>{backToEventsLabel}</span>
         </a>
         <div class={`event-hero-grid-premium ${posterMedia?'has-poster':'no-poster'}`}>
