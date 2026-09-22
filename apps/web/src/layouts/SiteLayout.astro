@@ -141,7 +141,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || '';
   </head>
   <body>
     <Header locale={locale} chrome={chrome} compact={hubMode} instagramUrl={instagramUrl} />
-    {!hubMode&&<LanguageGate locale={locale} chrome={chrome} />}
+    {!hubMode&&Astro.url.pathname==='/'&&<LanguageGate locale={locale} chrome={chrome} />}
     <slot />
     <GtrzFooter locale={locale} settings={settings} />
     <script is:inline>
