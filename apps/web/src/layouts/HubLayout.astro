@@ -1,13 +1,19 @@
 ---
 import type { Locale } from '@/lib/cms';
 
-const { locale } = Astro.props as { locale:Locale };
+const { locale, ogImage='' } = Astro.props as { locale:Locale; ogImage?:string };
 const es=locale==='es';
 const apiBase=import.meta.env.PUBLIC_API_BASE||'';
 const title=es?'GTRZ Eventos — Próximas noches':'GTRZ Eventos — Próximas noites';
 const description=es
   ?'Agenda oficial de eventos GTRZ. Elige tu próxima noche.'
   :'Agenda oficial de eventos GTRZ. Escolha sua próxima noite.';
+const canonicalPtUrl=new URL('/',Astro.url.origin).toString();
+const canonicalEsUrl=new URL('/?lang=es',Astro.url.origin).toString();
+const canonicalUrl=es?canonicalEsUrl:canonicalPtUrl;
+const absoluteOgImage=ogImage?new URL(ogImage,Astro.url.origin).toString():'';
+const socialLocale=es?'es_ES':'pt_BR';
+const socialLocaleAlternate=es?'pt_BR':'es_ES';
 ---
 <!doctype html>
 <html lang={es?'es':'pt-BR'}>
@@ -17,6 +23,27 @@ const description=es
     <meta name="theme-color" content="#070707" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="pt-BR" href={canonicalPtUrl} />
+    <link rel="alternate" hreflang="es" href={canonicalEsUrl} />
+    <link rel="alternate" hreflang="x-default" href={canonicalPtUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="GTRZ Eventos" />
+    <meta property="og:locale" content={socialLocale} />
+    <meta property="og:locale:alternate" content={socialLocaleAlternate} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {absoluteOgImage&&<meta property="og:image" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta property="og:image:secure_url" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta property="og:image:alt" content={es?'Próximos eventos de GTRZ Eventos':'Próximos eventos da GTRZ Eventos'} />}
+
+    <meta name="twitter:card" content={absoluteOgImage?'summary_large_image':'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {absoluteOgImage&&<meta name="twitter:image" content={absoluteOgImage} />}
+    {absoluteOgImage&&<meta name="twitter:image:alt" content={es?'Próximos eventos de GTRZ Eventos':'Próximos eventos da GTRZ Eventos'} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
