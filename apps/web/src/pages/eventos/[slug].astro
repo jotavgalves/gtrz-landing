@@ -12,7 +12,7 @@ const isEs=locale==='es';
 const site=await getHomePage();
 const c=getPublicCopy(site.settings,locale,'eventPage');
 const eventListHref=isEs?'/?lang=es#eventos':'/#eventos';
-const backToEventsLabel=isEs?'VOLVER A EVENTOS':'VOLTAR AOS EVENTOS';
+const backToEventsLabel='EVENTOS';
 let payload:any=null;
 try{payload=await publicApi<any>(`/api/public/events/${encodeURIComponent(slug||'')}`)}catch{Astro.response.status=404}
 const loc=payload?.localizations?.find((x:any)=>x.locale===locale)||payload?.localizations?.find((x:any)=>x.locale==='pt-BR')||payload?.localizations?.[0];
@@ -183,8 +183,8 @@ const eventTerms=isEs?{
     <section class="event-premium-hero" data-section="event_hero">
       <div class="event-premium-hero-bg">{backgroundMedia&&<img src={backgroundMedia} alt="" />}</div>
       <div class="event-shell">
-        <a class="event-back event-back-hero" href={eventListHref} aria-label={backToEventsLabel}>
-          <span class="event-back-icon" aria-hidden="true">←</span>
+        <a class="event-back event-back-hero" href={eventListHref} aria-label={isEs?'Volver a eventos':'Voltar aos eventos'}>
+          <span class="event-back-arrow" aria-hidden="true">←</span>
           <span>{backToEventsLabel}</span>
         </a>
         <div class={`event-hero-grid-premium ${posterMedia?'has-poster':'no-poster'}`}>
