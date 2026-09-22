@@ -2,6 +2,7 @@
 import type { CmsEvent,Locale,SiteSettings } from '@/lib/cms';
 import { API_BASE } from '@/lib/api';
 import LanguageGate from '@/components/LanguageGate.astro';
+import GtrzFooter from '@/components/GtrzFooter.astro';
 
 const {events,locale,siteSettings={}}=Astro.props as {events:CmsEvent[];locale:Locale;siteSettings?:SiteSettings};
 const es=locale==='es';
@@ -255,11 +256,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     </section>
   </main>
 
-  <footer class="hub-footer hub-shell">
-    <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
-    <span>{copy.footer}</span>
-    <a href={instagram} target="_blank" rel="noreferrer" data-track="hub.footer.instagram">@gtrzeventos</a>
-  </footer>
+  <GtrzFooter locale={locale} settings={siteSettings} />
 </div>
 
 <style>
