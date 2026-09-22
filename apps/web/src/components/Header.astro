@@ -7,6 +7,10 @@ const defaultEs:[string,string][]=[['Sobre','#sobre'],['Ritmos','#ritmos'],['Dif
 const configured=es?chrome.navEs:chrome.navPt;
 const nav=Array.isArray(configured)&&configured.length?configured:(es?defaultEs:defaultPt);
 const onHome=Astro.url.pathname==='/'||Astro.url.pathname==='';
+const eventPathMatch=Astro.url.pathname.match(/^\/eventos\/[^/]+\/?$/);
+const eventPath=eventPathMatch?Astro.url.pathname.replace(/\/$/,''):'';
+const languagePtHref=eventPath||'?lang=pt-BR';
+const languageEsHref=eventPath?`/es${eventPath}`:'?lang=es';
 const homeUrl=`/?lang=${locale}`;
 const normalizeHref=(value:unknown)=>{
   const href=String(value||'');
@@ -36,8 +40,8 @@ const menuLabel=es?'Abrir navegación':'Abrir navegação';
     </nav>
     <div class="nav-actions">
       <div class="lang-switch" aria-label="Idioma">
-        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-astro-prefetch="viewport">{langPt}</a>
-        <a class:list={{active:es}} href="?lang=es" data-language="es" data-astro-prefetch="viewport">{langEs}</a>
+        <a class:list={{active:!es}} href={languagePtHref} data-language="pt-BR" data-astro-prefetch="viewport">{langPt}</a>
+        <a class:list={{active:es}} href={languageEsHref} data-language="es" data-astro-prefetch="viewport">{langEs}</a>
       </div>
       {!compact&&<a class="events-btn" href={eventsHref} data-track="nav.events">{eventsLabel}</a>}
       <button class:list={['mobile-menu-button',compact&&'compact-menu-button']}  type="button" aria-expanded="false" aria-controls="mobileNav" aria-label={menuLabel} data-mobile-menu-button><span></span></button>
