@@ -55,7 +55,6 @@ const instagramUrl=typeof settings.social?.instagram==='string'
 const title=Astro.props.title||(locale==='es'?(chrome.metaTitleEs||'GTRZ Eventos'):(chrome.metaTitlePt||'GTRZ Eventos'));
 const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
 const configuredDescription=locale==='es'?chrome.metaDescriptionEs:chrome.metaDescriptionPt;
-const configuredFooter=locale==='es'?chrome.footerEs:chrome.footerPt;
 const defaultDescription=configuredDescription&&!legacyCountryFocus.test(configuredDescription)
   ?configuredDescription
   :(locale==='es'?'GTRZ Eventos — fiestas, música y experiencias para una comunidad latina multicultural.':'GTRZ Eventos — festas, música e experiências para uma comunidade latina multicultural.');
@@ -63,9 +62,6 @@ const description=Astro.props.description||defaultDescription;
 const absoluteOgImage=ogImage?new URL(ogImage,Astro.url.origin).toString():'';
 const socialLocale=locale==='es'?'es_ES':'pt_BR';
 const socialLocaleAlternate=locale==='es'?'pt_BR':'es_ES';
-const footer=configuredFooter&&!legacyCountryFocus.test(configuredFooter)
-  ?configuredFooter
-  :(locale==='es'?'GTRZ Eventos · Cultura latina en movimiento':'GTRZ Eventos · Cultura latina em movimento');
 const apiBase = import.meta.env.PUBLIC_API_BASE || '';
 ---
 <!doctype html>
