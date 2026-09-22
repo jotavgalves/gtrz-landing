@@ -12,10 +12,11 @@ import { Commercial } from './modules/commercial/Commercial';
 import { Marketing } from './modules/marketing/Marketing';
 import { Media } from './modules/media/Media';
 import { Analytics } from './modules/analytics/Analytics';
+import { Feedback } from './modules/feedback/Feedback';
 import { Settings } from './modules/settings/Settings';
 import { System } from './modules/system/System';
 
-type View='dashboard'|'content'|'copy'|'events'|'people'|'commercial'|'marketing'|'media'|'analytics'|'settings'|'system';
+type View='dashboard'|'content'|'copy'|'events'|'people'|'feedback'|'commercial'|'marketing'|'media'|'analytics'|'settings'|'system';
 type NavItem={id:View;label:string;desc:string;icon:IconName;group:'Operação'|'Crescimento'|'Plataforma'};
 const items:NavItem[]=[
   {id:'dashboard',label:'Dashboard',desc:'Visão geral',icon:'dashboard',group:'Operação'},
@@ -23,6 +24,7 @@ const items:NavItem[]=[
   {id:'copy',label:'Textos do site',desc:'Interface pública · PT/ES',icon:'content',group:'Operação'},
   {id:'events',label:'Eventos',desc:'Agenda, identidade e ingressos',icon:'events',group:'Operação'},
   {id:'people',label:'Pessoas',desc:'Equipe e freelancers',icon:'people',group:'Operação'},
+  {id:'feedback',label:'Sugestões',desc:'Feedback das festas',icon:'activity',group:'Operação'},
   {id:'commercial',label:'Comercial',desc:'Parcerias e leads',icon:'commercial',group:'Crescimento'},
   {id:'marketing',label:'Marketing',desc:'Popups, campanhas e links',icon:'marketing',group:'Crescimento'},
   {id:'analytics',label:'Analytics',desc:'Aquisição e conversão',icon:'analytics',group:'Crescimento'},
@@ -126,7 +128,7 @@ export function App(){
       </header>
       <div className={`content-shell ${view==='copy'?'content-shell-editor':''}`}>
         {view!=='copy'&&<div className="page-intro"><div><span>{current.group}</span><h1>{current.label}</h1><p>{current.desc}</p></div><div className="page-intro-line"/></div>}
-        <div className="content">{view==='dashboard'?<Dashboard onNavigate={go}/>:view==='content'?<Content/>:view==='copy'?<PublicCopy/>:view==='events'?<Events/>:view==='people'?<People/>:view==='commercial'?<Commercial/>:view==='marketing'?<Marketing/>:view==='media'?<Media/>:view==='analytics'?<Analytics/>:view==='settings'?<Settings/>:<System/>}</div>
+        <div className="content">{view==='dashboard'?<Dashboard onNavigate={go}/>:view==='content'?<Content/>:view==='copy'?<PublicCopy/>:view==='events'?<Events/>:view==='people'?<People/>:view==='feedback'?<Feedback/>:view==='commercial'?<Commercial/>:view==='marketing'?<Marketing/>:view==='media'?<Media/>:view==='analytics'?<Analytics/>:view==='settings'?<Settings/>:<System/>}</div>
       </div>
     </main>
   </div>;
