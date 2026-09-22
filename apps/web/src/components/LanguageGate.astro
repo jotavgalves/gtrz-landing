@@ -1,6 +1,6 @@
 ---
 import type { ChromeSettings,Locale } from '@/lib/cms';
-const { locale, chrome={}, mode='default' } = Astro.props as { locale:Locale; chrome?:ChromeSettings; mode?:'default'|'session' };
+const { locale, chrome={}, mode='default' } = Astro.props as { locale:Locale; chrome?:ChromeSettings; mode?:'default'|'hub' };
 const es=locale==='es';
 const legacyCountryFocus=/Venezuela.*Brasil|Brasil.*Venezuela/i;
 const configuredEyebrow=es?(chrome.gateEyebrowEs||chrome.gateEyebrow):(chrome.gateEyebrowPt||chrome.gateEyebrow);
@@ -27,18 +27,67 @@ const optionEs=chrome.gateOptionEs||'Español';
     <p class="language-hint">{hint}</p>
   </div>
 </div>
-<script define:vars={{mode}}>
+<script define:vars={{mode,locale}}>
   const gate = document.querySelector('[data-language-gate]');
+  const isHomepage = location.pathname === '/' || location.pathname === '';
   let saved = null;
-  let seenThisSession = false;
+  let seenEver = false;
+  let firstVisitRedirect = false;
+
   try {
     saved = localStorage.getItem('gtrz_locale');
-    seenThisSession = sessionStorage.getItem('gtrz_language_gate_seen') === '1';
+    seenEver = localStorage.getItem('gtrz_language_gate_seen') === '1';
+    firstVisitRedirect = sessionStorage.getItem('gtrz_language_first_visit_redirect') === '1';
+
+    // Existing visitors may already have a saved locale from the previous flow.
+    // Treat that as a completed language choice so they are not interrupted again.
+    if (saved && !seenEver) {
+      localStorage.setItem('gtrz_language_gate_seen','1');
+      seenEver = true;
+    }
   } catch {}
-  const explicitLanguage = new URLSearchParams(location.search).has('lang');
-  const shouldOpen = mode === 'session'
-    ? !seenThisSession
-    : (!saved && !explicitLanguage);
+
+  const params = new URLSearchParams(location.search);
+  const explicitLanguage = params.has('lang');
+  const currentLocale = locale === 'es' ? 'es' : 'pt-BR';
+  const browserLocale = (() => {
+    const languages = Array.isArray(navigator.languages) && navigator.languages.length
+      ? navigator.languages
+      : [navigator.language || ''];
+    return languages.some((value) => String(value).toLowerCase().startsWith('es')) ? 'es' : 'pt-BR';
+  })();
+
+  const redirectToLocale = (target) => {
+    if (!isHomepage || target === currentLocale) return false;
+    const next = new URL(location.href);
+    if (target === 'es') next.searchParams.set('lang','es');
+    else next.searchParams.set('lang','pt-BR');
+    location.replace(next.toString());
+    return true;
+  };
+
+  if (isHomepage) {
+    if (!seenEver && !saved && !explicitLanguage) {
+      // First absolute visit: render in the browser language, then show the
+      // one-time selector so the visitor can confirm or change it.
+      if (browserLocale !== currentLocale) {
+        try { sessionStorage.setItem('gtrz_language_first_visit_redirect','1'); } catch {}
+        redirectToLocale(browserLocale);
+      }
+    } else if (seenEver && !explicitLanguage && saved && saved !== currentLocale) {
+      // Returning visitor: open immediately in the last language used.
+      redirectToLocale(saved);
+    } else if (explicitLanguage && !firstVisitRedirect) {
+      // A language-explicit shared URL is already a clear preference.
+      try {
+        localStorage.setItem('gtrz_locale',currentLocale);
+        localStorage.setItem('gtrz_language_gate_seen','1');
+      } catch {}
+      seenEver = true;
+    }
+  }
+
+  const shouldOpen = isHomepage && !seenEver && (!explicitLanguage || firstVisitRedirect);
 
   if (shouldOpen && gate) {
     gate.hidden = false;
@@ -50,11 +99,13 @@ const optionEs=chrome.gateOptionEs||'Español';
   document.querySelectorAll('[data-first-language]').forEach((el)=>el.addEventListener('click',()=>{
     try {
       localStorage.setItem('gtrz_locale',el.dataset.firstLanguage || 'pt-BR');
-      sessionStorage.setItem('gtrz_language_gate_seen','1');
-      if (mode === 'session') sessionStorage.removeItem('gtrz_language_handoff');
+      localStorage.setItem('gtrz_language_gate_seen','1');
+      sessionStorage.removeItem('gtrz_language_first_visit_redirect');
+      sessionStorage.removeItem('gtrz_language_gate_seen');
+      if (mode === 'hub') sessionStorage.removeItem('gtrz_language_handoff');
       else sessionStorage.setItem('gtrz_language_handoff','1');
     } catch {}
-    if (mode !== 'session') document.documentElement.classList.add('gtrz-popup-handoff');
+    if (mode !== 'hub') document.documentElement.classList.add('gtrz-popup-handoff');
     document.body.classList.remove('modal-open');
   }));
 </script>
