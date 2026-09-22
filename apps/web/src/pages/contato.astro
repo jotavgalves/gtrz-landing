@@ -1,0 +1,73 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import UtilityPage from '@/components/UtilityPage.astro';
+import { getHomePage } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+
+const locale:Locale=Astro.url.searchParams.get('lang')==='es'?'es':'pt-BR';
+const es=locale==='es';
+const site=await getHomePage();
+const general=site.settings.general||{};
+const social=site.settings.social||{};
+const instagram=typeof social.instagram==='string'&&social.instagram
+  ?String(social.instagram)
+  :typeof social.instagramUrl==='string'&&social.instagramUrl
+    ?String(social.instagramUrl)
+    :'https://instagram.com/gtrzeventos';
+const email=general.contactEmail||'';
+const whatsapp=general.contactWhatsapp||'';
+const whatsappHref=whatsapp?`https://wa.me/${String(whatsapp).replace(/\D/g,'')}`:'';
+const canonicalPt=new URL('/contato',Astro.url.origin).toString();
+const canonicalEs=new URL('/contato?lang=es',Astro.url.origin).toString();
+const copy=es?{
+  eyebrow:'CONTACTO',
+  title:'HABLE CON GTRZ.',
+  intro:'Canales oficiales para dudas sobre eventos, atención y producciones.',
+  instagram:'INSTAGRAM',
+  instagramText:'Sigue y contacta a GTRZ por nuestro perfil oficial.',
+  email:'E-MAIL',
+  emailText:'Utiliza el e-mail para asuntos institucionales y atención.',
+  whatsapp:'WHATSAPP',
+  whatsappText:'Cuando esté disponible, este es el canal directo de atención de GTRZ.',
+  note:'Utiliza siempre los canales oficiales publicados en gtrz.com.br.'
+}:{
+  eyebrow:'CONTATO',
+  title:'FALE COM A GTRZ.',
+  intro:'Canais oficiais para dúvidas sobre eventos, atendimento e produções.',
+  instagram:'INSTAGRAM',
+  instagramText:'Acompanhe e fale com a GTRZ pelo nosso perfil oficial.',
+  email:'E-MAIL',
+  emailText:'Use o e-mail para assuntos institucionais e atendimento.',
+  whatsapp:'WHATSAPP',
+  whatsappText:'Quando disponível, este é o canal direto de atendimento da GTRZ.',
+  note:'Utilize sempre os canais oficiais publicados em gtrz.com.br.'
+};
+---
+<SiteLayout
+  locale={locale}
+  settings={site.settings}
+  title={es?'Contacto · GTRZ Eventos':'Contato · GTRZ Eventos'}
+  description={copy.intro}
+  canonicalUrl={es?canonicalEs:canonicalPt}
+  alternatePtUrl={canonicalPt}
+  alternateEsUrl={canonicalEs}
+>
+  <UtilityPage eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro}>
+    <div class="utility-block">
+      <h2>{copy.instagram}</h2>
+      <p>{copy.instagramText}</p>
+      <a class="utility-link" href={instagram} target="_blank" rel="noreferrer">@gtrzeventos</a>
+    </div>
+    {email&&<div class="utility-block">
+      <h2>{copy.email}</h2>
+      <p>{copy.emailText}</p>
+      <a class="utility-link" href={`mailto:${email}`}>{email}</a>
+    </div>}
+    {whatsappHref&&<div class="utility-block">
+      <h2>{copy.whatsapp}</h2>
+      <p>{copy.whatsappText}</p>
+      <a class="utility-link" href={whatsappHref} target="_blank" rel="noreferrer">{whatsapp}</a>
+    </div>}
+    <div class="utility-block"><p class="utility-meta">{copy.note}</p></div>
+  </UtilityPage>
+</SiteLayout>

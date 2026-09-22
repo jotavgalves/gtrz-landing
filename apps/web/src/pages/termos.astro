@@ -1,0 +1,66 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import UtilityPage from '@/components/UtilityPage.astro';
+import { getHomePage } from '@/lib/cms';
+import type { Locale } from '@/lib/cms';
+
+const locale:Locale=Astro.url.searchParams.get('lang')==='es'?'es':'pt-BR';
+const es=locale==='es';
+const site=await getHomePage();
+const canonicalPt=new URL('/termos',Astro.url.origin).toString();
+const canonicalEs=new URL('/termos?lang=es',Astro.url.origin).toString();
+const copy=es?{
+  eyebrow:'TÉRMINOS',
+  title:'TÉRMINOS DE USO.',
+  intro:'Condiciones generales para el uso de gtrz.com.br. Las reglas específicas de cada evento continúan publicadas en su página oficial.',
+  use:'USO DEL SITIO',
+  useText:'El sitio reúne información institucional, agenda de eventos, canales de compra, contenidos y formularios de GTRZ. El usuario debe utilizar estos recursos de forma lícita y sin intentar comprometer la seguridad, disponibilidad o funcionamiento de la plataforma.',
+  events:'EVENTOS Y ENTRADAS',
+  eventsText:'Fechas, horarios, locales, lotes, precios, disponibilidad y condiciones pueden variar según cada edición. Antes de comprar, verifica la página oficial del evento y las condiciones mostradas en el canal de venta utilizado.',
+  specific:'REGLAS ESPECÍFICAS',
+  specificText:'Las condiciones de acceso, reembolso, conducta, edad, alimentos, bebidas, registro audiovisual y demás reglas propias de una edición se presentan en la respectiva página del evento. En caso de divergencia, deben observarse las condiciones específicas divulgadas para aquella edición y la legislación aplicable.',
+  external:'SERVICIOS EXTERNOS',
+  externalText:'Algunos enlaces pueden dirigir a servicios de terceros, como plataformas de entradas, mapas, redes sociales o mensajería. Esos servicios poseen sus propios términos, políticas y condiciones de funcionamiento.',
+  intellectual:'CONTENIDO Y MARCA',
+  intellectualText:'La identidad visual, marcas, textos, piezas y materiales de GTRZ no pueden ser reproducidos o utilizados de forma que sugiera asociación, autorización o patrocinio inexistentes, sin perjuicio de los usos permitidos por la legislación.',
+  changes:'ACTUALIZACIONES',
+  changesText:'Estos términos pueden actualizarse para acompañar cambios en los servicios, en la operación del sitio o en requisitos legales. La versión vigente será la publicada en esta página.',
+  contact:'CONTACTAR A GTRZ'
+}:{
+  eyebrow:'TERMOS',
+  title:'TERMOS DE USO.',
+  intro:'Condições gerais para utilização de gtrz.com.br. As regras específicas de cada evento continuam publicadas em sua página oficial.',
+  use:'USO DO SITE',
+  useText:'O site reúne informações institucionais, agenda de eventos, canais de compra, conteúdos e formulários da GTRZ. O usuário deve utilizar esses recursos de forma lícita e sem tentar comprometer a segurança, disponibilidade ou funcionamento da plataforma.',
+  events:'EVENTOS E INGRESSOS',
+  eventsText:'Datas, horários, locais, lotes, preços, disponibilidade e condições podem variar conforme cada edição. Antes da compra, confira a página oficial do evento e as condições apresentadas no canal de venda utilizado.',
+  specific:'REGRAS ESPECÍFICAS',
+  specificText:'As condições de acesso, reembolso, conduta, idade, alimentos, bebidas, registro audiovisual e demais regras próprias de uma edição são apresentadas na respectiva página do evento. Em caso de divergência, devem ser observadas as condições específicas divulgadas para aquela edição e a legislação aplicável.',
+  external:'SERVIÇOS EXTERNOS',
+  externalText:'Alguns links podem direcionar a serviços de terceiros, como plataformas de ingressos, mapas, redes sociais ou mensageria. Esses serviços possuem seus próprios termos, políticas e condições de funcionamento.',
+  intellectual:'CONTEÚDO E MARCA',
+  intellectualText:'A identidade visual, marcas, textos, peças e materiais da GTRZ não podem ser reproduzidos ou utilizados de forma que sugira associação, autorização ou patrocínio inexistentes, sem prejuízo dos usos permitidos pela legislação.',
+  changes:'ATUALIZAÇÕES',
+  changesText:'Estes termos podem ser atualizados para acompanhar mudanças nos serviços, na operação do site ou em requisitos legais. A versão vigente será a publicada nesta página.',
+  contact:'FALAR COM A GTRZ'
+};
+const q=es?'?lang=es':'';
+---
+<SiteLayout
+  locale={locale}
+  settings={site.settings}
+  title={es?'Términos de uso · GTRZ Eventos':'Termos de uso · GTRZ Eventos'}
+  description={copy.intro}
+  canonicalUrl={es?canonicalEs:canonicalPt}
+  alternatePtUrl={canonicalPt}
+  alternateEsUrl={canonicalEs}
+>
+  <UtilityPage eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro}>
+    <div class="utility-block"><h2>{copy.use}</h2><p>{copy.useText}</p></div>
+    <div class="utility-block"><h2>{copy.events}</h2><p>{copy.eventsText}</p></div>
+    <div class="utility-block"><h2>{copy.specific}</h2><p>{copy.specificText}</p></div>
+    <div class="utility-block"><h2>{copy.external}</h2><p>{copy.externalText}</p></div>
+    <div class="utility-block"><h2>{copy.intellectual}</h2><p>{copy.intellectualText}</p></div>
+    <div class="utility-block"><h2>{copy.changes}</h2><p>{copy.changesText}</p><a class="utility-link" href={`/contato${q}`}>{copy.contact}</a></div>
+  </UtilityPage>
+</SiteLayout>
