@@ -342,8 +342,15 @@ const eventTerms=isEs?{
 
     <section class="event-instagram-premium" data-section="event_instagram" data-section-theme={sectionTheme('instagram')} style={sectionStyle('instagram')}><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos</a></div></section>
 
-    {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy"><div><small>{isEs?'ENTRADAS':'INGRESSOS'}</small><strong>{firstPurchasable.copy.title||firstPurchasable.name} · {money(firstPurchasable.price_cents,firstPurchasable.currency||'BRL')}</strong></div><a href="#ingressos">{isEs?'COMPRAR':'COMPRAR'}</a></div>}
+    {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy" data-event-mobile-buy aria-hidden="true">
+      <div>
+        <small>{loc?.title||event.slug}</small>
+        <strong>{firstPurchasable.price_cents!=null?money(firstPurchasable.price_cents,firstPurchasable.currency||'BRL'):(isEs?'ENTRADA DISPONIBLE':'INGRESSO DISPONÍVEL')}</strong>
+      </div>
+      <a href="#ingressos" data-track="event.mobile_buy">{isEs?'COMPRAR':'COMPRAR'}</a>
+    </div>}
 
     <script src="/event-countdown.js" defer></script>
+    <script src="/event-mobile-buy.js" defer></script>
   </main>:<main class="event-not-found-premium"><div class="event-shell"><span class="event-eyebrow">404</span><h1>{c.notFoundTitle}</h1><a href={`/?lang=${locale}`}>{c.notFoundCta}</a></div></main>}
 </SiteLayout>
