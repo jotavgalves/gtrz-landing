@@ -1,0 +1,137 @@
+---
+import type { Locale, SiteSettings } from '@/lib/cms';
+
+const {locale,settings={}}=Astro.props as {locale:Locale;settings?:SiteSettings};
+const es=locale==='es';
+const instagram=typeof settings.social?.instagram==='string'&&settings.social.instagram
+  ?String(settings.social.instagram)
+  :typeof settings.social?.instagramUrl==='string'&&settings.social.instagramUrl
+    ?String(settings.social.instagramUrl)
+    :'https://instagram.com/gtrzeventos';
+const langQuery=es?'?lang=es':'';
+const copy=es?{
+  instagram:'Instagram',
+  contact:'Contacto',
+  privacy:'Privacidad',
+  terms:'Términos',
+  freelancers:'Freelancers',
+  tagline:'CULTURA LATINA EN MOVIMIENTO'
+}:{
+  instagram:'Instagram',
+  contact:'Contato',
+  privacy:'Privacidade',
+  terms:'Termos',
+  freelancers:'Freelancers',
+  tagline:'CULTURA LATINA EM MOVIMENTO'
+};
+const year=new Date().getFullYear();
+---
+<footer class="gtrz-footer">
+  <div class="gtrz-footer-inner">
+    <div class="gtrz-footer-brand">
+      <img src="/brand/gtrz-wordmark.svg" alt="GTRZ" />
+      <span>{copy.tagline}</span>
+    </div>
+
+    <nav class="gtrz-footer-nav" aria-label={es?'Enlaces del pie de página':'Links do rodapé'}>
+      <a href={instagram} target="_blank" rel="noreferrer" data-track="footer.instagram">{copy.instagram}</a>
+      <a href={`/contato${langQuery}`} data-track="footer.contact">{copy.contact}</a>
+      <a href={`/privacidade${langQuery}`} data-track="footer.privacy">{copy.privacy}</a>
+      <a href={`/termos${langQuery}`} data-track="footer.terms">{copy.terms}</a>
+      <a href={`/trabalhe-conosco${langQuery}`} data-track="footer.freelancers">{copy.freelancers}</a>
+    </nav>
+
+    <div class="gtrz-footer-bottom">
+      <span>© {year} GTRZ Eventos</span>
+      <span>GTRZ · BRASIL</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .gtrz-footer{
+    width:100%;
+    background:#070707;
+    color:#fff;
+    border-top:1px solid rgba(255,255,255,.10);
+  }
+  .gtrz-footer-inner{
+    width:min(calc(100% - 28px),1320px);
+    margin-inline:auto;
+    padding:30px 0 24px;
+  }
+  .gtrz-footer-brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding-bottom:24px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .gtrz-footer-brand img{
+    width:78px;
+    opacity:.92;
+  }
+  .gtrz-footer-brand span{
+    color:#5f5956;
+    font-size:.52rem;
+    font-weight:800;
+    letter-spacing:.13em;
+    text-align:right;
+  }
+  .gtrz-footer-nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 22px;
+    padding:21px 0;
+  }
+  .gtrz-footer-nav a{
+    position:relative;
+    color:#99918d;
+    font-size:.61rem;
+    font-weight:800;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    transition:color .18s ease;
+  }
+  .gtrz-footer-nav a::after{
+    content:'';
+    position:absolute;
+    left:0;
+    right:100%;
+    bottom:-5px;
+    height:1px;
+    background:#fff;
+    transition:right .18s ease;
+  }
+  .gtrz-footer-nav a:hover{color:#fff}
+  .gtrz-footer-nav a:hover::after{right:0}
+  .gtrz-footer-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.08);
+    color:#57514e;
+    font-size:.50rem;
+    font-weight:800;
+    letter-spacing:.11em;
+    text-transform:uppercase;
+  }
+  @media(min-width:700px){
+    .gtrz-footer-inner{width:min(calc(100% - 48px),1320px);padding:36px 0 28px}
+    .gtrz-footer-brand img{width:88px}
+    .gtrz-footer-nav{gap:16px 30px;padding:24px 0}
+    .gtrz-footer-nav a{font-size:.63rem}
+  }
+  @media(max-width:470px){
+    .gtrz-footer-brand{align-items:flex-start}
+    .gtrz-footer-brand span{max-width:150px;line-height:1.5}
+    .gtrz-footer-nav{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+    .gtrz-footer-bottom{align-items:flex-start;flex-direction:column;gap:8px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .gtrz-footer-nav a,.gtrz-footer-nav a::after{transition:none}
+  }
+</style>
