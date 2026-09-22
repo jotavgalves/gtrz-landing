@@ -131,11 +131,11 @@ const eventOgImage=heroMedia||posterMedia||logoMedia||'';
 const eventOgImageAlt=isEs
   ?`Arte oficial de ${eventTitle}, evento de GTRZ Eventos`
   :`Arte oficial de ${eventTitle}, evento da GTRZ Eventos`;
-const feedbackHref=`/sugestoes?${new URLSearchParams({
-  ...(isEs?{lang:'es'}:{}),
-  evento:loc?.title||event?.slug||'',
-  origem:isEs?`/es/eventos/${slug||''}`:`/eventos/${slug||''}`
-}).toString()}`;
+const feedbackParams=new URLSearchParams();
+if(isEs)feedbackParams.set('lang','es');
+feedbackParams.set('evento',loc?.title||event?.slug||'');
+feedbackParams.set('origem',isEs?`/es/eventos/${slug||''}`:`/eventos/${slug||''}`);
+const feedbackHref=`/sugestoes?${feedbackParams.toString()}`;
 
 const eventTerms=isEs?{
   eyebrow:'INFORMACIÓN IMPORTANTE',
