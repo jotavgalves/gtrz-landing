@@ -5,10 +5,11 @@ import { audit } from '../../services/audit';
 export const dashboardAdminRoutes = new Hono<{ Bindings: Env }>();
 
 dashboardAdminRoutes.get('/dashboard', async (c) => {
-  const [events, freelancers, partnerships, visitors] = await Promise.all([
+  const [events, freelancers, partnerships, feedback, visitors] = await Promise.all([
     c.env.DB.prepare("SELECT COUNT(*) total FROM events WHERE status IN ('published','sales_open','sold_out')").first<{ total:number }>(),
     c.env.DB.prepare("SELECT COUNT(*) total FROM freelancer_applications WHERE status='new'").first<{ total:number }>(),
     c.env.DB.prepare("SELECT COUNT(*) total FROM partnership_leads WHERE status='new'").first<{ total:number }>(),
+    c.env.DB.prepare("SELECT COUNT(*) total FROM event_feedback WHERE status='new'").first<{ total:number }>(),
     c.env.DB.prepare("SELECT COUNT(DISTINCT session_hash) total FROM analytics_sessions_daily WHERE day >= date('now','-30 days')").first<{ total:number }>()
   ]);
   const metrics = await c.env.DB.prepare(
@@ -18,6 +19,7 @@ dashboardAdminRoutes.get('/dashboard', async (c) => {
     activeEvents: events?.total || 0,
     newFreelancers: freelancers?.total || 0,
     newPartnerships: partnerships?.total || 0,
+    newFeedback: feedback?.total || 0,
     uniqueVisitors30d: visitors?.total || 0,
     metrics: metrics.results
   });

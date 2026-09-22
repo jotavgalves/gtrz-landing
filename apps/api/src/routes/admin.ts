@@ -6,6 +6,7 @@ import { contentAdminRoutes } from './admin/content';
 import { eventsAdminRoutes } from './admin/events';
 import { peopleAdminRoutes } from './admin/people';
 import { marketingAdminRoutes } from './admin/marketing';
+import { feedbackAdminRoutes } from './admin/feedback';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
@@ -17,3 +18,4 @@ adminRoutes.route('/', contentAdminRoutes);
 adminRoutes.route('/', eventsAdminRoutes);
 adminRoutes.route('/', peopleAdminRoutes);
 adminRoutes.route('/', marketingAdminRoutes);
+adminRoutes.route('/', feedbackAdminRoutes);
