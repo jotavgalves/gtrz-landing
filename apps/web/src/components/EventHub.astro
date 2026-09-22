@@ -30,8 +30,8 @@ const copy=es?{
   emptyBody:'Sigue a GTRZ para recibir primero los próximos anuncios.',
   emptyCta:'SEGUIR EN INSTAGRAM',
   feedbackEyebrow:'TU OPINIÓN',
-  feedbackTitle:'¿HAY ALGO QUE PODRÍA SER MEJOR?',
-  feedbackBody:'Cuéntanos qué funcionó, qué cambiarías o qué te gustaría encontrar en una próxima edición.',
+  feedbackTitle:'TU OPINIÓN IMPORTA.',
+  feedbackBody:'¿Hay algo que podamos mejorar? Cuéntaselo a GTRZ.',
   feedbackCta:'ENVIAR SUGERENCIA',
   freelancerEyebrow:'OPORTUNIDADES',
   freelancerTitle:'SÉ PARTE DE LAS PRÓXIMAS PRODUCCIONES.',
@@ -55,8 +55,8 @@ const copy=es?{
   emptyBody:'Acompanhe a GTRZ para receber primeiro os próximos anúncios.',
   emptyCta:'SEGUIR NO INSTAGRAM',
   feedbackEyebrow:'SUA OPINIÃO',
-  feedbackTitle:'TEM ALGO QUE PODERIA SER MELHOR?',
-  feedbackBody:'Conte o que funcionou, o que você mudaria ou o que gostaria de encontrar em uma próxima edição.',
+  feedbackTitle:'SUA OPINIÃO IMPORTA.',
+  feedbackBody:'Tem algo que a gente pode melhorar? Conte pra GTRZ.',
   feedbackCta:'ENVIAR SUGESTÃO',
   freelancerEyebrow:'OPORTUNIDADES',
   freelancerTitle:'FAÇA PARTE DAS PRÓXIMAS PRODUÇÕES.',
@@ -246,7 +246,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
       )}
     </section>
 
-    <section class="hub-feedback hub-shell" data-section="feedback">
+    <section class="hub-feedback hub-shell" data-section="feedback" aria-label={copy.feedbackEyebrow}>
       <div class="hub-feedback-inner">
         <div class="hub-feedback-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
@@ -254,8 +254,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
           </svg>
         </div>
         <div class="hub-feedback-copy">
-          <span>{copy.feedbackEyebrow}</span>
-          <h2>{copy.feedbackTitle}</h2>
+          <strong>{copy.feedbackTitle}</strong>
           <p>{copy.feedbackBody}</p>
         </div>
         <a class="hub-feedback-link" href={es?'/sugestoes?lang=es':'/sugestoes'} data-track="hub.feedback">
@@ -595,42 +594,29 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-empty>a{width:max-content;padding:13px 16px;background:var(--hub-red);font-size:.59rem;font-weight:800;letter-spacing:.09em}
 
   .hub-feedback{
-    padding:0 0 34px;
+    padding:0 0 30px;
   }
   .hub-feedback-inner{
-    position:relative;
-    overflow:hidden;
     display:grid;
-    grid-template-columns:42px minmax(0,1fr);
-    gap:16px 18px;
+    grid-template-columns:36px minmax(0,1fr);
+    gap:13px 15px;
     align-items:center;
-    padding:24px 20px;
-    border:1px solid rgba(255,255,255,.11);
-    background:
-      radial-gradient(circle at 88% 18%,rgba(255,36,26,.1),transparent 18rem),
-      #0a0a0a;
-  }
-  .hub-feedback-inner::after{
-    content:'';
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:2px;
-    background:var(--hub-red);
+    padding:17px 2px;
+    border-top:1px solid rgba(255,255,255,.10);
+    border-bottom:1px solid rgba(255,255,255,.10);
   }
   .hub-feedback-icon{
-    width:42px;
-    height:42px;
+    width:36px;
+    height:36px;
     display:grid;
     place-items:center;
-    border:1px solid rgba(255,36,26,.25);
-    background:rgba(255,36,26,.06);
+    border-radius:50%;
+    background:rgba(255,36,26,.08);
     color:var(--hub-red);
   }
   .hub-feedback-icon svg{
-    width:20px;
-    height:20px;
+    width:17px;
+    height:17px;
     fill:none;
     stroke:currentColor;
     stroke-width:1.7;
@@ -638,63 +624,48 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     stroke-linejoin:round;
   }
   .hub-feedback-copy{min-width:0}
-  .hub-feedback-copy>span{
+  .hub-feedback-copy strong{
     display:block;
-    color:var(--hub-red);
-    font-size:.53rem;
-    font-weight:900;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-  }
-  .hub-feedback-copy h2{
-    margin:7px 0 0;
+    color:#f3efec;
     font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-    font-size:clamp(2.15rem,9vw,3.35rem);
+    font-size:1.35rem;
     font-weight:900;
-    line-height:.88;
-    letter-spacing:-.025em;
+    line-height:1;
+    letter-spacing:.015em;
     text-transform:uppercase;
   }
   .hub-feedback-copy p{
-    max-width:620px;
-    margin:10px 0 0;
-    color:#8c8581;
-    font-size:.78rem;
-    line-height:1.55;
+    margin:5px 0 0;
+    color:#756e6a;
+    font-size:.70rem;
+    line-height:1.45;
   }
   .hub-feedback-link{
-    grid-column:1 / -1;
-    width:100%;
-    min-height:46px;
-    display:flex;
+    grid-column:2;
+    width:max-content;
+    max-width:100%;
+    display:inline-flex;
     align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:0 15px;
-    border:1px solid rgba(255,255,255,.13);
-    color:#eee9e5;
-    font-size:.59rem;
+    gap:9px;
+    color:#b9b1ad;
+    font-size:.56rem;
     font-weight:900;
-    letter-spacing:.1em;
+    letter-spacing:.10em;
     text-transform:uppercase;
-    transition:border-color .18s ease,background .18s ease,color .18s ease;
+    transition:color .18s ease;
   }
   .hub-feedback-link svg{
-    width:18px;
-    height:18px;
+    width:16px;
+    height:16px;
     flex:none;
     fill:none;
     stroke:var(--hub-red);
-    stroke-width:1.8;
+    stroke-width:1.7;
     stroke-linecap:round;
     stroke-linejoin:round;
     transition:transform .18s ease;
   }
-  .hub-feedback-link:hover{
-    border-color:rgba(255,36,26,.45);
-    background:rgba(255,36,26,.045);
-    color:#fff;
-  }
+  .hub-feedback-link:hover{color:#fff}
   .hub-feedback-link:hover svg{transform:translate(3px,-3px)}
 
   .hub-freelancers{
@@ -781,13 +752,18 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     .hub-event-meta{flex-direction:row;justify-content:space-between;gap:16px}
     .hub-event-title-row h2{font-size:clamp(3rem,5vw,4.35rem)}
     .hub-empty{grid-template-columns:70px 1fr auto;align-items:center;padding:32px}
-    .hub-feedback{padding-bottom:42px}
-    .hub-feedback-inner{grid-template-columns:54px minmax(0,1fr) auto;gap:24px;padding:28px 26px}
-    .hub-feedback-icon{width:54px;height:54px}
-    .hub-feedback-icon svg{width:23px;height:23px}
-    .hub-feedback-copy h2{font-size:clamp(2.6rem,4.6vw,4rem)}
-    .hub-feedback-copy p{font-size:.84rem}
-    .hub-feedback-link{grid-column:auto;width:auto;min-height:48px;padding:0 18px}
+    .hub-feedback{padding-bottom:46px}
+    .hub-feedback-inner{
+      min-height:88px;
+      grid-template-columns:38px minmax(0,1fr) auto;
+      gap:20px;
+      padding:18px 0;
+    }
+    .hub-feedback-icon{width:38px;height:38px}
+    .hub-feedback-icon svg{width:18px;height:18px}
+    .hub-feedback-copy strong{font-size:1.5rem}
+    .hub-feedback-copy p{font-size:.74rem}
+    .hub-feedback-link{grid-column:auto}
     .hub-freelancers{padding-bottom:64px}
     .hub-freelancers-inner{grid-template-columns:130px minmax(0,1fr) auto;gap:30px;align-items:end;padding-top:34px}
     .hub-freelancers-copy h2{font-size:clamp(2.8rem,5.4vw,4.4rem)}
