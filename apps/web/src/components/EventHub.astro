@@ -98,7 +98,7 @@ const heroEvents=activeEvents.slice(0,2).map(event=>({
 const heroCities=[...new Set(activeEvents.map(event=>event.city).filter(Boolean))].slice(0,3).join(' · ');
 const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'pt-BR',{month:'long',year:'numeric'}).format(new Date(activeEvents[0].starts_at)).toUpperCase():'';
 ---
-<LanguageGate locale={locale} chrome={siteSettings.chrome||{}} mode="session" />
+<LanguageGate locale={locale} chrome={siteSettings.chrome||{}} mode="hub" />
 <div class="event-hub" id="top">
   <header class="hub-header">
     <a class="hub-brand" href="#top" aria-label="GTRZ Eventos" data-track="hub.logo">
@@ -109,8 +109,8 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
       <a class="hub-nav-events" href="#eventos" data-track="hub.nav.events">{copy.navEvents}</a>
       <a class="hub-nav-instagram" href={instagram} target="_blank" rel="noreferrer" data-track="hub.nav.instagram">{copy.navInstagram}</a>
       <div class="hub-lang" aria-label="Idioma">
-        <a class:list={{active:!es}} href="?lang=pt-BR" data-track="hub.lang.pt">PT</a>
-        <a class:list={{active:es}} href="?lang=es" data-track="hub.lang.es">ES</a>
+        <a class:list={{active:!es}} href="?lang=pt-BR" data-language="pt-BR" data-track="hub.lang.pt">PT</a>
+        <a class:list={{active:es}} href="?lang=es" data-language="es" data-track="hub.lang.es">ES</a>
       </div>
     </nav>
   </header>
@@ -258,6 +258,19 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
   <GtrzFooter locale={locale} settings={siteSettings} />
 </div>
+
+<script>
+  document.querySelectorAll('[data-language]').forEach((link)=>{
+    if (link.dataset.hubLanguageBound === '1') return;
+    link.dataset.hubLanguageBound = '1';
+    link.addEventListener('click',()=>{
+      try {
+        localStorage.setItem('gtrz_locale',link.dataset.language || 'pt-BR');
+        localStorage.setItem('gtrz_language_gate_seen','1');
+      } catch {}
+    });
+  });
+</script>
 
 <style>
   .event-hub{
