@@ -39,3 +39,82 @@ let resumeMediaId:string|null=null,resumeFileName:string|null=null;const file=is
 const appId=id(),noticeText=privacyNotice(privacyLocale);await c.env.DB.prepare(`INSERT INTO freelancer_applications(id,name,cpf,birth_date,email,whatsapp,postal_code,city,state,neighborhood,street,address_number,complement,instagram,roles_json,other_role,portfolio_url,resume_media_id,resume_file_name,availability,source,risk_flags_json,privacy_accepted,privacy_accepted_at,privacy_notice_version,privacy_notice_locale,privacy_notice_text) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,CURRENT_TIMESTAMP,?,?,?)`).bind(appId,name,cpf,birthDate,email,whatsapp,postalCode||null,city,state,neighborhood,street,addressNumber,complement||null,body.instagram?upper(body.instagram,160):null,JSON.stringify(roles),otherRole||null,body.portfolioUrl?String(body.portfolioUrl).trim().slice(0,1000):null,resumeMediaId,resumeFileName,availability,body.source?String(body.source).slice(0,160):null,JSON.stringify(riskFlags),PRIVACY_NOTICE_VERSION,privacyLocale,noticeText).run();return c.json({ok:true,id:appId,whatsapp:config.whatsapp},201)});
 
 publicRoutes.post('/partnerships',async(c)=>{const b=await c.req.json<any>().catch(()=>null);if(!b?.contactName||!b?.partnershipType)return c.json({error:'invalid_form'},400);if(!(await verifyTurnstile(c,b.turnstileToken)))return c.json({error:'challenge_failed'},400);if(!(await consumePublicFormQuota(c,'partnership')))return c.json({error:'rate_limited'},429);const leadId=id();await c.env.DB.prepare('INSERT INTO partnership_leads(id,contact_name,company_name,partnership_type,email,whatsapp,city,message,source,campaign) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(leadId,String(b.contactName).slice(0,160),b.companyName?String(b.companyName).slice(0,200):null,String(b.partnershipType).slice(0,80),b.email?String(b.email).slice(0,200):null,b.whatsapp?String(b.whatsapp).slice(0,50):null,b.city?String(b.city).slice(0,100):null,b.message?String(b.message).slice(0,5000):null,b.source?String(b.source).slice(0,160):null,b.campaign?String(b.campaign).slice(0,160):null).run();return c.json({ok:true,id:leadId},201)});
+
+const FEEDBACK_MAX_BODY_BYTES=12*1024;
+const feedbackSingleLine=(value:unknown,max:number)=>String(value??'')
+  .normalize('NFKC')
+  .replace(/[\u0000-\u001F\u007F\u202A-\u202E\u2066-\u2069]/g,' ')
+  .replace(/[<>]/g,'')
+  .replace(/\s+/g,' ')
+  .trim()
+  .slice(0,max);
+const feedbackMultiline=(value:unknown,max:number)=>String(value??'')
+  .normalize('NFKC')
+  .replace(/\r\n?/g,'\n')
+  .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u202A-\u202E\u2066-\u2069]/g,'')
+  .replace(/[<>]/g,'')
+  .split('\n')
+  .map(line=>line.replace(/[ \t]+/g,' ').trimEnd())
+  .join('\n')
+  .trim()
+  .slice(0,max);
+const feedbackSourcePath=(value:unknown)=>{
+  const cleaned=feedbackSingleLine(value,220);
+  return cleaned.startsWith('/')?cleaned:'/sugestoes';
+};
+
+publicRoutes.post('/feedback',async(c)=>{
+  const contentType=(c.req.header('content-type')||'').toLowerCase();
+  if(!contentType.includes('application/json'))return c.json({error:'unsupported_media_type'},415);
+
+  const declaredLength=Number(c.req.header('content-length')||0);
+  if(Number.isFinite(declaredLength)&&declaredLength>FEEDBACK_MAX_BODY_BYTES)return c.json({error:'payload_too_large'},413);
+
+  const raw=await c.req.text();
+  if(new TextEncoder().encode(raw).byteLength>FEEDBACK_MAX_BODY_BYTES)return c.json({error:'payload_too_large'},413);
+
+  let body:any=null;
+  try{body=JSON.parse(raw)}catch{return c.json({error:'invalid_form'},400)}
+  if(!body||typeof body!=='object'||Array.isArray(body))return c.json({error:'invalid_form'},400);
+
+  // Honeypot: accept silently without persisting to avoid teaching simple bots how they were detected.
+  if(feedbackSingleLine(body.website,200)){
+    await consumePublicFormQuota(c,'feedback-bot').catch(()=>false);
+    return c.json({ok:true},201,{'cache-control':'no-store'});
+  }
+
+  if(typeof body.anonymous!=='boolean')return c.json({error:'invalid_form'},400);
+
+  const eventName=feedbackSingleLine(body.eventName,80);
+  const anonymous=body.anonymous;
+  const name=anonymous?'':feedbackSingleLine(body.name,80);
+  const message=feedbackMultiline(body.message,1500);
+  const locale=body.locale==='es'?'es':'pt-BR';
+  const sourcePath=feedbackSourcePath(body.sourcePath);
+
+  if(eventName.length<2||eventName.length>80||message.length<5||message.length>1500||(!anonymous&&(name.length<2||name.length>80))){
+    return c.json({error:'invalid_form'},400);
+  }
+
+  if(!(await verifyTurnstile(c,typeof body.turnstileToken==='string'?body.turnstileToken:undefined))){
+    return c.json({error:'challenge_failed'},400);
+  }
+  if(!(await consumePublicFormQuota(c,'feedback')))return c.json({error:'rate_limited'},429);
+
+  const feedbackId=id();
+  await c.env.DB.prepare(`
+    INSERT INTO event_feedback(id,event_name,anonymous,name,message,locale,source_path,status)
+    VALUES(?,?,?,?,?,?,?,'new')
+  `).bind(
+    feedbackId,
+    eventName,
+    anonymous?1:0,
+    anonymous?null:name,
+    message,
+    locale,
+    sourcePath
+  ).run();
+
+  return c.json({ok:true,id:feedbackId},201,{'cache-control':'no-store'});
+});
+
