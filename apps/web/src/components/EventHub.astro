@@ -260,7 +260,7 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 </div>
 
 <script>
-  document.querySelectorAll('[data-language]').forEach((link)=>{
+  document.querySelectorAll<HTMLElement>('[data-language]').forEach((link)=>{
     if (link.dataset.hubLanguageBound === '1') return;
     link.dataset.hubLanguageBound = '1';
     link.addEventListener('click',()=>{
