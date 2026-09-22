@@ -56,10 +56,16 @@
 }
 
 .event-premium .event-back-arrow{
-  display:inline-block;
-  color:currentColor;
-  font-size:.95rem;
-  line-height:1;
+  display:block;
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+  overflow:visible;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
   transform:translateX(0);
   transition:transform .18s ease;
 }
@@ -1242,7 +1248,9 @@
     letter-spacing:.1em;
   }
   .event-premium .event-back-arrow{
-    font-size:.9rem;
+    width:15px;
+    height:15px;
+    flex-basis:15px;
   }
   .event-premium-hero{padding:92px 0 0}
   .event-hero-grid-premium{margin-top:36px;gap:34px}
