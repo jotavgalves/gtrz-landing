@@ -1,0 +1,96 @@
+---
+import type { Locale } from '@/lib/cms';
+
+const {locale,eventName,slug}=Astro.props as {locale:Locale;eventName:string;slug:string};
+const es=locale==='es';
+const params=new URLSearchParams();
+if(es)params.set('lang','es');
+params.set('evento',eventName);
+params.set('origem',es?`/es/eventos/${slug}`:`/eventos/${slug}`);
+const href=`/sugestoes?${params.toString()}`;
+---
+<section class="event-feedback-invite" aria-label={es?'Sugerencias sobre el evento':'Sugestões sobre o evento'}>
+  <div class="event-feedback-invite-inner">
+    <span>{es?'TU OPINIÓN':'SUA OPINIÃO'}</span>
+    <div>
+      <strong>{es?'AYUDA A MEJORAR LA PRÓXIMA.':'AJUDE A MELHORAR A PRÓXIMA.'}</strong>
+      <p>{es?'¿Algo podría ser mejor? Envíalo directamente al equipo de GTRZ.':'Algo poderia ser melhor? Envie diretamente para a equipe da GTRZ.'}</p>
+    </div>
+    <a href={href} data-track="event.feedback">{es?'ENVIAR SUGERENCIA':'ENVIAR SUGESTÃO'} <b aria-hidden="true">→</b></a>
+  </div>
+</section>
+
+<style>
+  .event-feedback-invite{
+    order:98;
+    padding:31px 0;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:#090909;
+    color:#f7f4ef;
+  }
+  .event-feedback-invite-inner{
+    width:min(1240px,calc(100% - 56px));
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:130px minmax(0,1fr) auto;
+    gap:28px;
+    align-items:center;
+  }
+  .event-feedback-invite-inner>span{
+    color:var(--event-accent,#ff1a12);
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+  }
+  .event-feedback-invite-inner strong{
+    display:block;
+    font-family:var(--font-display,'Arial Narrow',sans-serif);
+    font-size:clamp(1.65rem,3vw,2.5rem);
+    font-weight:900;
+    line-height:.94;
+    letter-spacing:-.025em;
+    text-transform:uppercase;
+  }
+  .event-feedback-invite-inner p{
+    max-width:620px;
+    margin:7px 0 0;
+    color:#8d8682;
+    font-size:.72rem;
+    line-height:1.55;
+  }
+  .event-feedback-invite-inner a{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:#f7f4ef;
+    font-size:.61rem;
+    font-weight:900;
+    letter-spacing:.09em;
+    text-decoration:none;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .event-feedback-invite-inner a b{
+    color:var(--event-accent,#ff1a12);
+    font-size:1rem;
+    transition:transform .18s ease;
+  }
+  .event-feedback-invite-inner a:hover b{transform:translateX(4px)}
+  @media(max-width:820px){
+    .event-feedback-invite-inner{
+      width:min(100% - 36px,1240px);
+      grid-template-columns:1fr;
+      gap:12px;
+      align-items:start;
+    }
+    .event-feedback-invite-inner a{margin-top:3px}
+  }
+  @media(max-width:620px){
+    .event-feedback-invite{padding:26px 0}
+    .event-feedback-invite-inner{width:min(100% - 28px,1240px)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .event-feedback-invite-inner a b{transition:none}
+  }
+</style>
