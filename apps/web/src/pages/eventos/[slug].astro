@@ -29,8 +29,7 @@ const eventSectionDefaults=[
   {id:'tickets',theme:'light'},
   {id:'location',theme:'dark'},
   {id:'terms',theme:'dark'},
-  {id:'instagram',theme:'light'},
-  {id:'feedback',theme:'dark'}
+  {id:'instagram',theme:'light'}
 ] as const;
 const defaultSectionIds=eventSectionDefaults.map(section=>section.id);
 const configuredSectionOrder=Array.isArray(theme.sectionOrder)?theme.sectionOrder.filter((id:any)=>defaultSectionIds.includes(id)):[];
@@ -131,11 +130,6 @@ const eventOgImage=heroMedia||posterMedia||logoMedia||'';
 const eventOgImageAlt=isEs
   ?`Arte oficial de ${eventTitle}, evento de GTRZ Eventos`
   :`Arte oficial de ${eventTitle}, evento da GTRZ Eventos`;
-const feedbackParams=new URLSearchParams();
-if(isEs)feedbackParams.set('lang','es');
-feedbackParams.set('evento',loc?.title||event?.slug||'');
-feedbackParams.set('origem',isEs?`/es/eventos/${slug||''}`:`/eventos/${slug||''}`);
-const feedbackHref=`/sugestoes?${feedbackParams.toString()}`;
 
 const eventTerms=isEs?{
   eyebrow:'INFORMACIÓN IMPORTANTE',
@@ -347,17 +341,6 @@ const eventTerms=isEs?{
     </section>
 
     <section class="event-instagram-premium" data-section="event_instagram" data-section-theme={sectionTheme('instagram')} style={sectionStyle('instagram')}><div class="event-shell event-instagram-inner"><div><span class="event-eyebrow">INSTAGRAM</span><h2 class="event-display">{isEs?'SIGUE LA EDICIÓN.':'ACOMPANHE A EDIÇÃO.'}</h2></div><a class="event-instagram-button" href={instagram} target="_blank" rel="noopener" data-track="event.instagram">@gtrzeventos</a></div></section>
-
-    <section class="event-feedback-strip" data-section="event_feedback" data-section-theme={sectionTheme('feedback')} style={sectionStyle('feedback')}>
-      <div class="event-shell event-feedback-inner">
-        <span class="event-eyebrow">{isEs?'TU OPINIÓN':'SUA OPINIÃO'}</span>
-        <div>
-          <strong>{isEs?'AYUDA A MEJORAR LA PRÓXIMA.':'AJUDE A MELHORAR A PRÓXIMA.'}</strong>
-          <p>{isEs?'¿Algo podría ser mejor? Envíalo directamente al equipo de GTRZ.':'Algo poderia ser melhor? Envie diretamente para a equipe da GTRZ.'}</p>
-        </div>
-        <a href={feedbackHref} data-track="event.feedback">{isEs?'ENVIAR SUGERENCIA':'ENVIAR SUGESTÃO'} <span aria-hidden="true">→</span></a>
-      </div>
-    </section>
 
     {firstPurchasable&&!eventEnded&&<div class="event-mobile-buy" data-event-mobile-buy aria-hidden="true">
       <div>
