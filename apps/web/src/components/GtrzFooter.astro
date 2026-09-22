@@ -14,13 +14,15 @@ const copy=es?{
   contact:'Contacto',
   privacy:'Privacidad',
   terms:'Términos',
-  freelancers:'Freelancers'
+  freelancers:'Freelancers',
+  suggestions:'Sugerencias'
 }:{
   instagram:'Instagram',
   contact:'Contato',
   privacy:'Privacidade',
   terms:'Termos',
-  freelancers:'Freelancers'
+  freelancers:'Freelancers',
+  suggestions:'Sugestões'
 };
 const year=new Date().getFullYear();
 ---
@@ -36,6 +38,7 @@ const year=new Date().getFullYear();
       <a href={`/privacidade${langQuery}`} data-track="footer.privacy">{copy.privacy}</a>
       <a href={`/termos${langQuery}`} data-track="footer.terms">{copy.terms}</a>
       <a href={`/trabalhe-conosco${langQuery}`} data-track="footer.freelancers">{copy.freelancers}</a>
+      <a href={`/sugestoes${langQuery}`} data-track="footer.suggestions">{copy.suggestions}</a>
     </nav>
 
     <span class="gtrz-footer-copy">© {year} GTRZ Eventos</span>
