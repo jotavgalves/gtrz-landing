@@ -27,6 +27,10 @@ const copy=es?{
   emptyTitle:'NUEVAS FECHAS EN CAMINO',
   emptyBody:'Sigue a GTRZ para recibir primero los próximos anuncios.',
   emptyCta:'SEGUIR EN INSTAGRAM',
+  freelancerEyebrow:'OPORTUNIDADES',
+  freelancerTitle:'SÉ PARTE DE LAS PRÓXIMAS PRODUCCIONES.',
+  freelancerBody:'Estamos ampliando nuestra base de freelancers para los eventos GTRZ.',
+  freelancerCta:'REGISTRO DE FREELANCERS',
   footer:'GTRZ EVENTOS · CULTURA LATINA EN MOVIMIENTO'
 }:{
   navEvents:'Eventos',
@@ -43,6 +47,10 @@ const copy=es?{
   emptyTitle:'NOVAS DATAS A CAMINHO',
   emptyBody:'Acompanhe a GTRZ para receber primeiro os próximos anúncios.',
   emptyCta:'SEGUIR NO INSTAGRAM',
+  freelancerEyebrow:'OPORTUNIDADES',
+  freelancerTitle:'FAÇA PARTE DAS PRÓXIMAS PRODUÇÕES.',
+  freelancerBody:'Estamos ampliando nossa base de freelancers para os eventos GTRZ.',
+  freelancerCta:'CADASTRO DE FREELANCERS',
   footer:'GTRZ EVENTOS · CULTURA LATINA EM MOVIMENTO'
 };
 
@@ -224,6 +232,26 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
           <a href={instagram} target="_blank" rel="noreferrer" data-track="hub.empty.instagram">{copy.emptyCta}</a>
         </div>
       )}
+    </section>
+
+    <section class="hub-freelancers hub-shell" data-section="freelancers">
+      <div class="hub-freelancers-inner">
+        <div class="hub-freelancers-kicker">{copy.freelancerEyebrow}</div>
+        <div class="hub-freelancers-copy">
+          <h2>{copy.freelancerTitle}</h2>
+          <p>{copy.freelancerBody}</p>
+        </div>
+        <a
+          class="hub-freelancers-link"
+          href={`/trabalhe-conosco?lang=${locale}`}
+          data-track="hub.freelancers"
+        >
+          <span>{copy.freelancerCta}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M7 17 17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
     </section>
   </main>
 
@@ -523,7 +551,67 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
   .hub-empty p{margin-bottom:0;color:#938985;line-height:1.55}
   .hub-empty>a{width:max-content;padding:13px 16px;background:var(--hub-red);font-size:.59rem;font-weight:800;letter-spacing:.09em}
 
-  .hub-footer{min-height:86px;border-top:1px solid var(--hub-line);display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;color:#67615e;font-size:.55rem;font-weight:800;letter-spacing:.10em}
+  .hub-freelancers{
+    padding:0 0 54px;
+  }
+  .hub-freelancers-inner{
+    display:grid;
+    gap:18px;
+    padding:28px 0 4px;
+    border-top:1px solid var(--hub-line);
+  }
+  .hub-freelancers-kicker{
+    color:#756e6a;
+    font-size:.55rem;
+    font-weight:850;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .hub-freelancers-copy h2{
+    max-width:760px;
+    margin:0;
+    font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+    font-size:clamp(2.35rem,10vw,3.65rem);
+    font-weight:900;
+    line-height:.88;
+    letter-spacing:-.025em;
+    text-transform:uppercase;
+  }
+  .hub-freelancers-copy p{
+    max-width:540px;
+    margin:14px 0 0;
+    color:#817a76;
+    font-size:.82rem;
+    line-height:1.6;
+  }
+  .hub-freelancers-link{
+    width:max-content;
+    max-width:100%;
+    display:inline-flex;
+    align-items:center;
+    gap:11px;
+    color:#b7b0ac;
+    font-size:.59rem;
+    font-weight:850;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    transition:color .18s ease;
+  }
+  .hub-freelancers-link svg{
+    width:17px;
+    height:17px;
+    flex:none;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    transition:transform .18s ease;
+  }
+  .hub-freelancers-link:hover{color:#fff}
+  .hub-freelancers-link:hover svg{transform:translate(3px,-3px)}
+
+    .hub-footer{min-height:86px;border-top:1px solid var(--hub-line);display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;color:#67615e;font-size:.55rem;font-weight:800;letter-spacing:.10em}
   .hub-footer img{width:76px;opacity:.85}.hub-footer span{display:none}.hub-footer a{color:#99918d}
 
   @media(min-width:700px){
@@ -547,6 +635,11 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     .hub-event-meta{flex-direction:row;justify-content:space-between;gap:16px}
     .hub-event-title-row h2{font-size:clamp(3rem,5vw,4.35rem)}
     .hub-empty{grid-template-columns:70px 1fr auto;align-items:center;padding:32px}
+    .hub-freelancers{padding-bottom:64px}
+    .hub-freelancers-inner{grid-template-columns:130px minmax(0,1fr) auto;gap:30px;align-items:end;padding-top:34px}
+    .hub-freelancers-copy h2{font-size:clamp(2.8rem,5.4vw,4.4rem)}
+    .hub-freelancers-copy p{font-size:.86rem}
+    .hub-freelancers-link{align-self:end;margin-bottom:6px}
     .hub-footer{grid-template-columns:auto 1fr auto}.hub-footer span{display:block;text-align:center}
   }
 
@@ -587,6 +680,10 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
     .hub-event-arrow,.hub-event-cta i{transition:transform .2s ease,width .2s ease}
     .hub-event-card:hover .hub-event-arrow{transform:translate(3px,-3px)}
     .hub-event-card:hover .hub-event-cta i{width:58px}
+    .hub-freelancers{padding-bottom:74px}
+    .hub-freelancers-inner{grid-template-columns:150px minmax(0,1fr) auto;gap:48px;padding-top:40px}
+    .hub-freelancers-copy h2{max-width:720px;font-size:4.35rem}
+    .hub-freelancers-link{margin-bottom:8px}
   }
 
   @media(max-width:370px){
@@ -601,6 +698,6 @@ const heroPeriod=activeEvents[0]?.starts_at?new Intl.DateTimeFormat(es?'es-ES':'
 
   @media(prefers-reduced-motion:reduce){
     .hub-marquee-track{animation:none}
-    .hub-event-card,.hub-event-visual>img,.hub-event-generated,.hub-event-title-row h2,.hub-event-arrow,.hub-event-cta i{transition:none}
+    .hub-event-card,.hub-event-visual>img,.hub-event-generated,.hub-event-title-row h2,.hub-event-arrow,.hub-event-cta i,.hub-freelancers-link,.hub-freelancers-link svg{transition:none}
   }
 </style>
